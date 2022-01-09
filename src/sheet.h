@@ -1,0 +1,1 @@
+void deveiceInfo(int tagID[]) {}
