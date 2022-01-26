@@ -85,10 +85,11 @@ disp Disp[8];
 // **************************
 // ***** NFC VARIABLES *****
 // **************************
-#define SS_PIN A3  // constante para referenciar pin de slave select
 #define RST_PIN D8 // constante para referenciar pin de reset
+#define SS_PIN A3  // constante para referenciar pin de slave select
+// #define WIDTH 80
 
-unsigned char data[16] = {"0#0#2#1#0#625"}; //{"0#1#4#1#0#1"};
+unsigned char data[] = {"0#1#4#1#0#1"}; // {"1#1#1#0#0#0"}; //{"0#0#2#1#0#625"}; //
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -185,7 +186,7 @@ void writeDataToBLock(byte blockAddr)
    }
 }
 
-void readDataFromBlock(byte blockAddr, byte buffer[], byte size)
+bool readDataFromBlock(byte blockAddr, byte buffer[], byte size)
 {
    // Serial.print(F("Leer datos del sector ")); Serial.print(blockAddr);
    status = (MFRC522::StatusCode)mfrc522.MIFARE_Read(blockAddr, buffer, &size);
@@ -193,7 +194,9 @@ void readDataFromBlock(byte blockAddr, byte buffer[], byte size)
    {
       Serial.print(F("MIFARE_Read() failed: "));
       Serial.println(mfrc522.GetStatusCodeName(status));
+      return false;
    }
+   return true;
 }
 
 void getTagID(int infoTag[])
@@ -207,12 +210,15 @@ void getTagID(int infoTag[])
    }
 
    // Write data to tag:
-   writeDataToBLock(blockAddr);
+   // writeDataToBLock(blockAddr);
 
    // Read data from the block's Tag.
    byte buffer[18];
    byte size = sizeof(buffer);
-   readDataFromBlock(blockAddr, buffer, size);
+   if (!readDataFromBlock(blockAddr, buffer, size))
+   {
+      return;
+   }
 
    // Conversión y almacenamiento
    // Convert from hex to String:
@@ -225,7 +231,7 @@ void getTagID(int infoTag[])
       // Serial.write(buffer[j]);
       // tagInfo += Serial.write(buffer[j]);
    }
-   Serial.printf("\nTagInfo: %s \n", tagInfo);
+   Serial.printlnf("TagInfo: %s", tagInfo);
    split(tagInfo, delim, infoTag);
 
    // Evitamos seguir leyendo la misma tag.
@@ -246,7 +252,7 @@ bool esAnalogico(int id)
    return id == 0;
 }
 
-int asignarPuerto(int id)
+char *asignarPuerto(int id)
 {
    int option;
    // Serial.printf("Digital %d, Analogico %d\n", puertoDigital, puertoAnalogico);
@@ -273,7 +279,7 @@ int asignarPuerto(int id)
 
       // statements executed if the expression equals the   p_A0
       // value of this constant_expression                  p_A1
-      return puertoAnalogico;
+      return "A0";
       break;
 
    case 1:
@@ -283,7 +289,7 @@ int asignarPuerto(int id)
       // Disp[0].pin2 = A3;
       // statements executed if the expression equals the p_A2
       // value of this constant_expression                 p_A3
-      return puertoAnalogico;
+      return "A2";
       break;
 
    case 2:
@@ -294,7 +300,7 @@ int asignarPuerto(int id)
       // Disp[0].pin2 = A5;
       // statements executed if the expression equals the p_A4
       // value of this constant_expression                  p_A5
-      return puertoAnalogico;
+      return "A4";
       break;
 
    case 3:
@@ -305,7 +311,7 @@ int asignarPuerto(int id)
       //  Disp[0].pin2 = D3;
       //  statements executed if the expression equals the  p_D2
       //  value of this constant_expression                  p_D3
-      return puertoDigital;
+      return "D2";
       break;
 
    case 4:
@@ -316,7 +322,7 @@ int asignarPuerto(int id)
       // Disp[0].pin2 = D5;
       // statements executed if the expression equals the p_D4
       // value of this constant_expression               p_D5
-      return puertoDigital;
+      return "D4";
       break;
    case 5:
       Serial.print("Conectar al puerto D6\n");
@@ -325,12 +331,37 @@ int asignarPuerto(int id)
       // Disp[0].pin2 = D5;
       // statements executed if the expression equals the p_D4
       // value of this constant_expression               p_D5
-      return puertoDigital;
+      return "D6";
       break;
    default:
       Serial.print("Error: No hay mas puertos disponibles \n");
-      return -1;
+      return "";
       // statements executed if expression does not equal
       // any case constant_expression
    }
+}
+
+int numSensores(bool array[])
+{
+   int contador = 0;
+   int j = 0;
+
+   for (j; j < 2; j++)
+   {
+      if (array[j])
+         contador++;
+   }
+
+   return contador;
+}
+
+// El numero de sensores representar la cantidad de elementos a true del vector.
+// Al tratarse de un vector booleano, incrementar la cantidad supone poner a true el siguiente false.
+void incrementarSensor(bool array[])
+{
+   int i = 0;
+   while (array[i])
+      i++;
+
+   array[i] = true;
 }

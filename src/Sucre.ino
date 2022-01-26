@@ -1,5 +1,3 @@
-
-
 // This #include statement was automatically added by the Particle IDE.
 #include <Grove_ChainableLED.h>
 
@@ -25,14 +23,16 @@
 // Unconnected mode ON
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
+bool sensoresArray[2] = {false, false};
 void setup()
 {
-  // Particle setup
-  Serial.begin(9600);
-  SPI.begin();
   // Unconnected mode ON
   Particle.disconnect();
   WiFi.off();
+
+  // Particle setup
+  Serial.begin(9600);
+  SPI.begin();
 
   // Oled setup
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
@@ -62,80 +62,45 @@ void loop()
     display.setTextColor(WHITE);
     display.setCursor(0, 0);
 
-    int infoTag[6];
-    getTagID(infoTag);
+    int tagInfo[6];
+    getTagID(tagInfo);
 
-    Serial.println(infoTag[0] ? "Es Actuador" : "Es Sensor");
-    Serial.println(infoTag[1] ? "Es Digital" : "Es Analogico");
+    Serial.println(esSensor(tagInfo[0]) ? "Es Sensor" : "Es Actuador");
+    Serial.println(esAnalogico(tagInfo[1]) ? "Es Analogico" : "Es Digital");
+    if (esSensor(tagInfo[0]))
+    {
 
-    asignarPuerto(infoTag[1]);
+      if (numSensores(sensoresArray) < 2)
+      {
 
-    // for (int i = 0; i < sizeof(tagInfo); i++)
-    // {
-    //   Serial.println(tagInfo[i]);
-    // }
+        char *puerto = asignarPuerto(tagInfo[1]);
+        Serial.printlnf("Puerto: %s", puerto);
 
-    // if (isSensor(tagID)){
-    //   if(isFisrtSensor(tagID)){
+        if (strcmp(puerto, "") != 0)
+        {
+          incrementarSensor(sensoresArray);
+        }
+        Serial.printlnf("\nSensores conectados: %d", numSensores(sensoresArray));
+      }
+      else
+      {
+        // Ya hay dos sensores
+        Serial.print("Ya hay dos sensores");
+      }
+    }
+    else
+    {
+      if (numSensores(sensoresArray) >= 1)
+      {
+        // Actuador
+      }
+      else
+      {
+        Serial.println("Error: necesario al menos un sensor");
+      }
+    }
 
-    //   //Second sensor
-    //   }else{
-    //     // only if logic and other sensor present
-    //     if(Logic() && FisrtSensor()){
-    //       //store the second sensor in sensorArray
-    //     } else {
-    //       // ERROR
-    //     }
-    //   }
-    // }else{
-    //   if(isLogic(tagID)){
-    //     // only if one sensor present
-    //     if(FisrtSensor()){
+    display.display();
 
-    //     } else {
-    //       // ERROR
-    //     }
-    //   // is actuator
-    //   }else{
-    //     if(AtLeastOneSensor())
-
-    //   }
-    // }
-  }
-
-  // Analizamos la información de la tag leida.
-  // Si la tag corresponde a un sensor:
-  // if (infoVec[0] >= 2)
-  // {
-  //   sensor = infoVec[0];
-  //   blinkAndSleep(true);  // Zumbador: confirmación sonara al pasar un tag
-  //   displayPrint(sensor); // Actualizamos la información de la pantalla con el nuevo sensor.
-  //   infoVec[0] = -1;
-  // }
-
-  // // Si la tag corresponde a un actuador
-  // if (sensor != -1)
-  // {
-  //   valor = leerSensor(sensor);
-  //   if (infoVec[0] == 0 || infoVec[0] == 1)
-  //   {
-  //     actuador = infoVec[0];
-  //     blinkAndSleep(true);    // Zumbador: confirmación sonara al pasar un tag
-  //     displayPrint(actuador); // Actualizamos la información de la pantalla con el nuevo sensor.
-  //     infoVec[0] = -1;
-  //   }
-  // }
-  // else
-  // {
-  //   ledApagar();
-  // }
-
-  // if (actuador != -1)
-  // {
-  //   activarActuador(actuador, infoVec[1], valor);
-  // }
-
-  // Mostramos la información que hayamos actualizado de la pantalla.
-  display.display();
-
-} // Fin loop
+  } // Fin loop
+}
