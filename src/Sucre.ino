@@ -17,13 +17,18 @@
 
 // Internal assets
 #include <controlador.h>
-// #include <actuadores.h>
-// #include <sensores.h>
+#include <actuadores.h>
+#include <sensores.h>
 
 // Unconnected mode ON
+void setup();
+void loop();
+#line 24 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 bool sensoresArray[2] = {false, false};
+char *puertosSensores[2] = {"-1", "-1"};
+
 void setup()
 {
   // Unconnected mode ON
@@ -63,36 +68,63 @@ void loop()
     display.setCursor(0, 0);
 
     int tagInfo[6];
+    // Leemos la tag y guardamos la informacion codificada en tagInfo.
     getTagID(tagInfo);
 
+    // Ejemplo de informacion codificada.
     Serial.println(esSensor(tagInfo[0]) ? "Es Sensor" : "Es Actuador");
     Serial.println(esAnalogico(tagInfo[1]) ? "Es Analogico" : "Es Digital");
+
+    // En caso de sensor:
     if (esSensor(tagInfo[0]))
     {
-
+      // Si no tenemos 2 sensores.
       if (numSensores(sensoresArray) < 2)
       {
-
+        // Añadimos el sensor a un puerto disponible.
         char *puerto = asignarPuerto(tagInfo[1]);
-        Serial.printlnf("Puerto: %s", puerto);
 
+        // Si el puerto no es un string vacio se ha sido asignado correctamente.
         if (strcmp(puerto, "") != 0)
         {
+          // Actualizamos la cantidad de sensores en el sistema
           incrementarSensor(sensoresArray);
+          Serial.printlnf("\nSensores conectados: %d", numSensores(sensoresArray));
+
+          // Guardamos el puerto asignado del sensor.
+          // Indice del sensor.
+          int num = numSensores(sensoresArray) - 1;
+          puertosSensores[num] = puerto;
         }
-        Serial.printlnf("\nSensores conectados: %d", numSensores(sensoresArray));
       }
+      // Si ya tenemos 2 sensores.
       else
       {
-        // Ya hay dos sensores
         Serial.print("Ya hay dos sensores");
       }
     }
+    // Actuador
     else
     {
+      // Si teneos al menos un sensor;
       if (numSensores(sensoresArray) >= 1)
       {
-        // Actuador
+        // Asignamos un puerto al actuador
+        char *puerto = asignarPuerto(tagInfo[1]);
+
+        // Si el puerto no es un string vacio se ha sido asignado correctamente.
+        if (strcmp(puerto, "") != 0)
+        {
+          int num = numSensores(sensoresArray);
+          // Leemos el valor del sensor 1;
+          // bool valor1 = leerSensor();
+          // Si hay 2 sensores, leemos el valor del sensor 2;
+          // bool valor2 = leerSensor();
+
+          // bool valor = valor1 && valor2;
+          // Ejecutamos el actuador con todo ya calculado;
+          // activarActuador(tagInfo[2], tagInfo[3], numSensores(sensoresArray), puertosSensores);
+        }
       }
       else
       {
@@ -101,6 +133,7 @@ void loop()
     }
 
     display.display();
+    Serial.println("***************");
 
   } // Fin loop
 }
