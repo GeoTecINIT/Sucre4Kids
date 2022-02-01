@@ -872,7 +872,7 @@ void loop()
    b4456:	2801      	cmp	r0, #1
    b4458:	dc24      	bgt.n	b44a4 <loop+0xbc>
     {
-      // Si no tenemos 2 sensores.
+      // Si no t enemos 2 sensores.
       if (numSensores(sensoresArray) < 2)
    b445a:	9801      	ldr	r0, [sp, #4]
    b445c:	f7ff fef2 	bl	b4244 <_Z13asignarPuertoi>

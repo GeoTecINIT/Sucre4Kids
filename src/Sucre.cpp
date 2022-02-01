@@ -84,7 +84,7 @@ void loop()
     // En caso de sensor:
     if (esSensor(tagInfo[0]))
     {
-      // Si no tenemos 2 sensores.
+      // Si no t enemos 2 sensores.
       if (numSensores(sensoresArray) < 2)
       {
         // Añadimos el sensor a un puerto disponible.
