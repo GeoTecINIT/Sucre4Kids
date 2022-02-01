@@ -1,4 +1,6 @@
 
+// This #include statement was automatically added by the Particle IDE.
+#include <Grove_ChainableLED.h>
 
 void ledApagar(ChainableLED leds)
 {
@@ -30,7 +32,9 @@ void ledNaranja(ChainableLED leds)
 }
 void ledBlanco(ChainableLED leds)
 {
+    Serial.println("Entra ledBlanco");
     leds.setColorRGB(0, 255, 255, 255);
+    Serial.println("Termina ledBlanco");
 }
 
 void ledAzulNaranja(boolean estado, ChainableLED leds)
@@ -127,11 +131,6 @@ void pitidoON(int puerto)
     digitalWrite(puerto, HIGH);
     digitalWrite(puerto + 1, HIGH);
     digitalWrite(puerto + 1, 1);
-
-    digitalWrite(D6, 1);
-    digitalWrite(D6, HIGH);
-    digitalWrite(D7, HIGH);
-    digitalWrite(D7, 1);
 }
 void pitidoOFF(int puerto)
 {
@@ -175,14 +174,14 @@ void zumbador(boolean estado, int puerto)
 }
 
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
-void activarLED(int opcion, char *puertoActuador, bool valor)
+void activarLED(int opcion, int puerto, bool valor)
 {
-    int puerto = strtol(&puertoActuador[0], NULL, 10);
+
     int led_PIN1 = puerto;
     int led_PIN2 = puerto + 1;
-    Serial.printlnf("Activar RGB en puerto: %d & %d", led_PIN1, led_PIN2);
-
-    ChainableLED leds(led_PIN1, led_PIN2, NUM_LEDS);
+    ChainableLED leds(led_PIN1, led_PIN2, 5);
+    leds.init();
+    Serial.printlnf("Activar RGB en puerto: %d & %d", puerto, puerto + 1);
 
     switch (opcion)
     {
@@ -207,6 +206,7 @@ void activarLED(int opcion, char *puertoActuador, bool valor)
         break;
 
     case 5:
+        Serial.printlnf("Entra LED ONOF");
         ledOnOff(valor, leds);
         break;
 
@@ -214,15 +214,17 @@ void activarLED(int opcion, char *puertoActuador, bool valor)
         Serial.println("Valor no valido");
         break;
     }
+
+    Serial.println("Sale swith");
 }
 
-void activarZumbador(int opcion, char *puertoActuador, bool valor)
+void activarZumbador(int opcion, int puerto, bool valor)
 {
     Serial.printf("Actuador: Zumbador; Tipo: %d ;", opcion);
     Serial.printf("Actua : %s ;", valor ? "True" : "False");
-
-    int puerto = strtol(&puertoActuador[0], NULL, 10);
     Serial.printlnf("Puerto Zumbador: %d", puerto);
+
+    pinMode(puerto, OUTPUT);
 
     switch (opcion)
     {

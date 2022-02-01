@@ -210,7 +210,7 @@ void getTagID(int infoTag[])
    }
 
    // Write data to tag:
-   //writeDataToBLock(blockAddr);
+   // writeDataToBLock(blockAddr);
 
    // Read data from the block's Tag.
    byte buffer[18];
@@ -252,7 +252,7 @@ bool esAnalogico(int id)
    return id == 0;
 }
 
-char *asignarPuerto(int id)
+int asignarPuerto(int id)
 {
    int option;
    // Serial.printf("Digital %d, Analogico %d\n", puertoDigital, puertoAnalogico);
@@ -279,7 +279,7 @@ char *asignarPuerto(int id)
 
       // statements executed if the expression equals the   p_A0
       // value of this constant_expression                  p_A1
-      return "A0";
+      return 0;
       break;
 
    case 1:
@@ -289,7 +289,7 @@ char *asignarPuerto(int id)
       // Disp[0].pin2 = A3;
       // statements executed if the expression equals the p_A2
       // value of this constant_expression                 p_A3
-      return "A2";
+      return 2;
       break;
 
    case 2:
@@ -300,7 +300,7 @@ char *asignarPuerto(int id)
       // Disp[0].pin2 = A5;
       // statements executed if the expression equals the p_A4
       // value of this constant_expression                  p_A5
-      return "A4";
+      return 4;
       break;
 
    case 3:
@@ -311,7 +311,7 @@ char *asignarPuerto(int id)
       //  Disp[0].pin2 = D3;
       //  statements executed if the expression equals the  p_D2
       //  value of this constant_expression                  p_D3
-      return "D2";
+      return 2;
       break;
 
    case 4:
@@ -322,7 +322,7 @@ char *asignarPuerto(int id)
       // Disp[0].pin2 = D5;
       // statements executed if the expression equals the p_D4
       // value of this constant_expression               p_D5
-      return "D4";
+      return 4;
       break;
    case 5:
       Serial.print("Conectar al puerto D6\n");
@@ -331,11 +331,11 @@ char *asignarPuerto(int id)
       // Disp[0].pin2 = D5;
       // statements executed if the expression equals the p_D4
       // value of this constant_expression               p_D5
-      return "D6";
+      return 6;
       break;
    default:
       Serial.print("Error: No hay mas puertos disponibles \n");
-      return "";
+      return -1;
       // statements executed if expression does not equal
       // any case constant_expression
    }

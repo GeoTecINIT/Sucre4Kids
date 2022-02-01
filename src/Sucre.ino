@@ -27,7 +27,7 @@ void loop();
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 bool sensoresArray[2] = {false, false};
-char *puertosSensores[2] = {"-1", "-1"};
+int puertosSensores[2] = {-1, -1};
 
 void setup()
 {
@@ -82,10 +82,10 @@ void loop()
       if (numSensores(sensoresArray) < 2)
       {
         // Añadimos el sensor a un puerto disponible.
-        char *puerto = asignarPuerto(tagInfo[1]);
+        int puerto = asignarPuerto(tagInfo[1]);
 
         // Si el puerto no es un string vacio se ha sido asignado correctamente.
-        if (strcmp(puerto, "") != 0)
+        if (puerto != -1)
         {
           // Actualizamos la cantidad de sensores en el sistema
           incrementarSensor(sensoresArray);
@@ -110,10 +110,10 @@ void loop()
       if (numSensores(sensoresArray) >= 1)
       {
         // Asignamos un puerto al actuador
-        char *puerto = asignarPuerto(tagInfo[1]);
+        int puerto = asignarPuerto(tagInfo[1]);
 
-        // Si el puerto no es un string vacio se ha sido asignado correctamente.
-        if (strcmp(puerto, "") != 0)
+        // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
+        if (puerto != -1)
         {
           int num = numSensores(sensoresArray);
           // Leemos el valor del sensor 1;
@@ -125,6 +125,7 @@ void loop()
           // Ejecutamos el actuador con todo ya calculado;
           if (tagInfo[2] == 0)
           {
+
             activarLED(tagInfo[3], puerto, valor);
           }
           else
