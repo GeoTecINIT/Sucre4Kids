@@ -89,7 +89,7 @@ disp Disp[8];
 #define SS_PIN A3  // constante para referenciar pin de slave select
 // #define WIDTH 80
 
-unsigned char data[] = {"0#1#4#1#0#1"}; // {"1#1#1#0#0#0"}; //{"0#0#2#1#0#625"}; //
+unsigned char data[] = {"1#1#0#5#0#0"}; //  {"0#1#4#1#0#1"}; //  //{"0#0#2#1#0#625"}; //
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -210,7 +210,7 @@ void getTagID(int infoTag[])
    }
 
    // Write data to tag:
-   // writeDataToBLock(blockAddr);
+   //writeDataToBLock(blockAddr);
 
    // Read data from the block's Tag.
    byte buffer[18];

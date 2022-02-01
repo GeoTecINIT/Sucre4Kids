@@ -106,7 +106,7 @@ void loop()
       // Si ya tenemos 2 sensores.
       else
       {
-        Serial.print("Ya hay dos sensores");
+        Serial.print("Se espera actuador");
       }
     }
     // Actuador
@@ -127,9 +127,16 @@ void loop()
           // Si hay 2 sensores, leemos el valor del sensor 2;
           // bool valor2 = leerSensor();
 
-          // bool valor = valor1 && valor2;
+          bool valor = true;
           // Ejecutamos el actuador con todo ya calculado;
-          // activarActuador(tagInfo[2], tagInfo[3], numSensores(sensoresArray), puertosSensores);
+          if (tagInfo[2] == 0)
+          {
+            activarLED(tagInfo[3], puerto, valor);
+          }
+          else
+          {
+            activarZumbador(tagInfo[3], puerto, valor);
+          }
         }
       }
       else
