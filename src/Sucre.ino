@@ -26,8 +26,19 @@ void loop();
 #line 24 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
+// El primer indice corresponde al primer sensor, y el segundo indice al posible segundo sensor.
+// True if the sensor is conected.
 bool sensoresArray[2] = {false, false};
+// TagInfo[1] value.
+int idSensor[2] = {-1, -1};
+// TagInfo[2] value.
+int condicionSensor[2] = {-1, -1};
+// Puerto asignado al sensor.
 int puertosSensores[2] = {-1, -1};
+
+int puertoActuador = -1;
+
+int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
 
 void setup()
 {
@@ -67,71 +78,70 @@ void loop()
     display.setTextColor(WHITE);
     display.setCursor(0, 0);
 
-    int tagInfo[6];
     // Leemos la tag y guardamos la informacion codificada en tagInfo.
     getTagID(tagInfo);
+  }
 
+  // Si se ha pasado nueva tag:
+  if (tagInfo[0] != -1)
+  {
     // Ejemplo de informacion codificada.
     Serial.println(esSensor(tagInfo[0]) ? "Es Sensor" : "Es Actuador");
     Serial.println(esAnalogico(tagInfo[1]) ? "Es Analogico" : "Es Digital");
 
-    // En caso de sensor:
+    // Si la tag es Sensor:
     if (esSensor(tagInfo[0]))
     {
-      // Si no t enemos 2 sensores.
+      //  Si no tenemos 2 sensores.
       if (numSensores(sensoresArray) < 2)
       {
         // Añadimos el sensor a un puerto disponible.
         int puerto = asignarPuerto(tagInfo[1]);
 
-        // Si el puerto no es un string vacio se ha sido asignado correctamente.
+        // Si el puerto es distinto de -1 el sensor ha sido asignado correctamente.
         if (puerto != -1)
         {
-          // Actualizamos la cantidad de sensores en el sistema
+          // Serial.println("2");
+          //  Actualizamos la cantidad de sensores en el sistema
           incrementarSensor(sensoresArray);
           Serial.printlnf("\nSensores conectados: %d", numSensores(sensoresArray));
 
-          // Guardamos el puerto asignado del sensor.
           // Indice del sensor.
-          int num = numSensores(sensoresArray) - 1;
-          puertosSensores[num] = puerto;
+          int indice = numSensores(sensoresArray) - 1;
+
+          // Guardamos el ID
+          idSensor[indice] = tagInfo[2];
+          Serial.printf("ID: %d ", idSensor[indice]);
+
+          // Guardamos la condicion
+          condicionSensor[indice] = tagInfo[3];
+          Serial.printf("Condicion: %d ", condicionSensor[indice]);
+
+          // Guardamos el puerto asignado del sensor.
+          puertosSensores[indice] = puerto;
+          Serial.printlnf("Puerto: %d", puertosSensores[indice]);
         }
       }
-      // Si ya tenemos 2 sensores.
       else
       {
-        Serial.print("Se espera actuador");
+        // Si ya tenemos 2 sensores.
+        Serial.println("Se espera actuador");
       }
     }
-    // Actuador
+
+    // Si la Tag es Actuador
     else
     {
-      // Si teneos al menos un sensor;
-      if (numSensores(sensoresArray) >= 1)
+      //  Si teneos al menos un sensor;
+      int num = numSensores(sensoresArray);
+      if (num >= 1)
       {
         // Asignamos un puerto al actuador
         int puerto = asignarPuerto(tagInfo[1]);
-
         // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
         if (puerto != -1)
         {
-          int num = numSensores(sensoresArray);
-          // Leemos el valor del sensor 1;
-          // bool valor1 = leerSensor();
-          // Si hay 2 sensores, leemos el valor del sensor 2;
-          // bool valor2 = leerSensor();
-
-          bool valor = true;
-          // Ejecutamos el actuador con todo ya calculado;
-          if (tagInfo[2] == 0)
-          {
-
-            activarLED(tagInfo[3], puerto, valor);
-          }
-          else
-          {
-            activarZumbador(tagInfo[3], puerto, valor);
-          }
+          puertoActuador = puerto;
         }
       }
       else
@@ -139,9 +149,35 @@ void loop()
         Serial.println("Error: necesario al menos un sensor");
       }
     }
+    tagInfo[0] = -1;
+  }
 
-    display.display();
-    Serial.println("***************");
+  int num = numSensores(sensoresArray);
+  if (num > 0)
+  {
+    // Serial.printlnf("Sensores : %d", num);
 
-  } // Fin loop
+    //  Leemos el valor del sensor 1;
+    bool valueSensor1 = leerSensor(idSensor[0], condicionSensor[0], puertosSensores[0]);
+    // Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
+
+    bool operacion = valueSensor1;
+    // Si hay 2 sensores, leemos el valor del sensor 2;
+    if (num == 2)
+    {
+      bool valueSensor2 = leerSensor(idSensor[1], condicionSensor[1], puertosSensores[1]);
+      operacion = operacion && valueSensor2;
+    }
+
+    if (puertoActuador != -1)
+    {
+      //  Ejecutamos el actuador (LED o Zumbador) con todo ya calculado;
+      tagInfo[2] == 0 ? activarLED(tagInfo[3], puertoActuador, valueSensor1) : activarZumbador(tagInfo[3], puertoActuador, valueSensor1);
+    }
+    // Serial.println();
+  }
+
+  display.display();
+
+  // Fin loop
 }

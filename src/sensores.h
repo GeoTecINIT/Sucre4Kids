@@ -1,26 +1,74 @@
-// boolean leerSensor(int sensor)
-// {
-//     switch (sensor)
-//     {
-//     case 2:
-//         return leerSensorLuz();
-//         break;
+// #define sensorLuz_PIN A2
+// #define boton_PIN D2
+// #define sensorSonido_PIN A4
+// #define rotoryAngle_PIN A0
 
-//     case 3:
-//         return leerSensorSonido();
-//         break;
+boolean leerSensorLuz(int puerto)
+{
+    if (analogRead(puerto) >= 2500)
+        return true;
+    return false;
+}
 
-//     case 4:
-//         return leerBoton();
-//         break;
+boolean leerBoton(int puerto)
+{
+    pinMode(puerto, INPUT);
+    // Serial.printlnf("Valor boton %d , %d", analogRead(boton_PIN), digitalRead(boton_PIN));
+    if (digitalRead(puerto) == HIGH)
+        return true;
+    return false;
+}
 
-//     case 5:
-//         return leerAngulo();
-//         break;
+boolean leerAngulo(int puerto)
+{
+    float voltage;
+    int sensor_value = analogRead(puerto);
+    voltage = (float)sensor_value * 5 / 1023;
+    float degrees = (voltage * 300) / 5;
 
-//     default:
-//         Serial.println("No es valido");
-//         return false;
-//         break;
-//     }
-// }
+    if (degrees >= 680)
+    {
+        // Serial.println(degrees);
+        return true;
+    }
+
+    return false;
+}
+
+boolean leerSensorSonido(int puerto)
+{
+    // Serial.printlnf("analogico: %d", analogRead(A4));
+    if (analogRead(puerto) >= 700)
+        return true;
+    return false;
+}
+
+boolean leerSensor(int id, int condicion, int puerto)
+{
+    switch (id)
+    {
+    case 2:
+        return leerSensorLuz(puerto);
+        break;
+
+    case 3:
+        return leerSensorSonido(puerto);
+        break;
+
+    case 4:
+        pinMode(puerto, INPUT);
+        return leerBoton(puerto);
+        break;
+
+    case 5:
+        return leerAngulo(puerto);
+        break;
+
+    default:
+
+        // TODO No entra en el lector MIRAR IMPORTANTE
+        Serial.println("InvalidSensorError");
+        return false;
+        break;
+    }
+}
