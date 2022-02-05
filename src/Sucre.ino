@@ -120,6 +120,9 @@ void loop()
           // Guardamos el puerto asignado del sensor.
           puertosSensores[indice] = puerto;
           Serial.printlnf("Puerto: %d", puertosSensores[indice]);
+
+          // Mostramos Sensor en pantalla:
+          displayPrint(true, idSensor[indice], condicionSensor[indice]);
         }
       }
       else
@@ -159,20 +162,24 @@ void loop()
 
     //  Leemos el valor del sensor 1;
     bool valueSensor1 = leerSensor(idSensor[0], condicionSensor[0], puertosSensores[0]);
-    // Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
+    Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
+    int operacion = valueSensor1;
 
-    bool operacion = valueSensor1;
     // Si hay 2 sensores, leemos el valor del sensor 2;
-    if (num == 2)
+    if (num == 2 && valueSensor1)
     {
       bool valueSensor2 = leerSensor(idSensor[1], condicionSensor[1], puertosSensores[1]);
-      operacion = operacion && valueSensor2;
+      Serial.printlnf("Sensor 2: %s", valueSensor2 ? "True" : "False");
+
+      valueSensor2 ? operacion = true : operacion = false;
     }
+
+    Serial.printlnf("Operacion: %s", operacion ? "True" : "False");
 
     if (puertoActuador != -1)
     {
       //  Ejecutamos el actuador (LED o Zumbador) con todo ya calculado;
-      tagInfo[2] == 0 ? activarLED(tagInfo[3], puertoActuador, valueSensor1) : activarZumbador(tagInfo[3], puertoActuador, valueSensor1);
+      tagInfo[2] == 0 ? activarLED(tagInfo[3], puertoActuador, operacion) : activarZumbador(tagInfo[3], puertoActuador, operacion);
     }
     // Serial.println();
   }

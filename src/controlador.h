@@ -22,11 +22,48 @@ char buf[64];
 
 String dispositivos[2] = {"-", "-"};
 
-void displayPrint(int n)
+void displayPrint(bool esSensor, int id, int condicion)
 {
    display.clearDisplay();
+   if (esSensor)
+   {
+      switch (id)
+      {
+      case 1:
+         condicion == 0 ? dispositivos[1] = "Sensor Poca Distancia" : dispositivos[1] = "Sensor Mucha Distancia";
+         break;
 
-   switch (n)
+      case 2:
+         //dispositivos[1] = "Sensor de Luz";
+         condicion == 0 ? dispositivos[1] = "Sensor No Luz" : dispositivos[1] = "Sensor Si Luz";
+         break;
+
+      case 3:
+         //dispositivos[1] = "Sensor de Ruido";
+         condicion == 0 ? dispositivos[1] = "Sensor No Luz" : dispositivos[1] = "Sensor Si Luz";
+         break;
+
+      case 4:
+         dispositivos[1] = "Sensor Boton";
+         break;
+
+      case 5:
+         dispositivos[1] = "Sensor Rotativo";
+         break;
+
+      case 6:
+         dispositivos[1] = "Sensor Rotativo";
+         break;
+      case 7:
+         dispositivos[1] = "Sensor Rotativo";
+         break;
+
+      default:
+         Serial.println("SensorNoValidoError");
+         break;
+      }
+   }
+   switch (id)
    {
    case 0:
       dispositivos[0] = "Actuador RGB";

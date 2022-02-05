@@ -1,19 +1,35 @@
-// #define sensorLuz_PIN A2
-// #define boton_PIN D2
-// #define sensorSonido_PIN A4
-// #define rotoryAngle_PIN A0
 
 boolean leerSensorLuz(int puerto)
 {
-    if (analogRead(puerto) >= 2500)
-        return true;
-    return false;
+    Serial.printlnf("Leer Luz");
+
+    int threshold = 2500;
+    switch (puerto)
+    {
+    case 0:
+        if (analogRead(A0) >= threshold)
+            return true;
+        return false;
+
+    case 2:
+        if (analogRead(A2) >= threshold)
+            return true;
+        return false;
+
+    case 4:
+        if (analogRead(A4) >= threshold)
+            return true;
+        return false;
+
+    default:
+        return false;
+    }
 }
 
 boolean leerBoton(int puerto)
 {
     pinMode(puerto, INPUT);
-    // Serial.printlnf("Valor boton %d , %d", analogRead(boton_PIN), digitalRead(boton_PIN));
+    Serial.println("Leer boton");
     if (digitalRead(puerto) == HIGH)
         return true;
     return false;

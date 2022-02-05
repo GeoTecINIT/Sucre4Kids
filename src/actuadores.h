@@ -126,7 +126,6 @@ void ledArcoiris(boolean estado, ChainableLED leds)
 // Acciones del zumbador
 void pitidoON(int puerto)
 {
-    Serial.println("Zumbador ON");
     digitalWrite(puerto, 1);
     digitalWrite(puerto, HIGH);
     digitalWrite(puerto + 1, HIGH);
@@ -220,9 +219,7 @@ void activarLED(int opcion, int puerto, bool valor)
 
 void activarZumbador(int opcion, int puerto, bool valor)
 {
-    Serial.printf("Actuador: Zumbador; Tipo: %d ;", opcion);
-    Serial.printf("Actua : %s ;", valor ? "True" : "False");
-    Serial.printlnf("Puerto Zumbador: %d", puerto);
+    
 
     pinMode(puerto, OUTPUT);
 
