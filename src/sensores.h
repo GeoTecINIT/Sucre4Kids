@@ -1,5 +1,5 @@
 
-boolean leerSensorLuz(int puerto)
+boolean leerSensorLuz(int puerto, int condicion)
 {
     Serial.printlnf("Leer Luz");
 
@@ -64,7 +64,7 @@ boolean leerSensor(int id, int condicion, int puerto)
     switch (id)
     {
     case 2:
-        return leerSensorLuz(puerto);
+        return leerSensorLuz(puerto, condicion);
         break;
 
     case 3:
@@ -72,7 +72,6 @@ boolean leerSensor(int id, int condicion, int puerto)
         break;
 
     case 4:
-        pinMode(puerto, INPUT);
         return leerBoton(puerto);
         break;
 

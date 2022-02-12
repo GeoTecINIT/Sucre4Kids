@@ -168,19 +168,19 @@ void loop()
 
     //  Leemos el valor del sensor 1;
     bool valueSensor1 = leerSensor(idSensor[0], condicionSensor[0], puertosSensores[0]);
-    Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
+    // Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
     int operacion = valueSensor1;
 
     // Si hay 2 sensores, leemos el valor del sensor 2;
     if (num == 2 && valueSensor1)
     {
       bool valueSensor2 = leerSensor(idSensor[1], condicionSensor[1], puertosSensores[1]);
-      Serial.printlnf("Sensor 2: %s", valueSensor2 ? "True" : "False");
+      // Serial.printlnf("Sensor 2: %s", valueSensor2 ? "True" : "False");
 
       valueSensor2 ? operacion = true : operacion = false;
     }
 
-    Serial.printlnf("Operacion: %s", operacion ? "True" : "False");
+    // Serial.printlnf("Operacion: %s", operacion ? "True" : "False");
 
     if (puertoActuador != -1)
     {

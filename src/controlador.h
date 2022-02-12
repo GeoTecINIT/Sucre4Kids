@@ -10,6 +10,11 @@
 // OLED Screen Library
 #include <Adafruit_SSD1306_RK.h>
 
+#include "Particle.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
 // RGB LED
 #define NUM_LEDS 5
 
@@ -22,93 +27,6 @@ char buf[64];
 
 String dispositivos[2] = {"-", "-"};
 
-void displayPrint(bool esSensor, int id, int condicion)
-{
-   display.clearDisplay();
-   if (esSensor)
-   {
-      switch (id)
-      {
-      case 1:
-         condicion == 0 ? dispositivos[1] = "Sensor Poca Distancia" : dispositivos[1] = "Sensor Mucha Distancia";
-         break;
-
-      case 2:
-         //dispositivos[1] = "Sensor de Luz";
-         condicion == 0 ? dispositivos[1] = "Sensor No Luz" : dispositivos[1] = "Sensor Si Luz";
-         break;
-
-      case 3:
-         //dispositivos[1] = "Sensor de Ruido";
-         condicion == 0 ? dispositivos[1] = "Sensor No Luz" : dispositivos[1] = "Sensor Si Luz";
-         break;
-
-      case 4:
-         dispositivos[1] = "Sensor Boton";
-         break;
-
-      case 5:
-         dispositivos[1] = "Sensor Rotativo";
-         break;
-
-      case 6:
-         dispositivos[1] = "Sensor Rotativo";
-         break;
-      case 7:
-         dispositivos[1] = "Sensor Rotativo";
-         break;
-
-      default:
-         Serial.println("SensorNoValidoError");
-         break;
-      }
-   }
-   switch (id)
-   {
-   case 0:
-      dispositivos[0] = "Actuador RGB";
-      break;
-
-   case 1:
-      dispositivos[0] = "Actuado Zumbador";
-      break;
-
-   case 2:
-      dispositivos[1] = "Sensor de Luz";
-      break;
-
-   case 3:
-      dispositivos[1] = "Sensor de Ruido";
-      break;
-
-   case 4:
-      dispositivos[1] = "Sensor Boton";
-      break;
-
-   case 5:
-      dispositivos[1] = "Sensor Rotativo";
-      break;
-
-   default:
-      Serial.println("No es valido");
-      break;
-   }
-
-   snprintf(buf, sizeof(buf), dispositivos[1]);
-   display.println(buf);
-
-   snprintf(buf, sizeof(buf), dispositivos[0]);
-   display.println(buf);
-
-   display.setCursor(0, 0);
-}
-
-//
-#include "Particle.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-
 // struct
 typedef struct
 {
@@ -119,14 +37,13 @@ typedef struct
 
 // typedef struct port Port;
 disp Disp[8];
-// **************************
-// ***** NFC VARIABLES *****
-// **************************
+
+// NFC Variables
 #define RST_PIN D8 // constante para referenciar pin de reset
 #define SS_PIN A3  // constante para referenciar pin de slave select
 // #define WIDTH 80
 
-unsigned char data[] = {"0#0#2#1#0#625"}; // {"1#1#0#5#0#0"}; //  {"0#1#4#1#0#1"}; //  // //
+unsigned char data[] = {"1#1#0#1#0#0"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -141,6 +58,106 @@ boolean Adigi = false;
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status;
+
+void displayPrint(bool esSensor, int id, int condicion)
+{
+   display.clearDisplay();
+   if (esSensor)
+   {
+      switch (id)
+      {
+      // Distancia
+      case 1:
+         condicion == 0 ? dispositivos[1] = "Sensor Poca Distancia" : dispositivos[1] = "Sensor Mucha Distancia";
+         break;
+
+      // Luz
+      case 2:
+         // dispositivos[1] = "Sensor de Luz";
+         condicion == 0 ? dispositivos[1] = "Sensor No Luz" : dispositivos[1] = "Sensor Si Luz";
+         break;
+
+      // Ruido
+      case 3:
+         // dispositivos[1] = "Sensor de Ruido";
+         condicion == 0 ? dispositivos[1] = "Sensor No Ruido" : dispositivos[1] = "Sensor Si Ruido";
+         break;
+
+      // Boton
+      case 4:
+         condicion == 0 ? dispositivos[1] = "Sensor No Boton" : dispositivos[1] = "Sensor Si Boton";
+         break;
+
+      // Rotativo
+      case 5:
+         condicion == 0 ? dispositivos[1] = "Sensor No Rotativo" : dispositivos[1] = "Sensor Si Rotativo";
+         break;
+
+      // Temperatura
+      case 6:
+         switch (condicion)
+         {
+         case 0:
+            dispositivos[1] = "Sensor Temp.Frio";
+            break;
+         case 1:
+            dispositivos[1] = "Sensor Temp.Templado";
+            break;
+         case 2:
+            dispositivos[1] = "Sensor Temp.Calor";
+            break;
+         }
+         break;
+
+      default:
+         Serial.println("SensorNoValidoError");
+         break;
+      }
+   }
+   // Actuadores.
+   switch (id)
+   {
+   case 0:
+      switch (condicion)
+      {
+      case 0:
+         dispositivos[0] = "RGB-Verde-Rojo";
+         break;
+      case 1:
+         dispositivos[0] = "RGB-Amarillo-Morado";
+         break;
+      case 2:
+         dispositivos[0] = "RGB-Azul-Naranja";
+         break;
+      case 3:
+         dispositivos[0] = "RGB-Blink";
+         break;
+      case 4:
+         dispositivos[0] = "RGB-RainBow";
+         break;
+
+      case 5:
+         dispositivos[0] = "RGB-On-Off";
+         break;
+      }
+
+   case 1:
+      condicion == 0 ? dispositivos[0] = "Zumbador On-Off" : dispositivos[0] = "Zumbador Blink";
+      break;
+
+   default:
+      Serial.println("ActuadorNoValidoError");
+      break;
+   }
+
+   snprintf(buf, sizeof(buf), dispositivos[1]);
+   display.println(buf);
+
+   snprintf(buf, sizeof(buf), dispositivos[0]);
+   display.println(buf);
+
+   display.setCursor(0, 0);
+}
 
 void printArray(byte *buffer, byte bufferSize)
 {
@@ -247,7 +264,7 @@ void getTagID(int infoTag[])
    }
 
    // Write data to tag:
-   //writeDataToBLock(blockAddr);
+   // writeDataToBLock(blockAddr);
 
    // Read data from the block's Tag.
    byte buffer[18];
@@ -378,6 +395,7 @@ int asignarPuerto(int id)
    }
 }
 
+// El numero de sensores representar la cantidad de elementos a true del vector.
 int numSensores(bool array[])
 {
    int contador = 0;
@@ -392,7 +410,6 @@ int numSensores(bool array[])
    return contador;
 }
 
-// El numero de sensores representar la cantidad de elementos a true del vector.
 // Al tratarse de un vector booleano, incrementar la cantidad supone poner a true el siguiente false.
 void incrementarSensor(bool array[])
 {
