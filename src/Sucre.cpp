@@ -131,7 +131,7 @@ void loop()
           // Serial.printlnf("Puerto: %d", puertosSensores[indice]);
 
           // Mostramos Sensor en pantalla:
-          displayPrint(idSensor[indice], condicionSensor[indice]);
+          displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), idSensor[indice], condicionSensor[indice], puerto);
         }
       }
       else
@@ -156,8 +156,8 @@ void loop()
           puertoActuador = puerto;
         }
 
-        // Mostramos por pantalla
-
+        // Mostramos Actuador en pantalla:
+        displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), tagInfo[2], tagInfo[3], puertoActuador);
       }
       else
       {

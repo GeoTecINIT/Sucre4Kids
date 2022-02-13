@@ -1,6 +1,4 @@
 
-// This #include statement was automatically added by the Particle IDE.
-#include <Grove_ChainableLED.h>
 
 void ledApagar(ChainableLED leds)
 {
@@ -37,8 +35,13 @@ void ledBlanco(ChainableLED leds)
     Serial.println("Termina ledBlanco");
 }
 
-void ledAzulNaranja(boolean estado, ChainableLED leds)
+void ledAzulNaranja(boolean estado, int puerto)
 {
+    int led_PIN1 = puerto;
+    int led_PIN2 = puerto + 1;
+    ChainableLED leds(led_PIN1, led_PIN2, 5);
+    leds.init();
+
     if (estado)
     {
         ledAzul(leds);
@@ -49,8 +52,13 @@ void ledAzulNaranja(boolean estado, ChainableLED leds)
     }
 }
 
-void ledMoradoAmarillo(boolean estado, ChainableLED leds)
+void ledMoradoAmarillo(boolean estado, int puerto)
 {
+    int led_PIN1 = puerto;
+    int led_PIN2 = puerto + 1;
+    ChainableLED leds(led_PIN1, led_PIN2, 5);
+    leds.init();
+
     if (estado)
     {
         ledMorado(leds);
@@ -61,8 +69,13 @@ void ledMoradoAmarillo(boolean estado, ChainableLED leds)
     }
 }
 
-void ledVerdeRojo(boolean estado, ChainableLED leds)
+void ledVerdeRojo(boolean estado, int puerto)
 {
+    int led_PIN1 = puerto;
+    int led_PIN2 = puerto + 1;
+    ChainableLED leds(led_PIN1, led_PIN2, 5);
+    leds.init();
+
     if (estado)
     {
         ledRojo(leds);
@@ -73,8 +86,13 @@ void ledVerdeRojo(boolean estado, ChainableLED leds)
     }
 }
 
-void ledBlink(boolean estado, ChainableLED leds)
+void ledBlink(boolean estado, int puerto)
 {
+    int led_PIN1 = puerto;
+    int led_PIN2 = puerto + 1;
+    ChainableLED leds(led_PIN1, led_PIN2, 5);
+    leds.init();
+
     if (estado)
     {
         ledBlanco(leds);
@@ -88,8 +106,13 @@ void ledBlink(boolean estado, ChainableLED leds)
     }
 }
 
-void ledOnOff(boolean estado, ChainableLED leds)
+void ledOnOff(boolean estado, int puerto)
 {
+    int led_PIN1 = puerto;
+    int led_PIN2 = puerto + 1;
+    ChainableLED leds(led_PIN1, led_PIN2, 5);
+    leds.init();
+
     if (estado)
     {
         ledBlanco(leds);
@@ -100,8 +123,13 @@ void ledOnOff(boolean estado, ChainableLED leds)
     }
 }
 
-void ledArcoiris(boolean estado, ChainableLED leds)
+void ledArcoiris(boolean estado, int puerto)
 {
+    int led_PIN1 = puerto;
+    int led_PIN2 = puerto + 1;
+    ChainableLED leds(led_PIN1, led_PIN2, 5);
+    leds.init();
+
     if (estado)
     {
         ledRojo(leds);
@@ -175,42 +203,34 @@ void zumbador(boolean estado, int puerto)
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
 void activarLED(int opcion, int puerto, bool valor)
 {
-
-    int led_PIN1 = puerto;
-    int led_PIN2 = puerto + 1;
-    ChainableLED leds(led_PIN1, led_PIN2, 5);
-    leds.init();
-    Serial.printlnf("Activar RGB en puerto: %d & %d", puerto, puerto + 1);
-
     switch (opcion)
     {
     case 0:
-        ledVerdeRojo(valor, leds);
+        ledVerdeRojo(valor, puerto);
         break;
 
     case 1:
-        ledMoradoAmarillo(valor, leds);
+        ledMoradoAmarillo(valor, puerto);
         break;
 
     case 2:
-        ledAzulNaranja(valor, leds);
+        ledAzulNaranja(valor, puerto);
         break;
 
     case 3:
-        ledBlink(valor, leds);
+        ledBlink(valor, puerto);
         break;
 
     case 4:
-        ledArcoiris(valor, leds);
+        ledArcoiris(valor, puerto);
         break;
 
     case 5:
-        Serial.printlnf("Entra LED ONOF");
-        ledOnOff(valor, leds);
+        ledOnOff(valor, puerto);
         break;
 
     default:
-        Serial.println("Valor no valido");
+        Serial.println("LedErrorOption");
         break;
     }
 

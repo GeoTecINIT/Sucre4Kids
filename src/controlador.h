@@ -71,10 +71,11 @@ bool esAnalogico(int id)
    return id == 0;
 }
 
-void displayPrint(int id, int condicion)
+void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int puerto)
 {
    display.clearDisplay();
-   if (esSensor(id))
+
+   if (isSensor)
    {
       switch (id)
       {
@@ -85,6 +86,7 @@ void displayPrint(int id, int condicion)
 
       // Luz
       case 2:
+         Serial.printlnf("OLED: Sensor Luz -> %d", condicion);
          // dispositivos[1] = "Sensor de Luz";
          condicion == 0 ? dispositivos[1] = "Sensor No Luz" : dispositivos[1] = "Sensor Si Luz";
          break;
@@ -166,7 +168,7 @@ void displayPrint(int id, int condicion)
       }
    }
 
-   snprintf(buf, sizeof(buf), dispositivos[1]);
+   snprintf(buf, sizeof(buf), dispositivos[1] + (isAnalogico ? " A" : " D") + (String)puerto);
    display.println(buf);
 
    snprintf(buf, sizeof(buf), dispositivos[0]);
