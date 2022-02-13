@@ -125,7 +125,7 @@ void loop()
           // Serial.printlnf("Puerto: %d", puertosSensores[indice]);
 
           // Mostramos Sensor en pantalla:
-          displayPrint(true, idSensor[indice], condicionSensor[indice]);
+          displayPrint(idSensor[indice], condicionSensor[indice]);
         }
       }
       else
@@ -143,11 +143,15 @@ void loop()
       {
         // Asignamos un puerto al actuador
         int puerto = asignarPuerto(tagInfo[1]);
+
         // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
         if (puerto != -1)
         {
           puertoActuador = puerto;
         }
+
+        // Mostramos por pantalla
+
       }
       else
       {
@@ -164,7 +168,7 @@ void loop()
   {
     //  Leemos el valor del sensor 1;
     bool valueSensor1 = leerSensor(idSensor[0], condicionSensor[0], puertosSensores[0]);
-    // Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
+    Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
 
     // Operacion nos permite juntar el output de dos sensores ya sea con AND u OR.
     int operacion = valueSensor1;
@@ -174,7 +178,7 @@ void loop()
     if (num == 2 && valueSensor1)
     {
       bool valueSensor2 = leerSensor(idSensor[1], condicionSensor[1], puertosSensores[1]);
-      // Serial.printlnf("Sensor 2: %s", valueSensor2 ? "True" : "False");
+      Serial.printlnf("Sensor 2: %s", valueSensor2 ? "True" : "False");
 
       // La asignacion de operacion podra verse modificada con una carta condicional (AND / OR)
       valueSensor2 ? operacion = true : operacion = false;

@@ -1,37 +1,15 @@
-boolean noDistancia(int puerto) {}
-boolean siDistancia(int puerto) {}
-
-// boolean leerSensorLuz(int puerto, int condicion)
-// {
-//     Serial.printlnf("Leer Luz");
-
-//     int threshold = 2500;
-//     // Apaño para leer del puerto asignado. AnalogRead(puerto) no funciona.
-//     switch (puerto)
-//     {
-//     case 0:
-//         if (analogRead(A0) >= threshold)
-//             return true;
-//         return false;
-
-//     case 2:
-//         if (analogRead(A2) >= threshold)
-//             return true;
-//         return false;
-
-//     case 4:
-//         if (analogRead(A4) >= threshold)
-//             return true;
-//         return false;
-
-//     default:
-//         return false;
-//     }
-// }
+boolean noDistancia(int puerto)
+{
+    return true;
+}
+boolean siDistancia(int puerto)
+{
+    return true;
+}
 
 boolean siLuz(int puerto)
 {
-    int threshold = 2500;
+    int threshold = 1000;
     switch (puerto)
     {
     case 0:
@@ -56,7 +34,7 @@ boolean siLuz(int puerto)
 
 boolean noLuz(int puerto)
 {
-    int threshold = 2500;
+    int threshold = 1000;
     switch (puerto)
     {
     case 0:
@@ -113,7 +91,6 @@ boolean noRuido(int puerto)
 boolean siBoton(int puerto)
 {
     pinMode(puerto, INPUT);
-    Serial.println("Leer boton");
     if (digitalRead(puerto) == HIGH)
         return true;
     return false;
@@ -122,7 +99,6 @@ boolean siBoton(int puerto)
 boolean noBoton(int puerto)
 {
     pinMode(puerto, INPUT);
-    Serial.println("Leer boton");
     if (digitalRead(puerto) == LOW)
         return true;
     return false;
@@ -167,9 +143,18 @@ boolean noRotativo(int puerto)
     return false;
 }
 
-boolean tempFrio(int puerto) {}
-boolean tempTemplado(int puerto) {}
-boolean tempCalor(int puerto) {}
+boolean tempFrio(int puerto)
+{
+    return true;
+}
+boolean tempTemplado(int puerto)
+{
+    return true;
+}
+boolean tempCalor(int puerto)
+{
+    return true;
+}
 
 boolean leerSensor(int id, int condicion, int puerto)
 {

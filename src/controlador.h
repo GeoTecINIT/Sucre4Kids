@@ -59,10 +59,22 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status;
 
-void displayPrint(bool esSensor, int id, int condicion)
+// Recibe el primer valor del tagInfo, true si es sensor (0) o false si actuador (1)
+bool esSensor(int id)
+{
+   return id == 0;
+}
+
+// Recibe el segundo valor del tagInfo, true si es analogico (0) o false si digital (1)
+bool esAnalogico(int id)
+{
+   return id == 0;
+}
+
+void displayPrint(int id, int condicion)
 {
    display.clearDisplay();
-   if (esSensor)
+   if (esSensor(id))
    {
       switch (id)
       {
@@ -114,40 +126,44 @@ void displayPrint(bool esSensor, int id, int condicion)
          break;
       }
    }
-   // Actuadores.
-   switch (id)
+   else
    {
-   case 0:
-      switch (condicion)
+
+      // Actuadores.
+      switch (id)
       {
       case 0:
-         dispositivos[0] = "RGB-Verde-Rojo";
-         break;
+         switch (condicion)
+         {
+         case 0:
+            dispositivos[0] = "RGB-Verde-Rojo";
+            break;
+         case 1:
+            dispositivos[0] = "RGB-Amarillo-Morado";
+            break;
+         case 2:
+            dispositivos[0] = "RGB-Azul-Naranja";
+            break;
+         case 3:
+            dispositivos[0] = "RGB-Blink";
+            break;
+         case 4:
+            dispositivos[0] = "RGB-RainBow";
+            break;
+
+         case 5:
+            dispositivos[0] = "RGB-On-Off";
+            break;
+         }
+
       case 1:
-         dispositivos[0] = "RGB-Amarillo-Morado";
-         break;
-      case 2:
-         dispositivos[0] = "RGB-Azul-Naranja";
-         break;
-      case 3:
-         dispositivos[0] = "RGB-Blink";
-         break;
-      case 4:
-         dispositivos[0] = "RGB-RainBow";
+         condicion == 0 ? dispositivos[0] = "Zumbador On-Off" : dispositivos[0] = "Zumbador Blink";
          break;
 
-      case 5:
-         dispositivos[0] = "RGB-On-Off";
+      default:
+         Serial.println("ActuadorNoValidoError");
          break;
       }
-
-   case 1:
-      condicion == 0 ? dispositivos[0] = "Zumbador On-Off" : dispositivos[0] = "Zumbador Blink";
-      break;
-
-   default:
-      Serial.println("ActuadorNoValidoError");
-      break;
    }
 
    snprintf(buf, sizeof(buf), dispositivos[1]);
@@ -292,18 +308,6 @@ void getTagID(int infoTag[])
    mfrc522.PICC_HaltA();
    // Stop encryption on PCD
    mfrc522.PCD_StopCrypto1();
-}
-
-// Recibe el primer valor del tagInfo, true si es sensor (0) o false si actuador (1)
-bool esSensor(int id)
-{
-   return id == 0;
-}
-
-// Recibe el segundo valor del tagInfo, true si es analogico (0) o false si digital (1)
-bool esAnalogico(int id)
-{
-   return id == 0;
 }
 
 int asignarPuerto(int id)

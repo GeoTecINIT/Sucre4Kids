@@ -219,8 +219,6 @@ void activarLED(int opcion, int puerto, bool valor)
 
 void activarZumbador(int opcion, int puerto, bool valor)
 {
-    
-
     pinMode(puerto, OUTPUT);
 
     switch (opcion)
