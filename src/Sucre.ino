@@ -2,7 +2,7 @@
 #include <Grove_ChainableLED.h>
 
 // This #include statement was automatically added by the Particle IDE.
-//#include <Arduino.h>
+// include <Arduino.h>
 
 // This #include statement was automatically added by the Particle IDE.
 #include <MFRC522.h>
@@ -21,9 +21,6 @@
 #include <sensores.h>
 
 // Unconnected mode ON, evita conexion wifi.
-void setup();
-void loop();
-#line 24 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // El primer indice corresponde al primer sensor, y el segundo indice al posible segundo sensor.

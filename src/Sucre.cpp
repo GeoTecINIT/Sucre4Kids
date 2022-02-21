@@ -7,7 +7,7 @@
 #include <Grove_ChainableLED.h>
 
 // This #include statement was automatically added by the Particle IDE.
-//#include <Arduino.h>
+// include <Arduino.h>
 
 // This #include statement was automatically added by the Particle IDE.
 #include <MFRC522.h>
@@ -26,7 +26,6 @@
 #include <sensores.h>
 
 // Unconnected mode ON, evita conexion wifi.
-#line 24 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
 void setup();
 void loop();
 #line 24 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"

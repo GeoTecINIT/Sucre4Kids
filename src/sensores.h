@@ -1,10 +1,28 @@
+// Temp & Humidiy
+#include <Adafruit_DHT_Particle.h>
+
+// Distance
+#include "Grove-Ultrasonic-Ranger.h"
+
 boolean noDistancia(int puerto)
 {
-    return true;
+    Ultrasonic ultrasonic(puerto);
+    long range = ultrasonic.MeasureInCentimeters();
+    Serial.printlnf("Distancia: %d", range);
+    if (range >= 0 && range < 10)
+        return true;
+    else
+        return false;
 }
 boolean siDistancia(int puerto)
 {
-    return true;
+    Ultrasonic ultrasonic(puerto);
+    long range = ultrasonic.MeasureInCentimeters();
+    Serial.printlnf("Distancia: %d", range);
+    if (range > 10)
+        return true;
+    else
+        return false;
 }
 
 boolean siLuz(int puerto)
@@ -79,15 +97,6 @@ boolean noRuido(int puerto)
     return false;
 }
 
-// boolean leerBoton(int puerto)
-// {
-//     pinMode(puerto, INPUT);
-//     Serial.println("Leer boton");
-//     if (digitalRead(puerto) == HIGH)
-//         return true;
-//     return false;
-// }
-
 boolean siBoton(int puerto)
 {
     pinMode(puerto, INPUT);
@@ -103,21 +112,6 @@ boolean noBoton(int puerto)
         return true;
     return false;
 }
-
-// boolean leerAngulo(int puerto)
-// {
-//     float voltage;
-//     int sensor_value = analogRead(puerto);
-//     voltage = (float)sensor_value * 5 / 1023;
-//     float degrees = (voltage * 300) / 5;
-
-//     if (degrees >= 680)
-//     {
-//         // Serial.println(degrees);
-//         return true;
-//     }
-//     return false;
-// }
 
 boolean siRotativo(int puerto)
 {
@@ -145,15 +139,57 @@ boolean noRotativo(int puerto)
 
 boolean tempFrio(int puerto)
 {
-    return true;
+    DHT dht(puerto, DHT11);
+    dht.begin();
+    float t = dht.getTempCelcius();
+
+    // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
+    while (isnan(t) | t == 0.0)
+    {
+        t = dht.getTempCelcius();
+    }
+
+    Serial.printlnf("Temp: %f", t);
+    if (t > 0.0 && t < 8)
+        return true;
+    else
+        return false;
 }
 boolean tempTemplado(int puerto)
 {
-    return true;
+    DHT dht(puerto, DHT11);
+    dht.begin();
+    float t = dht.getTempCelcius();
+
+    // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
+    while (isnan(t) | t == 0.0)
+    {
+        t = dht.getTempCelcius();
+    }
+
+    Serial.printlnf("Temp: %f", t);
+    if (t > 7 && t < 26)
+        return true;
+    else
+        return false;
 }
 boolean tempCalor(int puerto)
 {
-    return true;
+    DHT dht(puerto, DHT11);
+    dht.begin();
+    float t = dht.getTempCelcius();
+
+    // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
+    while (isnan(t) | t == 0.0)
+    {
+        t = dht.getTempCelcius();
+    }
+
+    Serial.printlnf("Temp: %f", t);
+    if (t > 25 && t < 50)
+        return true;
+    else
+        return false;
 }
 
 boolean leerSensor(int id, int condicion, int puerto)
@@ -165,19 +201,15 @@ boolean leerSensor(int id, int condicion, int puerto)
 
     case 2:
         return (condicion == 0 ? noLuz(puerto) : siLuz(puerto));
-        break;
 
     case 3:
         return (condicion == 0 ? noRuido(puerto) : siRuido(puerto));
-        break;
 
     case 4:
         return (condicion == 0 ? noBoton(puerto) : siBoton(puerto));
-        break;
 
     case 5:
-        return (condicion == 0 ? noRotativo(puerto) : siRotativo(puerto));
-        break;
+        return (condicion == 0) ? noRotativo(puerto) : siRotativo(puerto);
 
     case 6:
         switch (condicion)
@@ -189,10 +221,11 @@ boolean leerSensor(int id, int condicion, int puerto)
         case 2:
             return tempCalor(puerto);
         }
+    case 7:
+        return (condicion == 0) ? noDistancia(puerto) : siDistancia(puerto);
 
     default:
         Serial.println("InvalidSensorError");
         return false;
-        break;
     }
 }

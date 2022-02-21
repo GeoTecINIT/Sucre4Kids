@@ -43,7 +43,7 @@ disp Disp[8];
 #define SS_PIN A3  // constante para referenciar pin de slave select
 // #define WIDTH 80
 
-unsigned char data[] = {"1#1#0#1#0#0"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
+unsigned char data[] = {"0#1#7#1#0#1024"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -122,6 +122,10 @@ void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int pu
             break;
          }
          break;
+
+      // Distancia
+      case 7:
+         condicion == 0 ? dispositivos[1] = "Sensor Distancia Cerca" : dispositivos[1] = "Sensor Distancia Lejos";
 
       default:
          Serial.println("SensorNoValidoError");
