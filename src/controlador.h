@@ -2,9 +2,6 @@
 #include <Grove_ChainableLED.h>
 
 // This #include statement was automatically added by the Particle IDE.
-//#include <Arduino.h>
-
-// This #include statement was automatically added by the Particle IDE.
 #include <MFRC522.h>
 
 // OLED Screen Library
@@ -14,9 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-
-// RGB LED
-#define NUM_LEDS 5
 
 // Memory sector chosen to r/w fron NFC Tag
 byte trailerBlock = 7;

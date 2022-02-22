@@ -1,154 +1,106 @@
+// This #include statement was automatically added by the Particle IDE.
+#include <Grove_ChainableLED.h>
+ChainableLED ledObject = ChainableLED(0, 0, 5);
 
-
-void ledApagar(ChainableLED leds)
+void ledApagar()
 {
-    leds.setColorRGB(0, 0, 0, 0);
+    ledObject.setColorRGB(0, 0, 0, 0);
 }
-void ledRojo(ChainableLED leds)
+void ledRojo()
 {
-    leds.setColorRGB(0, 255, 0, 0);
+    ledObject.setColorRGB(0, 255, 0, 0);
 }
-void ledVerde(ChainableLED leds)
+void ledVerde()
 {
-    leds.setColorRGB(0, 0, 255, 10);
+    ledObject.setColorRGB(0, 0, 255, 10);
 }
-void ledAzul(ChainableLED leds)
+void ledAzul()
 {
-    leds.setColorRGB(0, 0, 0, 255);
+    ledObject.setColorRGB(0, 0, 0, 255);
 }
-void ledAmarillo(ChainableLED leds)
+void ledAmarillo()
 {
-    leds.setColorRGB(0, 255, 233, 0);
+    ledObject.setColorRGB(0, 255, 233, 0);
 }
-void ledMorado(ChainableLED leds)
+void ledMorado()
 {
-    leds.setColorRGB(0, 108, 70, 117);
+    ledObject.setColorRGB(0, 108, 70, 117);
 }
-void ledNaranja(ChainableLED leds)
+void ledNaranja()
 {
-    leds.setColorRGB(0, 255, 128, 0);
+    ledObject.setColorRGB(0, 255, 128, 0);
 }
-void ledBlanco(ChainableLED leds)
+void ledBlanco()
 {
-    Serial.println("Entra ledBlanco");
-    leds.setColorRGB(0, 255, 255, 255);
-    Serial.println("Termina ledBlanco");
+    ledObject.setColorRGB(0, 255, 255, 255);
 }
 
-void ledAzulNaranja(boolean estado, int puerto)
+void ledAzulNaranja(boolean estado)
 {
-    int led_PIN1 = puerto;
-    int led_PIN2 = puerto + 1;
-    ChainableLED leds(led_PIN1, led_PIN2, 5);
-    leds.init();
-
     if (estado)
-    {
-        ledAzul(leds);
-    }
+        ledAzul();
     else
-    {
-        ledNaranja(leds);
-    }
+        ledNaranja();
 }
 
-void ledMoradoAmarillo(boolean estado, int puerto)
+void ledMoradoAmarillo(boolean estado)
 {
-    int led_PIN1 = puerto;
-    int led_PIN2 = puerto + 1;
-    ChainableLED leds(led_PIN1, led_PIN2, 5);
-    leds.init();
 
     if (estado)
-    {
-        ledMorado(leds);
-    }
+        ledMorado();
     else
-    {
-        ledAmarillo(leds);
-    }
+        ledAmarillo();
 }
 
-void ledVerdeRojo(boolean estado, int puerto)
+void ledVerdeRojo(boolean estado)
 {
-    int led_PIN1 = puerto;
-    int led_PIN2 = puerto + 1;
-    ChainableLED leds(led_PIN1, led_PIN2, 5);
-    leds.init();
-
     if (estado)
-    {
-        ledRojo(leds);
-    }
+        ledRojo();
     else
-    {
-        ledVerde(leds);
-    }
+        ledVerde();
 }
 
-void ledBlink(boolean estado, int puerto)
+void ledBlink(boolean estado)
 {
-    int led_PIN1 = puerto;
-    int led_PIN2 = puerto + 1;
-    ChainableLED leds(led_PIN1, led_PIN2, 5);
-    leds.init();
-
     if (estado)
     {
-        ledBlanco(leds);
+        ledBlanco();
         delay(400);
-        ledApagar(leds);
+        ledApagar();
         delay(200);
     }
     else
-    {
-        ledApagar(leds);
-    }
+        ledApagar();
 }
 
-void ledOnOff(boolean estado, int puerto)
+void ledOnOff(boolean estado)
 {
-    int led_PIN1 = puerto;
-    int led_PIN2 = puerto + 1;
-    ChainableLED leds(led_PIN1, led_PIN2, 5);
-    leds.init();
+    if (estado)
+        ledBlanco();
+    else
+        ledApagar();
+}
+
+void ledArcoiris(boolean estado)
+{
 
     if (estado)
     {
-        ledBlanco(leds);
-    }
-    else
-    {
-        ledApagar(leds);
-    }
-}
-
-void ledArcoiris(boolean estado, int puerto)
-{
-    int led_PIN1 = puerto;
-    int led_PIN2 = puerto + 1;
-    ChainableLED leds(led_PIN1, led_PIN2, 5);
-    leds.init();
-
-    if (estado)
-    {
-        ledRojo(leds);
+        ledRojo();
         delay(200);
-        ledNaranja(leds);
+        ledNaranja();
         delay(200);
-        ledAmarillo(leds);
+        ledAmarillo();
         delay(200);
-        ledVerde(leds);
+        ledVerde();
         delay(200);
-        ledMorado(leds);
+        ledMorado();
         delay(200);
-        ledAzul(leds);
+        ledAzul();
         delay(200);
     }
     else
-    {
-        ledApagar(leds);
-    }
+        ledApagar();
 }
 
 // Acciones del zumbador
@@ -159,9 +111,9 @@ void pitidoON(int puerto)
     digitalWrite(puerto + 1, HIGH);
     digitalWrite(puerto + 1, 1);
 }
+
 void pitidoOFF(int puerto)
 {
-    // Serial.println("Zumbador OFF");
     digitalWrite(puerto, 0);
     digitalWrite(puerto, LOW);
     digitalWrite(puerto + 1, LOW);
@@ -179,62 +131,59 @@ void pitidoBlink(int puerto)
 void blinkAndSleep(boolean estado, int puerto)
 {
     if (estado)
-    {
         pitidoBlink(puerto);
-    }
     else
-    {
         pitidoOFF(puerto);
-    }
 }
 
 void zumbador(boolean estado, int puerto)
 {
     if (estado)
-    {
         pitidoON(puerto);
-    }
     else
-    {
         pitidoOFF(puerto);
-    }
 }
 
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
 void activarLED(int opcion, int puerto, bool valor)
 {
+    Serial.println("ACTIVAR LED");
+    ledObject = ChainableLED(puerto, puerto + 1, 5);
+    ledObject.init();
+    // ChainableLED ledObject(puerto, puerto + 1, 5);
+
     switch (opcion)
     {
     case 0:
-        ledVerdeRojo(valor, puerto);
+        Serial.println("LED: CASE 0");
+
+        ledVerdeRojo(valor);
         break;
 
     case 1:
-        ledMoradoAmarillo(valor, puerto);
+        ledMoradoAmarillo(valor);
         break;
 
     case 2:
-        ledAzulNaranja(valor, puerto);
+        ledAzulNaranja(valor);
         break;
 
     case 3:
-        ledBlink(valor, puerto);
+        ledBlink(valor);
         break;
 
     case 4:
-        ledArcoiris(valor, puerto);
+        ledArcoiris(valor);
         break;
 
     case 5:
-        ledOnOff(valor, puerto);
+        ledOnOff(valor);
         break;
 
     default:
         Serial.println("LedErrorOption");
         break;
     }
-
-    Serial.println("Sale swith");
 }
 
 void activarZumbador(int opcion, int puerto, bool valor)

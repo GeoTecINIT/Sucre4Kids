@@ -7,9 +7,6 @@
 #include <Grove_ChainableLED.h>
 
 // This #include statement was automatically added by the Particle IDE.
-// include <Arduino.h>
-
-// This #include statement was automatically added by the Particle IDE.
 #include <MFRC522.h>
 
 // OLED Screen Library
@@ -28,7 +25,7 @@
 // Unconnected mode ON, evita conexion wifi.
 void setup();
 void loop();
-#line 24 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
+#line 21 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // El primer indice corresponde al primer sensor, y el segundo indice al posible segundo sensor.
@@ -51,6 +48,8 @@ int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
 
 void setup()
 {
+
+  ledObject.init();
   // Unconnected mode ON
   Particle.disconnect();
   WiFi.off();
@@ -173,7 +172,7 @@ void loop()
   {
     //  Leemos el valor del sensor 1;
     bool valueSensor1 = leerSensor(idSensor[0], condicionSensor[0], puertosSensores[0]);
-    Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
+    // Serial.printlnf("Sensor 1: %s", valueSensor1 ? "True" : "False");
 
     // Operacion nos permite juntar el output de dos sensores ya sea con AND u OR.
     int operacion = valueSensor1;
@@ -183,7 +182,7 @@ void loop()
     if (num == 2 && valueSensor1)
     {
       bool valueSensor2 = leerSensor(idSensor[1], condicionSensor[1], puertosSensores[1]);
-      Serial.printlnf("Sensor 2: %s", valueSensor2 ? "True" : "False");
+      // Serial.printlnf("Sensor 2: %s", valueSensor2 ? "True" : "False");
 
       // La asignacion de operacion podra verse modificada con una carta condicional (AND / OR)
       valueSensor2 ? operacion = true : operacion = false;
