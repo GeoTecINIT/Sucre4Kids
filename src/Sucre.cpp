@@ -49,7 +49,7 @@ int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
 void setup()
 {
 
-  ledObject.init();
+  // ledObject.init();
   // Unconnected mode ON
   Particle.disconnect();
   WiFi.off();
