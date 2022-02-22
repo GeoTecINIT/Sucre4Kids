@@ -150,10 +150,10 @@ void zumbador(boolean estado, int puerto)
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
 void activarLED(int opcion, int puerto, bool valor)
 {
-    ledObject = ChainableLED(puerto, puerto + 1, 5);
 
     if (init)
     {
+        ledObject = ChainableLED(puerto, puerto + 1, 5);
         ledObject.init();
         init = false;
     }
