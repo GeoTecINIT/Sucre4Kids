@@ -1,5 +1,8 @@
 // This #include statement was automatically added by the Particle IDE.
 #include <Grove_ChainableLED.h>
+
+bool init = true;
+
 ChainableLED ledObject = ChainableLED(0, 0, 5);
 
 void ledApagar()
@@ -147,16 +150,17 @@ void zumbador(boolean estado, int puerto)
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
 void activarLED(int opcion, int puerto, bool valor)
 {
-    Serial.println("ACTIVAR LED");
     ledObject = ChainableLED(puerto, puerto + 1, 5);
-    ledObject.init();
-    // ChainableLED ledObject(puerto, puerto + 1, 5);
+
+    if (init)
+    {
+        ledObject.init();
+        init = false;
+    }
 
     switch (opcion)
     {
     case 0:
-        Serial.println("LED: CASE 0");
-
         ledVerdeRojo(valor);
         break;
 
