@@ -60,9 +60,9 @@ bool esSensor(int id)
 }
 
 // Recibe el segundo valor del tagInfo, true si es analogico (0) o false si digital (1)
-bool esAnalogico(int id)
+bool esAnalogico(int type)
 {
-   return id == 0;
+   return type == 0;
 }
 
 void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int puerto)

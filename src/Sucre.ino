@@ -20,6 +20,35 @@
 // Unconnected mode ON, evita conexion wifi.
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
+// *** Variables de Entorno ***
+bool IF_pasado = false;
+bool THEN_pasado = false;
+bool ELSE_pasado = false;
+
+int numBloque = 0;
+int numCondicionalesBloque = 0;
+int numSensoresBloque = 0;
+int numActuadoresBloque = 0;
+
+struct SENSOR
+{
+  int id;
+  int condicion;
+  int bloque;
+  int puerto;
+};
+struct SENSOR sensoresBloque[20];
+
+struct ACTUADOR
+{
+  int id;
+  int condicion;
+  int bloque;
+  int puerto;
+  bool actuadorTrue;
+};
+struct ACTUADOR actuadoresBloque[20];
+
 // El primer indice corresponde al primer sensor, y el segundo indice al posible segundo sensor.
 // True if the sensor is conected.
 bool sensoresArray[2] = {false, false};
@@ -83,9 +112,106 @@ void loop()
   // Si se ha pasado nueva tag:
   if (tagInfo[0] != -1)
   {
-    // Ejemplo lectura de informacion codificada en tarjeta.
-    Serial.println(esSensor(tagInfo[0]) ? "Es Sensor" : "Es Actuador");
-    Serial.println(esAnalogico(tagInfo[1]) ? "Es Analogico" : "Es Digital");
+    switch (tagInfo[0])
+    {
+    // Sensor
+    case 0:
+      if (IF_pasado && (numSensoresBloque == numCondicionalesBloque))
+      {
+        // Si el puerto es distinto de -1 el sensor ha sido asignado correctamente.
+        int puerto = asignarPuerto(tagInfo[1]);
+        if (puerto != -1)
+        {
+          struct SENSOR newSensor;
+          newSensor.id = tagInfo[2];
+          newSensor.condicion = tagInfo[3];
+          newSensor.bloque = numBloque;
+          newSensor.puerto = puerto;
+
+          sensoresBloque[numSensoresBloque] = newSensor;
+          numSensoresBloque++;
+
+          displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newSensor.id, newSensor.condicion, newSensor.puerto);
+        }
+      }
+      else
+      {
+        if (!IF_pasado)
+          Serial.println("Se esperaba IF tag");
+
+        if (numSensoresBloque != numCondicionalesBloque)
+          Serial.println("Se esperaba condicional");
+      }
+
+      break;
+
+    // Actuador: puede tratarse de un actuador de condicion TRUE o FALSE;
+    case 1:
+      //  Tag ActuadorTrue: Secuencia actuadores cuando sensores del bloque evualuen a True
+      if (THEN_pasado)
+      {
+        // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
+        int puerto = asignarPuerto(tagInfo[1]);
+        if (puerto != -1)
+        {
+          struct ACTUADOR newActuador;
+          newActuador.id = tagInfo[2];
+          newActuador.condicion = tagInfo[3];
+          newActuador.bloque = numBloque;
+          newActuador.puerto = puerto;
+
+          // Tag ActuadorFalse: Secuencia actuadores cuando sensores del bloque evualuen a False
+          if (!ELSE_pasado)
+            newActuador.actuadorTrue = true;
+          else
+            newActuador.actuadorTrue = false;
+
+          actuadoresBloque[numActuadoresBloque] = newActuador;
+          numActuadoresBloque++;
+
+          // Mostramos Actuador en pantalla:
+          displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
+        }
+      }
+      break;
+
+    // IF: Inicio de un bloque, fin secuencia ActuadoresFalse
+    case 2:
+
+      if (numBloque == 0 || numBloque == 1 && numActuadoresBloque > 0)
+      {
+
+        numBloque++;
+
+        bool THEN_pasado = false;
+        bool ELSE_pasado = false;
+
+        int numCondicionalesBloque = 0;
+        int numSensoresBloque = 0;
+        int numActuadoresBloque = 0;
+      }
+      else
+      {
+        Serial.println("");
+      }
+      break;
+
+    // AND/OR: Inicio de un bloque, fin secuencia ActuadoresFalse
+    case 3:
+      break;
+
+    // THEN: Inicio de un bloque, fin secuencia ActuadoresFalse
+    case 4:
+      break;
+
+    // ELSE: Inicio de un bloque, fin secuencia ActuadoresFalse
+    case 5:
+      break;
+
+    default:
+      Serial.println("Error");
+      break;
+    }
 
     // Si la tag es Sensor:
     if (esSensor(tagInfo[0]))
@@ -127,8 +253,9 @@ void loop()
         // Si ya tenemos 2 sensores.
         Serial.println("Se espera actuador");
       }
+
+      // Si la Tag es Actuador
     }
-    // Si la Tag es Actuador
     else
     {
       //  Si teneos al menos un sensor;
@@ -152,6 +279,7 @@ void loop()
         Serial.println("Error: necesario al menos un sensor");
       }
     }
+
     tagInfo[0] = -1;
   }
 
