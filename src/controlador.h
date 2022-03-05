@@ -12,6 +12,9 @@
 #include <string.h>
 #include <stdbool.h>
 
+// struct
+#include <interface.h>
+
 // Memory sector chosen to r/w fron NFC Tag
 byte trailerBlock = 7;
 byte blockAddr = 4;
@@ -44,10 +47,6 @@ int puertoDigital = 3;
 int puertoAnalogico = 0;
 
 bool haveSensor = false;
-
-boolean start = false;
-boolean Sdigi = false;
-boolean Adigi = false;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
@@ -422,4 +421,28 @@ void incrementarSensor(bool array[])
       i++;
 
    array[i] = true;
+}
+
+bool evaluate(SENSOR sensor[], bool condicion[])
+{
+
+   // bool valor = leerSensor(sensoresBloque[0].id, sensoresBloque[0].condicion, sensoresBloque[0].puerto);
+
+   // for (int i = 0; i < sizeof(conditions); i++)
+   // {
+   //    struct SENSOR sigSensor = sensoresBloque[i];
+   //    int nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
+
+   //    if (conditions[i])
+   //    {
+   //       valor = valor && nextValor;
+   //    }
+
+   //    else
+   //    {
+
+   //       valor = valor || nextValor;
+   //    }
+   // }
+   return true;
 }

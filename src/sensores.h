@@ -4,7 +4,7 @@
 // Distance
 #include "Grove-Ultrasonic-Ranger.h"
 
-boolean noDistancia(int puerto)
+bool noDistancia(int puerto)
 {
     Ultrasonic ultrasonic(puerto);
     long range = ultrasonic.MeasureInCentimeters();
@@ -14,7 +14,7 @@ boolean noDistancia(int puerto)
     else
         return false;
 }
-boolean siDistancia(int puerto)
+bool siDistancia(int puerto)
 {
     Ultrasonic ultrasonic(puerto);
     long range = ultrasonic.MeasureInCentimeters();
@@ -25,7 +25,7 @@ boolean siDistancia(int puerto)
         return false;
 }
 
-boolean siLuz(int puerto)
+bool siLuz(int puerto)
 {
     int threshold = 1000;
     switch (puerto)
@@ -50,7 +50,7 @@ boolean siLuz(int puerto)
     }
 }
 
-boolean noLuz(int puerto)
+bool noLuz(int puerto)
 {
     int threshold = 1000;
     switch (puerto)
@@ -75,7 +75,7 @@ boolean noLuz(int puerto)
     }
 }
 
-// boolean leerSensorSonido(int puerto)
+// bool leerSensorSonido(int puerto)
 // {
 //     // Serial.printlnf("analogico: %d", analogRead(A4));
 //     if (analogRead(puerto) >= 700)
@@ -83,21 +83,21 @@ boolean noLuz(int puerto)
 //     return false;
 // }
 
-boolean siRuido(int puerto)
+bool siRuido(int puerto)
 {
     if (analogRead(puerto) >= 700)
         return true;
     return false;
 }
 
-boolean noRuido(int puerto)
+bool noRuido(int puerto)
 {
     if (analogRead(puerto) <= 700)
         return true;
     return false;
 }
 
-boolean siBoton(int puerto)
+bool siBoton(int puerto)
 {
     pinMode(puerto, INPUT);
     if (digitalRead(puerto) == HIGH)
@@ -105,7 +105,7 @@ boolean siBoton(int puerto)
     return false;
 }
 
-boolean noBoton(int puerto)
+bool noBoton(int puerto)
 {
     pinMode(puerto, INPUT);
     if (digitalRead(puerto) == LOW)
@@ -113,7 +113,7 @@ boolean noBoton(int puerto)
     return false;
 }
 
-boolean siRotativo(int puerto)
+bool siRotativo(int puerto)
 {
     float voltage;
     int sensor_value = analogRead(puerto);
@@ -125,7 +125,7 @@ boolean siRotativo(int puerto)
     return false;
 }
 
-boolean noRotativo(int puerto)
+bool noRotativo(int puerto)
 {
     float voltage;
     int sensor_value = analogRead(puerto);
@@ -137,7 +137,7 @@ boolean noRotativo(int puerto)
     return false;
 }
 
-boolean tempFrio(int puerto)
+bool tempFrio(int puerto)
 {
     DHT dht(puerto, DHT11);
     dht.begin();
@@ -155,7 +155,7 @@ boolean tempFrio(int puerto)
     else
         return false;
 }
-boolean tempTemplado(int puerto)
+bool tempTemplado(int puerto)
 {
     DHT dht(puerto, DHT11);
     dht.begin();
@@ -173,7 +173,7 @@ boolean tempTemplado(int puerto)
     else
         return false;
 }
-boolean tempCalor(int puerto)
+bool tempCalor(int puerto)
 {
     DHT dht(puerto, DHT11);
     dht.begin();
@@ -192,7 +192,7 @@ boolean tempCalor(int puerto)
         return false;
 }
 
-boolean leerSensor(int id, int condicion, int puerto)
+bool leerSensor(int id, int condicion, int puerto)
 {
     switch (id)
     {
