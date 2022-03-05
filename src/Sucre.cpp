@@ -28,6 +28,7 @@
 // Unconnected mode ON, evita conexion wifi.
 void setup();
 void loop();
+bool evaluate(SENSOR sensor[], bool condicion[]);
 #line 24 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
@@ -40,12 +41,6 @@ int numBloque = -1;
 int numCondicionalesBloque = 0;
 int numSensoresBloque = 0;
 int numActuadoresBloque = 0;
-
-SENSORES_POR_BLOQUE sensoresPorBloque[2];
-
-CONDICION_BLOQUE condicionesPorBloque[2];
-
-ACTUADORES_POR_BLOQUE actuadoresPorBloque[2];
 
 // El primer indice corresponde al primer sensor, y el segundo indice al posible segundo sensor.
 // True if the sensor is conected.
@@ -126,7 +121,8 @@ void loop()
           newSensor.bloque = numBloque;
           newSensor.puerto = puerto;
 
-          sensoresPorBloque[numBloque].sensoresBloque[numSensoresBloque] = newSensor;
+          bloques[numBloque].sensores[numSensoresBloque] = newSensor;
+          // sensoresPorBloque[numBloque].sensoresBloque[numSensoresBloque] = newSensor;
           numSensoresBloque++;
 
           displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newSensor.id, newSensor.condicion, newSensor.puerto);
@@ -164,7 +160,8 @@ void loop()
           else
             newActuador.actuadorTrue = false;
 
-          actuadoresPorBloque[numBloque].actuadoresBloque[numActuadoresBloque] = newActuador;
+          bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
+          // actuadoresPorBloque[numBloque].actuadoresBloque[numActuadoresBloque] = newActuador;
           numActuadoresBloque++;
 
           // Mostramos Actuador en pantalla:
@@ -198,7 +195,8 @@ void loop()
       if (numCondicionalesBloque < numSensoresBloque && numActuadoresBloque == 0)
       {
         // Tag condicional => 3#0 | 3#1 == OR | AND
-        condicionesPorBloque[0].condicionesBloque[numCondicionalesBloque] = tagInfo[1];
+        bloques[numBloque].condiciones.condicionesBloque[numCondicionalesBloque] = tagInfo[1];
+        // condicionesPorBloque[0].condicionesBloque[numCondicionalesBloque] = tagInfo[1];
         numCondicionalesBloque++;
       }
       else
@@ -241,9 +239,32 @@ void loop()
   // Para cada iterazion del loop debemos evaluar los sensores de cada bloque y actuar en consecuencia.
   for (int i = 0; i < numBloque; i++)
   {
-    SENSOR *sensoresBloque = sensoresPorBloque[i].sensoresBloque;
 
-    bool evaluacion = evaluate(sensoresPorBloque[i].sensoresBloque, condicionesPorBloque[i].condicionesBloque);
+    // bool evaluacion = evaluate(sensoresPorBloque[i].sensoresBloque, condicionesPorBloque[i].condicionesBloque);
   }
 }
 // Fin loop
+
+bool evaluate(SENSOR sensor[], bool condicion[])
+{
+
+  // bool valor = leerSensor(sensoresBloque[0].id, sensoresBloque[0].condicion, sensoresBloque[0].puerto);
+
+  // for (int i = 0; i < sizeof(conditions); i++)
+  // {
+  //    struct SENSOR sigSensor = sensoresBloque[i];
+  //    int nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
+
+  //    if (conditions[i])
+  //    {
+  //       valor = valor && nextValor;
+  //    }
+
+  //    else
+  //    {
+
+  //       valor = valor || nextValor;
+  //    }
+  // }
+  return true;
+}

@@ -5,13 +5,8 @@ struct SENSOR
     int bloque;
     int puerto;
 };
-struct SENSORES_POR_BLOQUE
-{
-    SENSOR sensoresBloque[20];
-};
 
-// Cada bloque tiene una secuencia de condiciones. conditions[0] ==> condiciones del bloque 0
-struct CONDICION_BLOQUE
+struct CONDICION
 {
     bool condicionesBloque[19];
 };
@@ -25,7 +20,13 @@ struct ACTUADOR
     bool actuadorTrue;
 };
 
-struct ACTUADORES_POR_BLOQUE
+struct BLOQUE
 {
-    ACTUADOR actuadoresBloque[20];
+    SENSOR sensores[20];
+    ACTUADOR actuadores[20];
+    CONDICION condiciones;
 };
+
+typedef struct BLOQUE Bloque;
+
+Bloque bloques[2];
