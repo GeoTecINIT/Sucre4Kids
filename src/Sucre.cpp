@@ -28,7 +28,6 @@
 // Unconnected mode ON, evita conexion wifi.
 void setup();
 void loop();
-bool evaluate(SENSOR sensor[], bool condicion[]);
 #line 24 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
@@ -41,21 +40,6 @@ int numBloque = -1;
 int numCondicionalesBloque = 0;
 int numSensoresBloque = 0;
 int numActuadoresBloque = 0;
-
-// El primer indice corresponde al primer sensor, y el segundo indice al posible segundo sensor.
-// True if the sensor is conected.
-bool sensoresArray[2] = {false, false};
-// El id se obtiene del TagInfo[1] value.
-int idSensor[2] = {-1, -1};
-
-// La condicion se obtiene del TagInfo[2] value.
-int condicionSensor[2] = {-1, -1};
-
-// Mapea los puerto asignados al sensor.
-int puertosSensores[2] = {-1, -1};
-
-// Mapea el puerto asignado al actuador.
-int puertoActuador = -1;
 
 // Informacion de la tarjeta leida.
 int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
@@ -156,9 +140,9 @@ void loop()
 
           // Tag ActuadorFalse: Secuencia actuadores cuando sensores del bloque evualuen a False
           if (!ELSE_pasado)
-            newActuador.actuadorTrue = true;
+            newActuador.evaluate = true;
           else
-            newActuador.actuadorTrue = false;
+            newActuador.evaluate = false;
 
           bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
           // actuadoresPorBloque[numBloque].actuadoresBloque[numActuadoresBloque] = newActuador;
@@ -239,32 +223,33 @@ void loop()
   // Para cada iterazion del loop debemos evaluar los sensores de cada bloque y actuar en consecuencia.
   for (int i = 0; i < numBloque; i++)
   {
-
-    // bool evaluacion = evaluate(sensoresPorBloque[i].sensoresBloque, condicionesPorBloque[i].condicionesBloque);
+    bool evaluacion = evaluate(bloques[i].sensores, bloques[i].condiciones.condicionesBloque);
+    for (int j = 0; sizeof(bloques[i].actuadores); j++)
+    {
+      ACTUADOR actuador = bloques[i].actuadores[j];
+      if (evaluacion == actuador.evaluate)
+      {
+        actuador.id == 1 ? activarZumbador(actuador.condicion, actuador.puerto) : activarLED(actuador.condicion, actuador.puerto);
+      }
+    }
   }
 }
 // Fin loop
 
 bool evaluate(SENSOR sensor[], bool condicion[])
 {
+  bool valorEvaluado = leerSensor(sensor[0].id, sensor[0].condicion, sensor[0].puerto);
 
-  // bool valor = leerSensor(sensoresBloque[0].id, sensoresBloque[0].condicion, sensoresBloque[0].puerto);
+  for (int i = 0; i < sizeof(condicion); i++)
+  {
+    struct SENSOR sigSensor = sensor[i];
+    int nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
 
-  // for (int i = 0; i < sizeof(conditions); i++)
-  // {
-  //    struct SENSOR sigSensor = sensoresBloque[i];
-  //    int nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
+    if (condicion[i])
+      valorEvaluado = valorEvaluado && nextValor;
+    else
+      valorEvaluado = valorEvaluado || nextValor;
+  }
 
-  //    if (conditions[i])
-  //    {
-  //       valor = valor && nextValor;
-  //    }
-
-  //    else
-  //    {
-
-  //       valor = valor || nextValor;
-  //    }
-  // }
   return true;
 }

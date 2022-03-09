@@ -132,9 +132,9 @@ void loop()
 
           // Tag ActuadorFalse: Secuencia actuadores cuando sensores del bloque evualuen a False
           if (!ELSE_pasado)
-            newActuador.actuadorTrue = true;
+            newActuador.evaluate = true;
           else
-            newActuador.actuadorTrue = false;
+            newActuador.evaluate = false;
 
           bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
           // actuadoresPorBloque[numBloque].actuadoresBloque[numActuadoresBloque] = newActuador;
@@ -216,6 +216,14 @@ void loop()
   for (int i = 0; i < numBloque; i++)
   {
     bool evaluacion = evaluate(bloques[i].sensores, bloques[i].condiciones.condicionesBloque);
+    for (int j = 0; sizeof(bloques[i].actuadores); j++)
+    {
+      ACTUADOR actuador = bloques[i].actuadores[j];
+      if (evaluacion == actuador.evaluate)
+      {
+        actuador.id == 1 ? activarZumbador(actuador.condicion, actuador.puerto) : activarLED(actuador.condicion, actuador.puerto);
+      }
+    }
   }
 }
 // Fin loop

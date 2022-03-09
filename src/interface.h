@@ -17,7 +17,7 @@ struct ACTUADOR
     int condicion;
     int bloque;
     int puerto;
-    bool actuadorTrue;
+    bool evaluate;
 };
 
 struct BLOQUE
