@@ -14,6 +14,7 @@ bool noDistancia(int puerto)
     else
         return false;
 }
+
 bool siDistancia(int puerto)
 {
     Ultrasonic ultrasonic(puerto);
@@ -74,14 +75,6 @@ bool noLuz(int puerto)
         return false;
     }
 }
-
-// bool leerSensorSonido(int puerto)
-// {
-//     // Serial.printlnf("analogico: %d", analogRead(A4));
-//     if (analogRead(puerto) >= 700)
-//         return true;
-//     return false;
-// }
 
 bool siRuido(int puerto)
 {
@@ -155,6 +148,7 @@ bool tempFrio(int puerto)
     else
         return false;
 }
+
 bool tempTemplado(int puerto)
 {
     DHT dht(puerto, DHT11);
@@ -173,6 +167,7 @@ bool tempTemplado(int puerto)
     else
         return false;
 }
+
 bool tempCalor(int puerto)
 {
     DHT dht(puerto, DHT11);

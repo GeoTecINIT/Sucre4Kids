@@ -148,7 +148,7 @@ void loop()
 
     // IF: Inicio de un bloque, fin secuencia ActuadoresFalse
     case 2:
-      if (numBloque == 0 || numBloque == 1 && numActuadoresBloque > 0)
+      if (numBloque == -1 || numBloque == 0 && numActuadoresBloque > 0)
       {
         numBloque++;
 
@@ -212,15 +212,16 @@ void loop()
     tagInfo[0] = -1;
   }
 
-  // Para cada iterazion del loop debemos evaluar los sensores de cada bloque y actuar en consecuencia.
-  for (int i = 0; i < numBloque; i++)
+  for (int i = 0; i <= numBloque; i++)
   {
+    // Para cada iterazion del loop debemos evaluar los sensores de cada bloque y actuar en consecuencia.
     bool evaluacion = evaluate(bloques[i].sensores, bloques[i].condiciones.condicionesBloque);
     for (int j = 0; sizeof(bloques[i].actuadores); j++)
     {
       ACTUADOR actuador = bloques[i].actuadores[j];
       if (evaluacion == actuador.evaluate)
       {
+        // Nueva firma
         actuador.id == 1 ? activarZumbador(actuador.condicion, actuador.puerto) : activarLED(actuador.condicion, actuador.puerto);
       }
     }
