@@ -2,7 +2,6 @@
 #include <Grove_ChainableLED.h>
 
 bool init = true;
-
 ChainableLED ledObject = ChainableLED(0, 0, 5);
 
 void ledApagar()

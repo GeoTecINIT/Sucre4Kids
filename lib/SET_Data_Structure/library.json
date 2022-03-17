@@ -1,0 +1,23 @@
+{
+  "name": "SET",
+  "keywords": "Set,add,sub,union,diff,intersection,equal,subset",
+  "description": "Library to implement SET datastructure.",
+  "authors":
+  [
+    {
+      "name": "Rob Tillaart",
+      "email": "Rob.Tillaart@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/RobTillaart/SET.git"
+  },
+  "version": "0.2.5",
+  "license": "MIT",
+  "frameworks": "arduino",
+  "platforms": "*",
+  "headers": "set.h"
+}
