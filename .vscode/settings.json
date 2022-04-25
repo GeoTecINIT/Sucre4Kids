@@ -1,7 +1,7 @@
 {
     "cortex-debug.openocdPath": "${command:particle.getDebuggerOpenocdPath}",
-    "particle.targetDevice": "e00fce681c0a635ec4f84fb2",
-    "particle.firmwareVersion": "3.2.0",
+    "particle.targetDevice": "e00fce686ffce3ee549e6cbb",
+    "particle.firmwareVersion": "3.3.0",
     "particle.targetPlatform": "argon",
     "files.associations": {
         "__bit_reference": "cpp",
@@ -13,6 +13,7 @@
         "string": "cpp",
         "string_view": "cpp",
         "unordered_map": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "algorithm": "cpp"
     }
 }

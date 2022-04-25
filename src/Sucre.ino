@@ -24,6 +24,8 @@
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // *** Variables de Entorno ***
+Bloque bloques[2];
+
 bool IF_pasado = false;
 bool THEN_pasado = false;
 bool ELSE_pasado = false;
@@ -55,6 +57,107 @@ void setup()
   {
     key.keyByte[i] = 0xFF;
   }
+
+  // initializeBLocks(bloques);
+}
+
+bool evaluate(SENSOR sensor[], bool condicion[])
+{
+  if (numSensoresBloque >= 2 && numCondicionalesBloque >= 1)
+  {
+    if (numCondicionalesBloque < numSensoresBloque)
+    {
+      bool valorEvaluado = leerSensor(sensor[0].id, sensor[0].condicion, sensor[0].puerto);
+      for (int i = 0; i < numCondicionalesBloque - 1; i++)
+      {
+        struct SENSOR sigSensor = sensor[i];
+        int nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
+
+        if (condicion[i])
+          valorEvaluado = valorEvaluado && nextValor;
+        else
+          valorEvaluado = valorEvaluado || nextValor;
+      }
+      // Serial.printlnf("Evaluate: %s", valorEvaluado ? "True" : "False");
+      return valorEvaluado;
+    }
+    else
+    {
+      // Serial.println("Evaluate: numCondicionalesBloque > numSensoresBloque");
+    }
+  }
+
+  // Serial.println("Evaluate: inficientes sensores");
+  return false;
+}
+
+// TRUE Si el disposivo no ha sido utilizado en el bloque ACTUAL.
+bool isValidSensor(int deviceID)
+{
+  // Serial.printlnf("deviceID:%d", deviceID);
+
+  BLOQUE bloque = bloques[numBloque];
+  for (int i = 0; i < numSensoresBloque; i++)
+  {
+    // Serial.printlnf("SensorBloqueID:%d", bloque.sensores[i].id);
+    if (bloque.sensores[i].id == deviceID)
+    {
+      Serial.println("Invalid sensor! -> Sensor repetido en el bloque");
+      return false;
+    }
+  };
+
+  // Serial.println("Valid sensor!");
+  return true;
+}
+
+// -1 si el sensor es nuevo, o el puerto donde esta siendo usado.
+int isNewSensor(int deviceID)
+{
+  for (int i = 0; i <= numBloque; i++)
+  {
+    BLOQUE bloque = bloques[i];
+    for (int j = 0; i < sizeof(bloque.actuadores); i++)
+    {
+      if (bloque.sensores[j].id == deviceID)
+        return bloque.sensores[j].puerto;
+    }
+  }
+  return -1;
+}
+
+// True cuando el actuador no se ha usado en ningun Then, evalState=T o, Else evalState=F de NINGUN bloque;
+// Actuador valido tanto en el then como en el else, cuando no ha sido usado en ningun bloque para ese state.
+// No puedo poner el led verde ON en then de bloque 1 a la vez que led rojo OFF en then de bloque 2.
+// Si es posible poner led verde ON en then de bloque 1 y led rojo ON en else de bloque 2.
+bool isValidActuador(bool evalState, int actuadorID)
+{
+  for (int i = 0; i <= numBloque; i++)
+  {
+    BLOQUE bloque = bloques[i];
+    for (int j = 0; i < sizeof(bloque.actuadores); i++)
+    {
+      if (bloque.actuadores[j].evaluate == evalState && bloque.actuadores[j].id == actuadorID)
+        return false;
+    }
+  }
+  return true;
+}
+
+// -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
+int isNewActuador(int deviceID)
+{
+  for (int i = 0; i <= numBloque; i++)
+  {
+    BLOQUE bloque = bloques[i];
+    for (int j = 0; i < sizeof(bloque.actuadores); i++)
+    {
+      if (bloque.actuadores[j].id == deviceID)
+        return bloque.actuadores[j].puerto;
+    }
+  }
+
+  return -1;
 }
 
 void loop()
@@ -62,6 +165,7 @@ void loop()
   // If tag detected
   if (mfrc522.PICC_IsNewCardPresent())
   {
+    Serial.print("Tag Detectada --> ");
     // Error in comunications, i.e Tag broken:
     if (!mfrc522.PICC_ReadCardSerial())
     {
@@ -78,30 +182,41 @@ void loop()
     getTagID(tagInfo);
   }
 
-  // Si se ha pasado nueva tag:
+  // Si se ha pasado nueva tag; se limpia al finalizar su lectura.
   if (tagInfo[0] != -1)
   {
+    int deviceID = tagInfo[2];
+    Serial.print("Ejecutando tag --> ");
+
     switch (tagInfo[0])
     {
     // Sensor
     case 0:
-      if (IF_pasado && (numSensoresBloque == numCondicionalesBloque))
+      if (IF_pasado && (numSensoresBloque == numCondicionalesBloque) && isValidSensor(deviceID))
       {
-        // Si el puerto es distinto de -1 el sensor ha sido asignado correctamente.
-        int puerto = asignarPuerto(tagInfo[1]);
+
+        int puerto = isNewSensor(deviceID);
+        // Si el puerto es distinto de -1 el sensor ha sido usado previamente. Si es nuevo, obtenemos un puerto disponible.
+        if (puerto == -1)
+          puerto = asignarPuerto(deviceID);
+
         if (puerto != -1)
         {
+
           SENSOR newSensor;
-          newSensor.id = tagInfo[2];
+          newSensor.id = deviceID;
           newSensor.condicion = tagInfo[3];
           newSensor.bloque = numBloque;
           newSensor.puerto = puerto;
 
           bloques[numBloque].sensores[numSensoresBloque] = newSensor;
-          // sensoresPorBloque[numBloque].sensoresBloque[numSensoresBloque] = newSensor;
           numSensoresBloque++;
 
           displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newSensor.id, newSensor.condicion, newSensor.puerto);
+        }
+        else
+        {
+          Serial.println("Error Puerto");
         }
       }
       else
@@ -112,38 +227,65 @@ void loop()
         if (numSensoresBloque != numCondicionalesBloque)
           Serial.println("Despues de un sensor se espera una concion: AND u OR");
       }
-
       break;
 
-    // Actuador: puede tratarse de un actuador de condicion TRUE o FALSE;
+    // Actuador: puede tratarse de un actuador de condicion TRUE o FALSE (para ser usado en el then o el else);
     case 1:
-      //  Tag ActuadorTrue: Secuencia actuadores cuando sensores del bloque evualuen a True
-      if (THEN_pasado)
+      //  Tag ActuadorTrue: Secuencia actuadores cuando sensores del bloque evaluate a True
+      if (THEN_pasado && !ELSE_pasado && isValidActuador(true, deviceID))
       {
+        int puerto = isNewActuador(deviceID);
+        if (puerto == -1)
+          puerto = asignarPuerto(deviceID);
+
         // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
-        int puerto = asignarPuerto(tagInfo[1]);
         if (puerto != -1)
         {
           ACTUADOR newActuador;
-          newActuador.id = tagInfo[2];
+          newActuador.id = deviceID;
           newActuador.condicion = tagInfo[3];
           newActuador.bloque = numBloque;
           newActuador.puerto = puerto;
-
-          // Tag ActuadorFalse: Secuencia actuadores cuando sensores del bloque evualuen a False
-          if (!ELSE_pasado)
-            newActuador.evaluate = true;
-          else
-            newActuador.evaluate = false;
+          newActuador.evaluate = true;
 
           bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
-          // actuadoresPorBloque[numBloque].actuadoresBloque[numActuadoresBloque] = newActuador;
           numActuadoresBloque++;
 
-          // Mostramos Actuador en pantalla:
           displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
         }
       }
+
+      //  Tag ActuadorFalse: Secuencia actuadores cuando sensores del bloque evaluate a False
+      else
+      {
+        if (THEN_pasado && ELSE_pasado && isValidActuador(false, deviceID))
+        {
+          int puerto = isNewActuador(deviceID);
+          if (puerto == -1)
+            puerto = asignarPuerto(deviceID);
+
+          // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
+          if (puerto != -1)
+          {
+            ACTUADOR newActuador;
+            newActuador.id = deviceID;
+            newActuador.condicion = tagInfo[3];
+            newActuador.bloque = numBloque;
+            newActuador.puerto = puerto;
+            newActuador.evaluate = false;
+
+            bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
+            numActuadoresBloque++;
+
+            displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
+          }
+        }
+        else
+        {
+          Serial.println("Invalid Actuador");
+        }
+      }
+
       break;
 
     // IF: Inicio de un bloque, fin secuencia ActuadoresFalse
@@ -151,7 +293,6 @@ void loop()
       if (numBloque == -1 || numBloque == 0 && numActuadoresBloque > 0)
       {
         numBloque++;
-
         IF_pasado = true;
         THEN_pasado = false;
         ELSE_pasado = false;
@@ -159,6 +300,9 @@ void loop()
         numCondicionalesBloque = 0;
         numSensoresBloque = 0;
         numActuadoresBloque = 0;
+
+        BLOQUE nuevoBloque;
+        bloques[numBloque] = nuevoBloque;
       }
       else
       {
@@ -172,7 +316,6 @@ void loop()
       {
         // Tag condicional => 3#0 | 3#1 == OR | AND
         bloques[numBloque].condiciones.condicionesBloque[numCondicionalesBloque] = tagInfo[1];
-        // condicionesPorBloque[0].condicionesBloque[numCondicionalesBloque] = tagInfo[1];
         numCondicionalesBloque++;
       }
       else
@@ -209,40 +352,29 @@ void loop()
       break;
     }
 
+    Serial.println("Fin Tag");
+    Serial.printlnf("Num bloques: %d", numBloque);
+    Serial.printlnf("Num sensoresBLoque: %d", numSensoresBloque);
+    Serial.printlnf("Num condicionesBLoque: %d", numCondicionalesBloque);
+    Serial.printlnf("Num CondicionalesBloque: %d", numActuadoresBloque);
+
     tagInfo[0] = -1;
+    Serial.println();
   }
 
   for (int i = 0; i <= numBloque; i++)
   {
     // Para cada iterazion del loop debemos evaluar los sensores de cada bloque y actuar en consecuencia.
+
     bool evaluacion = evaluate(bloques[i].sensores, bloques[i].condiciones.condicionesBloque);
-    for (int j = 0; sizeof(bloques[i].actuadores); j++)
+    for (int j = 0; j < numActuadoresBloque; j++)
     {
       ACTUADOR actuador = bloques[i].actuadores[j];
       if (evaluacion == actuador.evaluate)
       {
-        // Nueva firma
-        actuador.id == 1 ? activarZumbador(actuador.condicion, actuador.puerto) : activarLED(actuador.condicion, actuador.puerto);
+        actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
       }
     }
   }
 }
 // Fin loop
-
-bool evaluate(SENSOR sensor[], bool condicion[])
-{
-  bool valorEvaluado = leerSensor(sensor[0].id, sensor[0].condicion, sensor[0].puerto);
-
-  for (int i = 0; i < sizeof(condicion); i++)
-  {
-    struct SENSOR sigSensor = sensor[i];
-    int nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
-
-    if (condicion[i])
-      valorEvaluado = valorEvaluado && nextValor;
-    else
-      valorEvaluado = valorEvaluado || nextValor;
-  }
-
-  return true;
-}

@@ -37,72 +37,29 @@ void ledBlanco()
     ledObject.setColorRGB(0, 255, 255, 255);
 }
 
-void ledAzulNaranja(boolean estado)
+void ledBlink()
 {
-    if (estado)
-        ledAzul();
-    else
-        ledNaranja();
+    ledBlanco();
+    delay(400);
+    ledApagar();
+    delay(200);
 }
 
-void ledMoradoAmarillo(boolean estado)
+void ledArcoiris()
 {
 
-    if (estado)
-        ledMorado();
-    else
-        ledAmarillo();
-}
-
-void ledVerdeRojo(boolean estado)
-{
-    if (estado)
-        ledRojo();
-    else
-        ledVerde();
-}
-
-void ledBlink(boolean estado)
-{
-    if (estado)
-    {
-        ledBlanco();
-        delay(400);
-        ledApagar();
-        delay(200);
-    }
-    else
-        ledApagar();
-}
-
-void ledOnOff(boolean estado)
-{
-    if (estado)
-        ledBlanco();
-    else
-        ledApagar();
-}
-
-void ledArcoiris(boolean estado)
-{
-
-    if (estado)
-    {
-        ledRojo();
-        delay(200);
-        ledNaranja();
-        delay(200);
-        ledAmarillo();
-        delay(200);
-        ledVerde();
-        delay(200);
-        ledMorado();
-        delay(200);
-        ledAzul();
-        delay(200);
-    }
-    else
-        ledApagar();
+    ledRojo();
+    delay(200);
+    ledNaranja();
+    delay(200);
+    ledAmarillo();
+    delay(200);
+    ledVerde();
+    delay(200);
+    ledMorado();
+    delay(200);
+    ledAzul();
+    delay(200);
 }
 
 // Acciones del zumbador
@@ -147,7 +104,7 @@ void zumbador(boolean estado, int puerto)
 }
 
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
-void activarLED(int opcion, int puerto, bool valor)
+void activarLED(int opcion, int puerto)
 {
 
     if (init)
@@ -160,27 +117,33 @@ void activarLED(int opcion, int puerto, bool valor)
     switch (opcion)
     {
     case 0:
-        ledVerdeRojo(valor);
+        ledVerde();
         break;
 
     case 1:
-        ledMoradoAmarillo(valor);
+        ledRojo();
         break;
 
     case 2:
-        ledAzulNaranja(valor);
+        ledAmarillo();
         break;
 
     case 3:
-        ledBlink(valor);
+        ledMorado();
         break;
 
     case 4:
-        ledArcoiris(valor);
+        ledAzul();
         break;
 
     case 5:
-        ledOnOff(valor);
+        ledNaranja();
+        break;
+    case 6:
+        ledBlink();
+        break;
+    case 7:
+        ledArcoiris();
         break;
 
     default:
@@ -189,20 +152,34 @@ void activarLED(int opcion, int puerto, bool valor)
     }
 }
 
-void activarZumbador(int opcion, int puerto, bool valor)
+void activarZumbador(int opcion, int puerto)
 {
     pinMode(puerto, OUTPUT);
 
     switch (opcion)
     {
     case 0:
-        zumbador(valor, puerto);
+        pitidoON(puerto);
         break;
     case 1:
-        blinkAndSleep(valor, puerto);
+        pitidoBlink(puerto);
         break;
     default:
         Serial.println("Valor no valido");
         break;
     }
+}
+
+void apagarActuador(int puerto)
+{
+    digitalWrite(puerto, 0);
+    digitalWrite(puerto, LOW);
+}
+
+void actuadorHandler(int id, int opcion, int puerto)
+{
+    if (id < 2)
+        id == 0 ? activarLED(opcion, puerto) : activarZumbador(opcion, puerto);
+    else
+        apagarActuador(puerto);
 }

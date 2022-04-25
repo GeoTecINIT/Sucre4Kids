@@ -21,23 +21,12 @@ char buf[64];
 
 String dispositivos[2] = {"-", "-"};
 
-// struct
-typedef struct
-{
-   uint8_t pin;
-   uint8_t pin2;
-
-} disp;
-
-// typedef struct port Port;
-disp Disp[8];
-
 // NFC Variables
 #define RST_PIN D8 // constante para referenciar pin de reset
 #define SS_PIN A3  // constante para referenciar pin de slave select
 // #define WIDTH 80
 
-unsigned char data[] = {"0#1#7#1#0#1024"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
+unsigned char data[] = {"2#0#0#0#0#0"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -196,6 +185,7 @@ int atoi(char *str)
       num = num * 10 + (str[i] - '0');
       i++;
    }
+
    if (isNegetive)
       num = -1 * num;
    return num;
@@ -213,9 +203,7 @@ void split(char cadena[], char delim[], int solution[])
    }
 
    if (!solution[0])
-   {
       haveSensor = true;
-   }
 }
 
 void print(int datos[])
@@ -233,13 +221,10 @@ void print(int datos[])
    }
 
    if (!datos[5])
-   {
       Serial.printf("Es analogico\n");
-   }
+
    else
-   {
       Serial.printf("Es digital\n");
-   }
 }
 
 void writeDataToBLock(byte blockAddr)
@@ -310,110 +295,51 @@ int asignarPuerto(int id)
 {
    int option;
    // Serial.printf("Digital %d, Analogico %d\n", puertoDigital, puertoAnalogico);
-
    if (esAnalogico(id))
-   {
       // Serial.print(" \t y es analógico\n");
       option = puertoAnalogico;
-   }
    else
-   {
       // Serial.print(" \t y es digital\n");
       option = puertoDigital;
-   }
 
    switch (option)
    {
    case 0:
       Serial.print("Conectar al puerto A0\n");
-
       puertoAnalogico++;
-      // Disp[0].pin = A0;
-      // Disp[0].pin2 = A1;
-
-      // statements executed if the expression equals the   p_A0
-      // value of this constant_expression                  p_A1
       return 0;
-      break;
 
    case 1:
       Serial.print("Conectar al puerto A2\n");
       puertoAnalogico++;
-      // Disp[0].pin = A2;
-      // Disp[0].pin2 = A3;
-      // statements executed if the expression equals the p_A2
-      // value of this constant_expression                 p_A3
       return 2;
-      break;
 
    case 2:
       Serial.print("Conectar al puerto A4\n");
-
       puertoAnalogico = -1;
-      // Disp[0].pin = A4;
-      // Disp[0].pin2 = A5;
-      // statements executed if the expression equals the p_A4
-      // value of this constant_expression                  p_A5
       return 4;
-      break;
 
    case 3:
       Serial.print("Conectar al puerto D2\n");
-
       puertoDigital++;
-      // Disp[0].pin = D2;
-      //  Disp[0].pin2 = D3;
-      //  statements executed if the expression equals the  p_D2
-      //  value of this constant_expression                  p_D3
       return 2;
-      break;
 
    case 4:
       Serial.print("Conectar al puerto D4\n");
-
       puertoDigital++;
-      // Disp[0].pin = D4;
-      // Disp[0].pin2 = D5;
-      // statements executed if the expression equals the p_D4
-      // value of this constant_expression               p_D5
       return 4;
-      break;
+
    case 5:
       Serial.print("Conectar al puerto D6\n");
       puertoDigital = -1;
-      // Disp[0].pin = D4;
-      // Disp[0].pin2 = D5;
-      // statements executed if the expression equals the p_D4
-      // value of this constant_expression               p_D5
       return 6;
-      break;
+
    default:
       Serial.print("Error: No hay mas puertos disponibles \n");
       return -1;
-      // statements executed if expression does not equal
-      // any case constant_expression
    }
 }
 
-// El numero de sensores representar la cantidad de elementos a true del vector.
-int numSensores(bool array[])
-{
-   int contador = 0;
-   for (int j = 0; j < 2; j++)
-   {
-      if (array[j])
-         contador++;
-   }
-
-   return contador;
-}
-
-// Al tratarse de un vector booleano, incrementar la cantidad supone poner a true el siguiente false.
-void incrementarSensor(bool array[])
-{
-   int i = 0;
-   while (array[i])
-      i++;
-
-   array[i] = true;
-}
+// void initializeBLocks(Bloque bloques)
+// {
+// }

@@ -28,5 +28,3 @@ struct BLOQUE
 };
 
 typedef struct BLOQUE Bloque;
-
-Bloque bloques[2];

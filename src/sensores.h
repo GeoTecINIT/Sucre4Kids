@@ -156,7 +156,7 @@ bool tempTemplado(int puerto)
     float t = dht.getTempCelcius();
 
     // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
-    while (isnan(t) | t == 0.0)
+    while (isnan(t) || (t == 0.0))
     {
         t = dht.getTempCelcius();
     }
