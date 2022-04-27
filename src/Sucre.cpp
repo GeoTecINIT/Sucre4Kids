@@ -72,23 +72,27 @@ void setup()
   // initializeBLocks(bloques);
 }
 
-bool evaluate(SENSOR sensor[], bool condicion[])
+bool evaluate(SENSOR sensores[], bool condiciones[])
 {
   if (numSensoresBloque >= 2 && numCondicionalesBloque >= 1)
   {
     if (numCondicionalesBloque < numSensoresBloque)
     {
-      bool valorEvaluado = leerSensor(sensor[0].id, sensor[0].condicion, sensor[0].puerto);
-      for (int i = 0; i < numCondicionalesBloque - 1; i++)
+      bool valorEvaluado = leerSensor(sensores[0].id, sensores[0].condicion, sensores[0].puerto);
+      for (int i = 1; i < numCondicionalesBloque; i++)
       {
-        struct SENSOR sigSensor = sensor[i];
+        struct SENSOR sigSensor = sensores[i];
         int nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
 
-        if (condicion[i])
+        if (condiciones[i])
           valorEvaluado = valorEvaluado && nextValor;
         else
           valorEvaluado = valorEvaluado || nextValor;
       }
+
+      if (valorEvaluado)
+        Serial.printlnf("Evaluate: True");
+
       // Serial.printlnf("Evaluate: %s", valorEvaluado ? "True" : "False");
       return valorEvaluado;
     }
@@ -182,7 +186,7 @@ void loop()
     if (!mfrc522.PICC_ReadCardSerial())
     {
       // Not sure if restart loop or finish program.
-      return;
+      // return;
     }
 
     display.clearDisplay();
@@ -364,10 +368,13 @@ void loop()
     }
 
     Serial.println("Fin Tag");
-    Serial.printlnf("Num bloques: %d", numBloque);
-    Serial.printlnf("Num sensoresBLoque: %d", numSensoresBloque);
-    Serial.printlnf("Num condicionesBLoque: %d", numCondicionalesBloque);
-    Serial.printlnf("Num CondicionalesBloque: %d", numActuadoresBloque);
+    Serial.println("# Bloques | # Sensores | # Condiciones | # Actuadores");
+    Serial.printlnf("    %d \t|\t %d \t|\t %d \t|\t %d", numBloque, numSensoresBloque, numCondicionalesBloque, numActuadoresBloque);
+
+    // Serial.printlnf("Num bloques: %d", numBloque);
+    // Serial.printlnf("Num sensoresBLoque: %d", numSensoresBloque);
+    // Serial.printlnf("Num condicionesBLoque: %d", numCondicionalesBloque);
+    // Serial.printlnf("Num ActuadoresBloque: %d", numActuadoresBloque);
 
     tagInfo[0] = -1;
     Serial.println();
@@ -381,8 +388,10 @@ void loop()
     for (int j = 0; j < numActuadoresBloque; j++)
     {
       ACTUADOR actuador = bloques[i].actuadores[j];
+      // Serial.printlnf("Actuandor: %d , %s", actuador.id, actuador.evaluate ? "True" : "False");
       if (evaluacion == actuador.evaluate)
       {
+        // Serial.println("Actuando...");
         actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
       }
     }

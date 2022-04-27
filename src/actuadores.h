@@ -2,7 +2,7 @@
 #include <Grove_ChainableLED.h>
 
 bool init = true;
-ChainableLED ledObject = ChainableLED(0, 0, 5);
+ChainableLED ledObject = ChainableLED(0, 1, 5);
 
 void ledApagar()
 {
@@ -10,6 +10,7 @@ void ledApagar()
 }
 void ledRojo()
 {
+    Serial.println("LedRojo");
     ledObject.setColorRGB(0, 255, 0, 0);
 }
 void ledVerde()
@@ -106,7 +107,7 @@ void zumbador(boolean estado, int puerto)
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
 void activarLED(int opcion, int puerto)
 {
-
+    Serial.println("Actiaver LED");
     if (init)
     {
         ledObject = ChainableLED(puerto, puerto + 1, 5);
