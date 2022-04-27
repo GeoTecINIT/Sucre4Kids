@@ -25,7 +25,6 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // *** Variables de Entorno ***
 Bloque bloques[2];
-
 bool IF_pasado = false;
 bool THEN_pasado = false;
 bool ELSE_pasado = false;
@@ -162,6 +161,7 @@ int isNewActuador(int deviceID)
 
 void loop()
 {
+
   // If tag detected
   if (mfrc522.PICC_IsNewCardPresent())
   {
@@ -177,7 +177,6 @@ void loop()
     display.setTextSize(1.5);
     display.setTextColor(WHITE);
     display.setCursor(0, 0);
-
     // Leemos la tag y guardamos la informacion codificada en tagInfo.
     getTagID(tagInfo);
   }
@@ -251,7 +250,7 @@ void loop()
           bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
           numActuadoresBloque++;
 
-          displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
+          // displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
         }
       }
 
@@ -277,7 +276,7 @@ void loop()
             bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
             numActuadoresBloque++;
 
-            displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
+            // displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
           }
         }
         else
