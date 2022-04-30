@@ -26,7 +26,7 @@ String dispositivos[2] = {"-", "-"};
 #define SS_PIN A3  // constante para referenciar pin de slave select
 // #define WIDTH 80
 
-unsigned char data[] = {"2#0#0#0#0#0"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
+unsigned char data[] = {"0#0#5#1#0#1"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -291,13 +291,16 @@ void getTagID(int infoTag[])
    mfrc522.PCD_StopCrypto1();
 }
 
-int asignarPuerto(int id)
+int asignarPuerto(int id, int type)
 {
    int option;
    // Serial.printf("Digital %d, Analogico %d\n", puertoDigital, puertoAnalogico);
-   if (esAnalogico(id))
+   if (esAnalogico(type))
+   {
       // Serial.print(" \t y es analógico\n");
+      Serial.println("Es analogico");
       option = puertoAnalogico;
+   }
    else
       // Serial.print(" \t y es digital\n");
       option = puertoDigital;
