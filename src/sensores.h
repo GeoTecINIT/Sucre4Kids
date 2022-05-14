@@ -8,7 +8,7 @@ bool noDistancia(int puerto)
 {
     Ultrasonic ultrasonic(puerto);
     long range = ultrasonic.MeasureInCentimeters();
-    Serial.printlnf("Distancia: %d", range);
+    // Serial.printlnf("Distancia: %d", range);
     if (range >= 0 && range < 10)
         return true;
     else
@@ -19,7 +19,7 @@ bool siDistancia(int puerto)
 {
     Ultrasonic ultrasonic(puerto);
     long range = ultrasonic.MeasureInCentimeters();
-    Serial.printlnf("Distancia: %d", range);
+    // Serial.printlnf("Distancia: %d", range);
     if (range > 10)
         return true;
     else
@@ -78,7 +78,8 @@ bool noLuz(int puerto)
 
 bool siRuido(int puerto)
 {
-    if (analogRead(puerto) >= 700)
+    int sonido = analogRead(puerto);
+    if (sonido >= 700)
         return true;
     return false;
 }
@@ -125,7 +126,6 @@ bool siRotativo(int puerto)
 
     voltage = (float)sensor_value * 5 / 1023;
     float degrees = (voltage * 300) / 5;
-    Serial.printlnf("Sensor si rotativo: %d => %.2f", puerto, degrees);
     if (degrees >= 680)
         return true;
     return false;
@@ -134,7 +134,20 @@ bool siRotativo(int puerto)
 bool noRotativo(int puerto)
 {
     float voltage;
-    int sensor_value = analogRead(puerto);
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+
     voltage = (float)sensor_value * 5 / 1023;
     float degrees = (voltage * 300) / 5;
 

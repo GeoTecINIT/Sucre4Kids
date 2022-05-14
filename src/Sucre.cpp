@@ -74,36 +74,30 @@ void setup()
 
 bool evaluate(SENSOR sensores[], bool condiciones[])
 {
-  // if (numSensoresBloque >= 2 && numCondicionalesBloque >= 1)
-  // {
-  //   if (numCondicionalesBloque < numSensoresBloque)
-  //   {
+
   bool valorEvaluado = leerSensor(sensores[0].id, sensores[0].condicion, sensores[0].puerto);
-  Serial.printlnf("Sensor 0: %s", valorEvaluado ? "True" : "False");
+  // Serial.printlnf("Sensor 0: %s", valorEvaluado ? "True" : "False");
 
   for (int i = 1; i < numSensoresBloque; i++)
   {
     struct SENSOR sigSensor = sensores[i];
-    int nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
-    Serial.printlnf("Sensor %d: %s", i, nextValor ? "True" : "False");
+    bool nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
+    // Serial.printlnf("Sensor %d: %s", i, nextValor ? "True" : "False");
+    // Serial.printlnf("nextValor %d: %s", sigSensor.id, nextValor ? "True" : "False");
+    // Serial.printlnf("Condicion i-1: %s",condiciones[i-1] ? "True" : "False");
 
     if (condiciones[i - 1])
-      valorEvaluado = valorEvaluado && nextValor;
+    {
+      // Serial.printlnf("valorEvaluado: %s", valorEvaluado ? "True" : "False");
+      valorEvaluado = (valorEvaluado && nextValor);
+      // Serial.printlnf("valorEvaluado2: %s", valorEvaluado ? "True" : "False");
+    }
     else
-      valorEvaluado = valorEvaluado || nextValor;
+    {
+      valorEvaluado = (valorEvaluado || nextValor);
+    }
   }
-
-  // Serial.printlnf("Evaluate: %s", valorEvaluado ? "True" : "False");
   return valorEvaluado;
-  //   }
-  //   else
-  //   {
-  //     // Serial.println("Evaluate: numCondicionalesBloque > numSensoresBloque");
-  //   }
-  // }
-
-  // Serial.println("Evaluate: inficientes sensores");
-  // return false;
 }
 
 // TRUE Si el disposivo no ha sido utilizado en el bloque ACTUAL.
@@ -420,8 +414,11 @@ void loop()
         // Serial.printlnf("Actuandor: %d , %s", actuador.id, actuador.evaluate ? "True" : "False");
         if (evaluacion == actuador.evaluate)
         {
-          // Serial.println("Actuando...");
           actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+        }
+        else
+        {
+          apagarActuador(actuador.id, actuador.puerto);
         }
       }
     }

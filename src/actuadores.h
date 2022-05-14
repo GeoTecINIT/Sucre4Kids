@@ -10,7 +10,7 @@ void ledApagar()
 }
 void ledRojo()
 {
-    Serial.println("LedRojo");
+    // Serial.println("LedRojo");
     ledObject.setColorRGB(0, 255, 0, 0);
 }
 void ledVerde()
@@ -107,7 +107,7 @@ void zumbador(boolean estado, int puerto)
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
 void activarLED(int opcion, int puerto)
 {
-    Serial.println("Actiaver LED");
+    // Serial.println("Actiaver LED");
     if (init)
     {
         ledObject = ChainableLED(puerto, puerto + 1, 5);
@@ -171,16 +171,13 @@ void activarZumbador(int opcion, int puerto)
     }
 }
 
-void apagarActuador(int puerto)
+void apagarActuador(int id, int puerto)
 {
-    digitalWrite(puerto, 0);
-    digitalWrite(puerto, LOW);
+    id == 0 ? ledApagar() : digitalWrite(puerto, 0);
 }
 
 void actuadorHandler(int id, int opcion, int puerto)
 {
     if (id < 2)
         id == 0 ? activarLED(opcion, puerto) : activarZumbador(opcion, puerto);
-    else
-        apagarActuador(puerto);
 }
