@@ -101,25 +101,17 @@ bool isValidActuador(bool evalState, int actuadorID)
 // -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
 int isNewActuador(int deviceID)
 {
-  // for (int i = 0; i <= numBloque; i++)
-  // {
-  //   BLOQUE bloque = bloques[i];
-  //   for (int j = 0; i < sizeof(bloque.actuadores); i++)
-  //   {
-  //     Serial.printlnf( "isNewActuador comparing  %d - %d", deviceID, bloque.actuadores[j].id);
-  //     if (bloque.actuadores[j].id == deviceID)
-  //       return bloque.actuadores[j].puerto;
-  //   }
-  // }
-
-  for (int i = 0; i < numActuadoresBloque; i++)
+  for (int j = 0; j <= numBloque; j++)
   {
-    ACTUADOR actuador = bloques[numBloque].actuadores[i];
-    Serial.printlnf("isNewActuador comparing  %d - %d", deviceID, actuador.id);
-
-    if (actuador.id == deviceID)
+    for (int i = 0; i < bloques[j].numActuadores; i++)
     {
-      return actuador.puerto;
+      ACTUADOR actuador = bloques[numBloque].actuadores[i];
+      Serial.printlnf("isNewActuador comparing  %d - %d", deviceID, actuador.id);
+
+      if (actuador.id == deviceID)
+      {
+        return actuador.puerto;
+      }
     }
   }
 
@@ -235,6 +227,7 @@ void loop()
 
           bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
           numActuadoresBloque++;
+          bloques[numBloque].numActuadores++;
 
           // displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
         }
@@ -266,6 +259,7 @@ void loop()
 
             bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
             numActuadoresBloque++;
+            bloques[numBloque].numActuadores++;
 
             // displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
           }
@@ -365,7 +359,7 @@ void loop()
 
     Serial.println("Fin Tag");
     Serial.println("# Bloque | # Sensores | # Condiciones | # Actuadores");
-    Serial.printlnf("    %d \t|\t %d \t|\t %d \t|\t %d", numBloque, numSensoresBloque, numCondicionalesBloque, numActuadoresBloque);
+    Serial.printlnf("    %d \t|\t %d \t|\t %d \t|\t %d \t|\t %d", numBloque, numSensoresBloque, numCondicionalesBloque, numActuadoresBloque, bloques[numBloque].numActuadores);
     // Serial.printlnf("Num bloques: %d", numBloque);
     // Serial.printlnf("Num sensoresBLoque: %d", numSensoresBloque);
     // Serial.printlnf("Num condicionesBLoque: %d", numCondicionalesBloque);

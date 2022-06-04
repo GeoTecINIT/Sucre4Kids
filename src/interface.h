@@ -22,9 +22,9 @@ struct ACTUADOR
 
 struct BLOQUE
 {
-    int numSensores;
+    int numSensores = 0;
     SENSOR sensores[20];
-    int numActuadores;
+    int numActuadores = 0;
     ACTUADOR actuadores[20];
     CONDICION condiciones;
 };
