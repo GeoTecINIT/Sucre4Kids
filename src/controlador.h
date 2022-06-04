@@ -11,6 +11,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sensores.h>
+
+// struct
+#include <interface.h>
 
 // Memory sector chosen to r/w fron NFC Tag
 byte trailerBlock = 7;
@@ -25,6 +29,19 @@ String dispositivos[2] = {"-", "-"};
 #define RST_PIN D8 // constante para referenciar pin de reset
 #define SS_PIN A3  // constante para referenciar pin de slave select
 // #define WIDTH 80
+
+// *** Variables de Entorno ***
+Bloque bloques[2];
+bool IF_pasado = false;
+bool THEN_pasado = false;
+bool ELSE_pasado = false;
+
+int numBloque = -1;
+int numCondicionalesBloque = 0;
+int numSensoresBloque = 0;
+int numActuadoresBloque = 0;
+
+// *** /Variables de Entorno ***
 
 unsigned char data[] = {"0#0#5#0#0#1"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
 char delim[] = "#";
@@ -48,6 +65,26 @@ bool esSensor(int id)
 bool esAnalogico(int type)
 {
    return type == 0;
+}
+
+// Evaluate recorre el vector de sensores, leyendo su valor y concatenandolo con el valor del siguiente
+// en funcion de la condición que los une (AND u OR). Comenienzando por el primer sensor.
+bool makeEvaluate(SENSOR sensores[], bool condiciones[])
+{
+   bool valorEvaluado = leerSensor(sensores[0].id, sensores[0].condicion, sensores[0].puerto);
+
+   for (int i = 1; i < numSensoresBloque; i++)
+   {
+      struct SENSOR sigSensor = sensores[i];
+      bool nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
+
+      if (condiciones[i - 1])
+         valorEvaluado = (valorEvaluado && nextValor);
+      else
+         valorEvaluado = (valorEvaluado || nextValor);
+   }
+
+   return valorEvaluado;
 }
 
 void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int puerto)
@@ -261,7 +298,7 @@ void getTagID(int infoTag[])
    }
 
    // Write data to tag:
-   //writeDataToBLock(blockAddr);
+   // writeDataToBLock(blockAddr);
 
    // Read data from the block's Tag.
    byte buffer[18];
