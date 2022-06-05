@@ -93,7 +93,7 @@ int isNewSensor(int deviceID)
   return -1;
 }
 
-// True cuando el actuador no se ha usado en ningun Then, evalState=T o, Else evalState=F de NINGUN bloque;
+// True cuando el actuador no se ha usado en ningun Then (evalState=T) ni Else (evalState=F) de NINGUN bloque;
 // Actuador valido tanto en el then como en el else, cuando no ha sido usado en ningun bloque para ese state.
 // No puedo poner el led verde ON en then de bloque 1 a la vez que led rojo OFF en then de bloque 2.
 // Si es posible poner led verde ON en then de bloque 1 y led rojo ON en else de bloque 2.
@@ -102,9 +102,10 @@ bool isValidActuador(bool evalState, int actuadorID)
   for (int i = 0; i <= numBloque; i++)
   {
     BLOQUE bloque = bloques[i];
-    for (int j = 0; i < sizeof(bloque.actuadores); i++)
+    for (int j = 0; j < bloques[i].numActuadores; j++)
     {
-      if (bloque.actuadores[j].evaluate == evalState && bloque.actuadores[j].id == actuadorID)
+      ACTUADOR actuador = bloques[i].actuadores[j];
+      if (actuador.evaluate == evalState && actuador.id == actuadorID)
         return false;
     }
   }
@@ -114,17 +115,6 @@ bool isValidActuador(bool evalState, int actuadorID)
 // -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
 int isNewActuador(int deviceID)
 {
-  // for (int i = 0; i <= numBloque; i++)
-  // {
-  //   BLOQUE bloque = bloques[i];
-  //   for (int j = 0; i <= bloque.numActuadores; i++)
-  //   {
-  //     Serial.printlnf("isNewActuador comparing  %d - %d", deviceID, bloque.actuadores[j].id);
-  //     if (bloque.actuadores[j].id == deviceID)
-  //       return bloque.actuadores[j].puerto;
-  //   }
-  // }
-
   for (int j = 0; j <= numBloque; j++)
   {
     for (int i = 0; i < bloques[j].numActuadores; i++)
@@ -263,11 +253,9 @@ void loop()
         if (THEN_pasado && ELSE_pasado && isValidActuador(false, deviceID))
         {
 
-          Serial.printf("Actuador Else %d-> ", deviceID);
           int puerto = isNewActuador(deviceID);
           if (puerto == -1)
           {
-            Serial.println("es nuevo, asignar puerto");
             puerto = asignarPuerto(deviceID, tagInfo[1]);
           }
 
@@ -282,8 +270,8 @@ void loop()
             newActuador.evaluate = false;
 
             bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
-            numActuadoresBloque++;
             bloques[numBloque].numActuadores++;
+            numActuadoresBloque++;
 
             // displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
           }
