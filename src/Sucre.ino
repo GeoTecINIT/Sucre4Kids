@@ -107,7 +107,6 @@ int isNewActuador(int deviceID)
     for (int i = 0; i < bloques[j].numActuadores; i++)
     {
       ACTUADOR actuador = bloques[numBloque].actuadores[i];
-      Serial.printlnf("isNewActuador comparing  %d - %d", deviceID, actuador.id);
 
       if (actuador.id == deviceID)
       {

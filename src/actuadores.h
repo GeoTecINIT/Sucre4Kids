@@ -49,18 +49,23 @@ void ledBlink()
 void ledArcoiris()
 {
 
-    ledRojo();
-    delay(200);
-    ledNaranja();
-    delay(200);
-    ledAmarillo();
-    delay(200);
-    ledVerde();
-    delay(200);
-    ledMorado();
-    delay(200);
-    ledAzul();
-    delay(200);
+    for (double i = 0; i < 1; i += 0.01)
+    {
+        ledObject.setColorHSB(0, i, 0.75, 0.75);
+    }
+
+    // ledRojo();
+    // delay(200);
+    // ledNaranja();
+    // delay(200);
+    // ledAmarillo();
+    // delay(200);
+    // ledVerde();
+    // delay(200);
+    // ledMorado();
+    // delay(200);
+    // ledAzul();
+    // delay(200);
 }
 
 // Acciones del zumbador
