@@ -1,6 +1,6 @@
 {
-    "particle.targetDevice": "e00fce6811f602ac5d6cca1e",
-    "particle.firmwareVersion": "5.0.0",
+    "particle.targetDevice": "e00fce68fba9b49e7f621128",
+    "particle.firmwareVersion": "3.3.0",
     "particle.targetPlatform": "argon",
     "files.associations": {
         "__bit_reference": "cpp",

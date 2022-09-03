@@ -2,7 +2,7 @@
 //       THIS IS A GENERATED FILE - DO NOT EDIT       //
 /******************************************************/
 
-#line 1 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
+#line 1 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
 // This #include statement was automatically added by the Particle IDE.
 #include <Grove_ChainableLED.h>
 
@@ -29,7 +29,7 @@ bool isValidActuador(bool evalState, int actuadorID);
 int isNewActuador(int deviceID);
 bool isActuadorDual(int deviceID);
 void loop();
-#line 20 "/Users/marcosgarciagarcia/Documents/Sucre/src/Sucre.ino"
+#line 20 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // Informacion de la tarjeta leida.
@@ -175,20 +175,27 @@ void loop()
     int deviceID = tagInfo[2];
     Serial.print("Ejecutando tag --> ");
 
-    switch (tagInfo[0])
-    {
+    switch (tagInfo[0]) {
+
     // Sensor
     case 0:
-      if (IF_pasado && (numSensoresBloque == numCondicionalesBloque) && isValidSensor(deviceID))
-      {
+
+      Serial.println("Sensor detectado");
+
+      if ( MODE == 0 ) {
+        IF_pasado = true;
+        numBloque = 0;
+        numSensoresBloque = 0;
+      }
+
+      if ( IF_pasado && (numSensoresBloque == numCondicionalesBloque) && isValidSensor(deviceID) ) {
 
         int puerto = isNewSensor(deviceID);
         // Si el puerto es distinto de -1 el sensor ha sido usado previamente. Si es nuevo, obtenemos un puerto disponible.
         if (puerto == -1)
           puerto = asignarPuerto(deviceID, tagInfo[1]);
 
-        if (puerto != -1)
-        {
+        if (puerto != -1) {
 
           SENSOR newSensor;
           newSensor.id = deviceID;
@@ -200,37 +207,54 @@ void loop()
           numSensoresBloque++;
 
           displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newSensor.id, newSensor.condicion, newSensor.puerto);
-        }
-        else
-        {
+        
+        } else {
+
           Serial.println("Error Puerto");
-        }
-      }
-      else
-      {
-        if (!IF_pasado)
-        {
-          Serial.println("Se esperaba IF tag");
-          break;
+        
         }
 
-        if (numSensoresBloque != numCondicionalesBloque)
-          Serial.println("Despues de un sensor se espera una concion: AND u OR");
+      } else {
+
+        if ((!IF_pasado) && (MODE == 1)) {
+
+          Serial.println("Se esperaba IF tag");
+          break;
+          
+        }
+
+        if (numSensoresBloque != numCondicionalesBloque) {
+
+            Serial.println("Despues de un sensor se espera una concion: AND u OR");
+        
+        }
+      
       }
+      
       break;
 
     // Actuador: puede tratarse de un actuador de condicion TRUE o FALSE (para ser usado en el then o el else);
     case 1:
+
+      Serial.println("Actuador detectado");
+
+      if ( MODE == 0 ) {
+        THEN_pasado = true;
+        numBloque = 0;
+        numActuadoresBloque = 0;
+      }
+
       //  Tag ActuadorTrue: Secuencia actuadores cuando sensores del bloque evaluate a True
-      if (THEN_pasado && !ELSE_pasado && isValidActuador(true, deviceID))
-      {
+      if ( THEN_pasado && !ELSE_pasado && isValidActuador(true, deviceID) ) {
+
         int puerto = isNewActuador(deviceID);
+
         if (puerto == -1)
           puerto = asignarPuerto(deviceID, tagInfo[1]);
 
         // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
-        if (puerto != -1)
-        {
+        if (puerto != -1) {
+
           ACTUADOR newActuador;
           newActuador.id = deviceID;
           newActuador.condicion = tagInfo[3];
@@ -244,128 +268,171 @@ void loop()
 
           // displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
         }
-      }
 
       //  Tag ActuadorFalse: Secuencia actuadores cuando sensores del bloque evaluate a False
-      else
-      {
-        if (THEN_pasado && ELSE_pasado && isValidActuador(false, deviceID))
-        {
+      } else if ( THEN_pasado && ELSE_pasado && isValidActuador(false, deviceID) ) {
 
-          int puerto = isNewActuador(deviceID);
-          if (puerto == -1)
-          {
-            puerto = asignarPuerto(deviceID, tagInfo[1]);
-          }
+        int puerto = isNewActuador(deviceID);
 
-          // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
-          if (puerto != -1)
-          {
-            ACTUADOR newActuador;
-            newActuador.id = deviceID;
-            newActuador.condicion = tagInfo[3];
-            newActuador.bloque = numBloque;
-            newActuador.puerto = puerto;
-            newActuador.evaluate = false;
+        if (puerto == -1)
+          puerto = asignarPuerto(deviceID, tagInfo[1]);
 
-            bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
-            bloques[numBloque].numActuadores++;
-            numActuadoresBloque++;
+        // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
+        if (puerto != -1) {
 
-            // displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
-          }
+          ACTUADOR newActuador;
+          newActuador.id = deviceID;
+          newActuador.condicion = tagInfo[3];
+          newActuador.bloque = numBloque;
+          newActuador.puerto = puerto;
+          newActuador.evaluate = false;
+
+          bloques[numBloque].actuadores[numActuadoresBloque] = newActuador;
+          bloques[numBloque].numActuadores++;
+          numActuadoresBloque++;
+
+          // displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
         }
-        else
-        {
-          if (!IF_pasado)
-          {
-            Serial.println("Se esperaba IF tag");
-            break;
-          }
 
-          Serial.println("Invalid Actuador");
+      } else {
+
+        if (!IF_pasado) {
+          Serial.println("Se esperaba IF tag");
+          break;
         }
+
+        Serial.println("Invalid Actuador");
+        
       }
 
       break;
 
     // IF: Inicio de un bloque, fin secuencia ActuadoresFalse
     case 2:
-      if (numBloque == -1 || numBloque == 0 && numActuadoresBloque > 0)
-      {
-        numBloque++;
-        IF_pasado = true;
-        THEN_pasado = false;
-        ELSE_pasado = false;
 
-        numCondicionalesBloque = 0;
-        numSensoresBloque = 0;
-        numActuadoresBloque = 0;
+      Serial.println("IF detectado");
 
-        BLOQUE nuevoBloque;
-        bloques[numBloque] = nuevoBloque;
-      }
-      else
-      {
-        Serial.println("Numero de bloques > 2 || Se necesita al menos un actuador para terminar el bloque");
+      // Si está el modo KIDS activo no se permite IF
+      if (MODE == 0) {
+
+        Serial.println("Tag inválida para el modo KIDS");
+
+      } else {
+
+        if (numBloque == -1 || numBloque == 0 && numActuadoresBloque > 0) {
+
+          numBloque++;
+          IF_pasado = true;
+          THEN_pasado = false;
+          ELSE_pasado = false;
+
+          numCondicionalesBloque = 0;
+          numSensoresBloque = 0;
+          numActuadoresBloque = 0;
+
+          BLOQUE nuevoBloque;
+          bloques[numBloque] = nuevoBloque;
+        
+        } else {
+
+          Serial.println("Numero de bloques > 2 || Se necesita al menos un actuador para terminar el bloque");
+        
+        }
+
       }
       break;
 
     // AND/OR: Condicion entre sensores
     case 3:
-      if (numCondicionalesBloque < numSensoresBloque && numActuadoresBloque == 0)
-      {
-        // Tag condicional => 3#0 | 3#1 == OR | AND
-        bloques[numBloque].condiciones.condicionesBloque[numCondicionalesBloque] = tagInfo[1];
-        numCondicionalesBloque++;
-      }
-      else
-      {
-        if (!IF_pasado)
-        {
-          Serial.println("Se esperaba IF tag");
-          break;
+
+      Serial.println("AND/OR detectado");
+
+      if (MODE == 0) {
+
+        Serial.println("Tag inválida para el modo KIDS");
+
+      } else {
+
+        if (numCondicionalesBloque < numSensoresBloque && numActuadoresBloque == 0) {
+
+          // Tag condicional => 3#0 | 3#1 == OR | AND
+          bloques[numBloque].condiciones.condicionesBloque[numCondicionalesBloque] = tagInfo[1];
+          numCondicionalesBloque++;
+        } else {
+
+          if (!IF_pasado) {
+
+            Serial.println("Se esperaba IF tag");
+            break;
+
+          }
+          Serial.println("Una concicion solo puede ir seguida de un sensor.");
+
         }
-        Serial.println("Una concicion solo puede ir seguida de un sensor.");
       }
       break;
 
     // THEN: Fin secuencia sensores
     case 4:
-      if (numSensoresBloque > 0 && numSensoresBloque > numCondicionalesBloque)
-      {
-        THEN_pasado = true;
-      }
-      else
-      {
-        if (!IF_pasado)
-        {
-          Serial.println("Se esperaba IF tag");
-          break;
+
+      Serial.println("THEN detectado");
+
+      if (MODE == 0) {
+
+        Serial.println("Tag inválida para el modo KIDS");
+
+      } else {
+
+        if (numSensoresBloque > 0 && numSensoresBloque > numCondicionalesBloque) {
+
+          THEN_pasado = true;
+        
+        } else {
+
+          if (!IF_pasado) {
+
+            Serial.println("Se esperaba IF tag");
+            break;
+
+          }
+          Serial.println("Numero de sensores infucientes");
         }
-        Serial.println("Numero de sensores infucientes");
       }
       break;
 
     // ELSE: Fin secuencia actuadores TRUE
     case 5:
-      if (numActuadoresBloque > 0)
-      {
-        ELSE_pasado = true;
-      }
-      else
-      {
-        if (!IF_pasado)
-        {
-          Serial.println("Se esperaba IF tag");
-          break;
+
+      Serial.println("ELSE detectado");
+
+      if (MODE == 0) {
+
+        Serial.println("Tag inválida para el modo KIDS");
+
+      } else {
+
+        if (numActuadoresBloque > 0) {
+
+          ELSE_pasado = true;
+        
+        } else {
+
+          if (!IF_pasado) {
+
+            Serial.println("Se esperaba IF tag");
+            break;
+          
+          }
+
         }
       }
       break;
 
     default:
+
       Serial.println("ID Tag incorrecta");
       break;
+
     }
 
     Serial.println("Fin Tag");
