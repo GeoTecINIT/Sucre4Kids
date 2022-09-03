@@ -46,7 +46,7 @@ int MODE = 0;
 
 // *** /Variables de Entorno ***
 
-unsigned char data[] = {"0#0#5#0#0#1"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
+unsigned char data[] = {"6#1#0#0#0#0"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -310,6 +310,7 @@ void getTagID(int infoTag[])
    {
       return;
    }
+   
 
    // Conversión y almacenamiento
    // Convert from hex to String:

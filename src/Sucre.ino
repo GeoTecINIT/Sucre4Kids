@@ -71,7 +71,7 @@ int isNewSensor(int deviceID)
   for (int i = 0; i <= numBloque; i++)
   {
     BLOQUE bloque = bloques[i];
-    for (int j = 0; i < sizeof(bloque.actuadores); i++)
+    for (int j = 0; j < bloque.numSensores; j++)
     {
       if (bloque.sensores[j].id == deviceID)
         return bloque.sensores[j].puerto;
@@ -134,6 +134,26 @@ bool isActuadorDual(int deviceID)
   return false;
 }
 
+void resetMode() 
+{
+  IF_pasado = false;
+  THEN_pasado = false;
+  ELSE_pasado = false;
+
+  numBloque = -1;
+  numCondicionalesBloque = 0;
+  numSensoresBloque = 0;
+  numActuadoresBloque = 0;
+
+  BLOQUE nuevoBloque;
+  bloques[0] = nuevoBloque;
+
+  haveSensor = false;
+
+  puertoDigital = 3;
+  puertoAnalogico = 0;
+}
+
 void loop()
 {
 
@@ -165,8 +185,7 @@ void loop()
     switch (tagInfo[0]) {
 
     // Sensor
-    case 0:
-
+    case 0: {
       Serial.println("Sensor detectado");
 
       if ( MODE == 0 ) {
@@ -219,10 +238,10 @@ void loop()
       }
       
       break;
+    }
 
     // Actuador: puede tratarse de un actuador de condicion TRUE o FALSE (para ser usado en el then o el else);
-    case 1:
-
+    case 1: {
       Serial.println("Actuador detectado");
 
       if ( MODE == 0 ) {
@@ -293,10 +312,10 @@ void loop()
       }
 
       break;
+    }
 
     // IF: Inicio de un bloque, fin secuencia ActuadoresFalse
-    case 2:
-
+    case 2: {
       Serial.println("IF detectado");
 
       // Si está el modo KIDS activo no se permite IF
@@ -328,10 +347,10 @@ void loop()
 
       }
       break;
+    }
 
     // AND/OR: Condicion entre sensores
-    case 3:
-
+    case 3: {
       Serial.println("AND/OR detectado");
 
       if (MODE == 0) {
@@ -358,10 +377,10 @@ void loop()
         }
       }
       break;
+    }
 
     // THEN: Fin secuencia sensores
-    case 4:
-
+    case 4: {
       Serial.println("THEN detectado");
 
       if (MODE == 0) {
@@ -386,10 +405,10 @@ void loop()
         }
       }
       break;
+    }
 
     // ELSE: Fin secuencia actuadores TRUE
-    case 5:
-
+    case 5: {
       Serial.println("ELSE detectado");
 
       if (MODE == 0) {
@@ -414,6 +433,25 @@ void loop()
         }
       }
       break;
+    }
+
+    case 6: {
+      if (tagInfo[1] == 0 ) {
+
+        Serial.println("Modo KIDS detectado");
+        MODE = 0;
+
+      } else if (tagInfo[1] == 1) {
+
+        Serial.println("Modo SUCRE detectado");
+        MODE = 1;
+
+      }
+      
+      resetMode();
+
+      break;
+    }
 
     default:
 
