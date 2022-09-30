@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <sensores.h>
+#include <splash.h>
 
 // struct
 #include <interface.h>
@@ -46,7 +47,7 @@ int MODE = 0;
 
 // *** /Variables de Entorno ***
 
-unsigned char data[] = {"6#1#0#0#0#0"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
+unsigned char data[] = {"0#1#4#1#0#1"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -150,10 +151,12 @@ void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int pu
          Serial.println("SensorNoValidoError");
          break;
       }
+
+      snprintf(buf, sizeof(buf), dispositivos[1] + (isAnalogico ? " A" : " D") + (String)puerto);
+      display.println(buf);
    }
    else
    {
-
       // Actuadores.
       switch (id)
       {
@@ -161,25 +164,31 @@ void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int pu
          switch (condicion)
          {
          case 0:
-            dispositivos[0] = "RGB-Verde-Rojo";
+            dispositivos[0] = "RGB Verde";
             break;
          case 1:
-            dispositivos[0] = "RGB-Amarillo-Morado";
+            dispositivos[0] = "RGB Rojo";
             break;
          case 2:
-            dispositivos[0] = "RGB-Azul-Naranja";
+            dispositivos[0] = "RGB Amarillo";
             break;
          case 3:
-            dispositivos[0] = "RGB-Blink";
+            dispositivos[0] = "RGB Morado";
             break;
          case 4:
-            dispositivos[0] = "RGB-RainBow";
+            dispositivos[0] = "RGB Azul";
             break;
-
          case 5:
-            dispositivos[0] = "RGB-On-Off";
+            dispositivos[0] = "RGB Naranja";
+            break;
+         case 6:
+            dispositivos[0] = "RGB Blink";
+            break;
+         case 7:
+            dispositivos[0] = "RGB Rainbow";
             break;
          }
+         break;
 
       case 1:
          condicion == 0 ? dispositivos[0] = "Zumbador On-Off" : dispositivos[0] = "Zumbador Blink";
@@ -189,13 +198,11 @@ void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int pu
          Serial.println("ActuadorNoValidoError");
          break;
       }
+      
+      snprintf(buf, sizeof(buf), dispositivos[0] + (isAnalogico ? " A" : " D") + (String)puerto);
+      display.println(buf);
+
    }
-
-   snprintf(buf, sizeof(buf), dispositivos[1] + (isAnalogico ? " A" : " D") + (String)puerto);
-   display.println(buf);
-
-   snprintf(buf, sizeof(buf), dispositivos[0]);
-   display.println(buf);
 
    display.setCursor(0, 0);
 }
@@ -332,6 +339,25 @@ void getTagID(int infoTag[])
    mfrc522.PCD_StopCrypto1();
 }
 
+
+void showBitmap(int mode) {
+   display.clearDisplay();
+
+   switch (mode)
+   {
+   case 0:
+      display.drawBitmap(0,0, conexionBitmap, conexion_width, conexion_height, 1);
+      break;
+   
+   default:
+      break;
+   }
+   
+   display.display();
+   delay(1000);
+}
+
+
 int asignarPuerto(int id, int type)
 {
    int option;
@@ -383,6 +409,7 @@ int asignarPuerto(int id, int type)
       return -1;
    }
 }
+
 
 // void initializeBLocks(Bloque bloques)
 // {

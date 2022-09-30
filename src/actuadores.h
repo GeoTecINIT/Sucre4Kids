@@ -93,6 +93,7 @@ void pitidoBlink(int puerto)
     delay(100);
 }
 
+/*
 void blinkAndSleep(boolean estado, int puerto)
 {
     if (estado)
@@ -100,7 +101,9 @@ void blinkAndSleep(boolean estado, int puerto)
     else
         pitidoOFF(puerto);
 }
+*/
 
+/*
 void zumbador(boolean estado, int puerto)
 {
     if (estado)
@@ -108,6 +111,7 @@ void zumbador(boolean estado, int puerto)
     else
         pitidoOFF(puerto);
 }
+*/
 
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
 void activarLED(int opcion, int puerto)
