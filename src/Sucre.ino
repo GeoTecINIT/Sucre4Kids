@@ -66,11 +66,10 @@ int isNewSensor(int deviceID)
 {
   for (int i = 0; i <= numBloque; i++)
   {
-    BLOQUE bloque = bloques[i];
-    for (int j = 0; j < bloque.numSensores; j++)
+    for (int j = 0; j < bloques[i].numSensores; j++)
     {
-      if (bloque.sensores[j].id == deviceID)
-        return bloque.sensores[j].puerto;
+      if (bloques[i].sensores[j].id == deviceID)
+        return bloques[i].sensores[j].puerto;
     }
   }
   return -1;
@@ -96,36 +95,36 @@ bool isValidActuador(int deviceState, int actuadorID)
   return true;
   */
 
-    for (int i = 0; i <= numBloque; i++)
+  for (int i = 0; i <= numBloque; i++)
+  {
+    // Comprobar que no se ha empleado el mismo estado en el bloque actual
+    if ( i == numBloque ) 
     {
-      // Comprobar que no se ha empleado en el bloque actual
-      if ( i == numBloque ) 
+      for (int j = 0; j < bloques[i].numActuadores; j++)
       {
-        for (int j = 0; j < bloques[i].numActuadores; j++)
-        {
-          ACTUADOR actuador = bloques[i].actuadores[j];
-          // Mismo actuador con el mismo estado
-          if (actuador.condicion == deviceState && actuador.id == actuadorID)
-            return false;
-        }
-      }
-      
-      // Comprobar que no se ha empleado en el bloque anterior, si existe
-      if ( numBloque == 1)
-      {
-        for (int j = 0; j < bloques[0].numActuadores; j++)
-        {
-          ACTUADOR actuador = bloques[0].actuadores[j];
-          // Mismo actuador
-          if (actuador.id == actuadorID)
-            return false;
-        }
-        
+        ACTUADOR actuador = bloques[i].actuadores[j];
+        // Mismo actuador con el mismo estado
+        if (actuador.condicion == deviceState && actuador.id == actuadorID)
+          return false;
       }
     }
     
-    return true;
+    // Comprobar que no se ha empleado en el bloque anterior, si existe
+    if ( numBloque == 1)
+    {
+      for (int j = 0; j < bloques[0].numActuadores; j++)
+      {
+        ACTUADOR actuador = bloques[0].actuadores[j];
+        // Mismo actuador
+        if (actuador.id == actuadorID)
+          return false;
+      }
+      
+    }
   }
+  
+  return true;
+}
 
 
 // -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
@@ -135,7 +134,7 @@ int isNewActuador(int deviceID)
   {
     for (int i = 0; i < bloques[j].numActuadores; i++)
     {
-      ACTUADOR actuador = bloques[numBloque].actuadores[i];
+      ACTUADOR actuador = bloques[j].actuadores[i];
 
       if (actuador.id == deviceID)
       {
