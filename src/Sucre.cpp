@@ -28,7 +28,7 @@ bool isValidSensor(int deviceID);
 int isNewSensor(int deviceID);
 bool isValidActuador(int deviceState, int actuadorID);
 int isNewActuador(int deviceID);
-bool isActuadorDual(int deviceID);
+bool isActuadorDual(int deviceID, int bloque);
 void resetMode();
 void ejecutarEvaluacion(bool evaluacion, int bloque);
 void loop();
@@ -81,20 +81,19 @@ int isNewSensor(int deviceID)
 {
   for (int i = 0; i <= numBloque; i++)
   {
-    BLOQUE bloque = bloques[i];
-    for (int j = 0; j < bloque.numSensores; j++)
+    for (int j = 0; j < bloques[i].numSensores; j++)
     {
-      if (bloque.sensores[j].id == deviceID)
-        return bloque.sensores[j].puerto;
+      if (bloques[i].sensores[j].id == deviceID)
+        return bloques[i].sensores[j].puerto;
     }
   }
   return -1;
 }
 
-// True cuando el actuador no se ha usado en ningun Then (evalState=T) ni Else (evalState=F) de NINGUN bloque;
-// Actuador valido tanto en el then como en el else, cuando no ha sido usado en ningun bloque para ese state.
-// No puedo poner el led verde ON en then de bloque 1 a la vez que led rojo OFF en then de bloque 2.
-// Si es posible poner led verde ON en then de bloque 1 y led rojo ON en else de bloque 2.
+// TRUE cuando el actuador no ha sido empleado en el bloque anterior
+// Y cuando no se ha empleado en el mismo MODO en el bloque actual
+// FALSE cuando se ha empleado el mismo actuador con el mismo MODO en el bloque actual
+// Y cuando se ha empleado en el bloque anterior
 bool isValidActuador(int deviceState, int actuadorID)
 {
   /**
@@ -111,36 +110,36 @@ bool isValidActuador(int deviceState, int actuadorID)
   return true;
   */
 
-    for (int i = 0; i <= numBloque; i++)
+  for (int i = 0; i <= numBloque; i++)
+  {
+    // Comprobar que no se ha empleado el mismo estado en el bloque actual
+    if ( i == numBloque ) 
     {
-      // Comprobar que no se ha empleado en el bloque actual
-      if ( i == numBloque ) 
+      for (int j = 0; j < bloques[i].numActuadores; j++)
       {
-        for (int j = 0; j < bloques[i].numActuadores; j++)
-        {
-          ACTUADOR actuador = bloques[i].actuadores[j];
-          // Mismo actuador con el mismo estado
-          if (actuador.condicion == deviceState && actuador.id == actuadorID)
-            return false;
-        }
-      }
-      
-      // Comprobar que no se ha empleado en el bloque anterior, si existe
-      if ( numBloque == 1)
-      {
-        for (int j = 0; j < bloques[0].numActuadores; j++)
-        {
-          ACTUADOR actuador = bloques[0].actuadores[j];
-          // Mismo actuador
-          if (actuador.id == actuadorID)
-            return false;
-        }
-        
+        ACTUADOR actuador = bloques[i].actuadores[j];
+        // Mismo actuador con el mismo estado
+        if (actuador.condicion == deviceState && actuador.id == actuadorID)
+          return false;
       }
     }
     
-    return true;
+    // Comprobar que no se ha empleado en el bloque anterior, si existe
+    if ( numBloque == 1)
+    {
+      for (int j = 0; j < bloques[0].numActuadores; j++)
+      {
+        ACTUADOR actuador = bloques[0].actuadores[j];
+        // Mismo actuador
+        if (actuador.id == actuadorID)
+          return false;
+      }
+      
+    }
   }
+  
+  return true;
+}
 
 
 // -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
@@ -150,7 +149,7 @@ int isNewActuador(int deviceID)
   {
     for (int i = 0; i < bloques[j].numActuadores; i++)
     {
-      ACTUADOR actuador = bloques[numBloque].actuadores[i];
+      ACTUADOR actuador = bloques[j].actuadores[i];
 
       if (actuador.id == deviceID)
       {
@@ -163,12 +162,12 @@ int isNewActuador(int deviceID)
 }
 
 // True si el actuador es usado tanto para THEN como ELSE; Necesario para no apagarlo y encenderlo constantemente.
-bool isActuadorDual(int deviceID)
+bool isActuadorDual(int deviceID, int bloque)
 {
   int contador = 0;
-  for (int i = 0; i < numActuadoresBloque; i++)
+  for (int i = 0; i < bloques[bloque].numActuadores; i++)
   {
-    if (bloques[numBloque].actuadores[i].id == deviceID)
+    if (bloques[bloque].actuadores[i].id == deviceID)
       contador++;
 
     if (contador > 1)
@@ -200,7 +199,7 @@ void resetMode()
 
 void ejecutarEvaluacion(bool evaluacion, int bloque) {
 
-  for (int j = 0; j < numActuadoresBloque; j++)
+  for (int j = 0; j < bloques[bloque].numActuadores; j++)
   {
     ACTUADOR actuador = bloques[bloque].actuadores[j];
     // Serial.printlnf("Actuandor: %d , %s", actuador.id, actuador.evaluate ? "True" : "False");
@@ -209,9 +208,10 @@ void ejecutarEvaluacion(bool evaluacion, int bloque) {
       // Serial.println("ActivarActuador");
       actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
     }
+    
     else
     {
-      if (!isActuadorDual(actuador.id))
+      if (!isActuadorDual(actuador.id, bloque))
       {
         // Serial.println("ApagarActuador");
         apagarActuador(actuador.id, actuador.puerto);
@@ -221,6 +221,7 @@ void ejecutarEvaluacion(bool evaluacion, int bloque) {
         // Serial.printlnf("%d:%d -> Actuador se usa dos veces", actuador.id, actuador.condicion);
       }
     }
+    
   }
 
 }
@@ -557,16 +558,16 @@ void loop()
   display.display();
 
   // Evaluación primer bloque
-  if ( (numBloque==0 && THEN_pasado) || numBloque==1) {
+  if ( (numBloque==0 && THEN_pasado) || numBloque==1 ) {
     bool evaluacion = makeEvaluate(bloques[0].sensores, bloques[0].condiciones.condicionesBloque);
-
+    
     ejecutarEvaluacion(evaluacion, 0);
   }
 
   // Evaluación segundo bloque
   if ( numBloque==1 && THEN_pasado ) {
     bool evaluacion = makeEvaluate(bloques[1].sensores, bloques[1].condiciones.condicionesBloque);
-
+    
     ejecutarEvaluacion(evaluacion, 1);
   }
 
