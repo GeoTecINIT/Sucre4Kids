@@ -11,7 +11,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+
 #include <sensores.h>
+
 #include <splash.h>
 
 // struct
@@ -26,13 +28,23 @@ char buf[64];
 
 String dispositivos[2] = {"-", "-"};
 
+//struct
+typedef struct
+{
+   uint8_t pin;
+   uint8_t pin2;
+
+} disp;
+
+//typedef struct port Port;
+disp Disp[8];
+
 // NFC Variables
 #define RST_PIN D8 // constante para referenciar pin de reset
 #define SS_PIN A3  // constante para referenciar pin de slave select
 // #define WIDTH 80
 
 // *** Variables de Entorno ***
-Bloque bloques[2];
 bool IF_pasado = false;
 bool THEN_pasado = false;
 bool ELSE_pasado = false;
@@ -52,6 +64,8 @@ char delim[] = "#";
 
 int puertoDigital = 3;
 int puertoAnalogico = 0;
+
+ChainableLED ledObject;
 
 bool haveSensor = false;
 
@@ -73,22 +87,66 @@ bool esAnalogico(int type)
 
 // Evaluate recorre el vector de sensores, leyendo su valor y concatenandolo con el valor del siguiente
 // en funcion de la condición que los une (AND u OR). Comenienzando por el primer sensor.
-bool makeEvaluate(SENSOR sensores[], bool condiciones[])
+bool makeEvaluate(Bloque bloque)
 {
-   bool valorEvaluado = leerSensor(sensores[0].id, sensores[0].condicion, sensores[0].puerto);
+   bool valorEvaluado = leerSensor1(bloque.sensores[0].id, bloque.sensores[0].condicion, bloque.sensores[0].puerto);
 
-   for (int i = 1; i < numSensoresBloque; i++)
+   for (int i = 1; i < bloque.numSensores; i++)
    {
-      struct SENSOR sigSensor = sensores[i];
-      bool nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
+      Sensor sigSensor = bloque.sensores[i];
+      bool nextValor = leerSensor1(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
 
-      if (condiciones[i - 1])
+      if (bloque.condiciones.condicionesBloque[i - 1])
          valorEvaluado = (valorEvaluado && nextValor);
       else
          valorEvaluado = (valorEvaluado || nextValor);
    }
 
    return valorEvaluado;
+}
+
+void displayPrint0(int n)
+{
+   display.clearDisplay();
+
+   switch (n)
+   {
+   case 0:
+      dispositivos[0] = "Actuador RGB";
+      break;
+
+   case 1:
+      dispositivos[0] = "Actuador Zumbador";
+      break;
+
+   case 2:
+      dispositivos[1] = "Sensor de Luz";
+      break;
+
+   case 3:
+      dispositivos[1] = "Sensor de Ruido";
+      break;
+
+   case 4:
+      dispositivos[1] = "Sensor Boton";
+      break;
+
+   case 5:
+      dispositivos[1] = "Sensor Rotativo";
+      break;
+
+   default:
+      Serial.println("No es valido");
+      break;
+   }
+
+   snprintf(buf, sizeof(buf), dispositivos[1]);
+   display.println(buf);
+
+   snprintf(buf, sizeof(buf), dispositivos[0]);
+   display.println(buf);
+
+   display.setCursor(0, 0);
 }
 
 void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int puerto)
@@ -356,6 +414,84 @@ void showBitmap(int mode) {
    display.display();
    delay(1000);
 }
+
+/**
+void asignarPuerto0(int dato)
+{
+   int option;
+   Serial.printf("Digital %d, Analogico %d\n", puertoDigital, puertoAnalogico);
+   if (dato)
+   {
+      Serial.print(" \t y es digital\n");
+      option = puertoDigital;
+   }
+   else
+   {
+      Serial.print(" \t y es analógico\n");
+      option = puertoAnalogico;
+   }
+   switch (option)
+   {
+      // declarations
+      // . . .
+
+   case 0:
+      Serial.print("Conectar al puerto A0\n");
+
+      puertoAnalogico++;
+      Disp[0].pin = A0;
+      Disp[0].pin2 = A1;
+
+      // statements executed if the expression equals the   p_A0
+      // value of this constant_expression                  p_A1
+      break;
+
+   case 1:
+      Serial.print("Conectar al puerto A2\n");
+      puertoAnalogico++;
+      Disp[0].pin = A2;
+      Disp[0].pin2 = A3;
+      // statements executed if the expression equals the p_A2
+      // value of this constant_expression                 p_A3
+      break;
+
+   case 2:
+      Serial.print("Conectar al puerto A4\n");
+
+      puertoAnalogico = -1;
+      Disp[0].pin = A4;
+      Disp[0].pin2 = A5;
+      // statements executed if the expression equals the p_A4
+      // value of this constant_expression                  p_A5
+      break;
+
+   case 3:
+      Serial.print("Conectar al puerto D2\n");
+
+      puertoDigital++;
+      //Disp[0].pin = D2;
+      // Disp[0].pin2 = D3;
+      // statements executed if the expression equals the  p_D2
+      // value of this constant_expression                  p_D3
+      break;
+
+   case 4:
+      Serial.print("Conectar al puerto D4\n");
+
+      puertoDigital = -1;
+      Disp[0].pin = D4;
+      Disp[0].pin2 = D5;
+      // statements executed if the expression equals the p_D4
+      // value of this constant_expression               p_D5
+      break;
+
+   default:
+      Serial.print("Error: No hay mas puertos disponibles \n");
+
+      // statements executed if expression does not equal
+      // any case constant_expression
+   }
+}*/
 
 
 int asignarPuerto(int id, int type)

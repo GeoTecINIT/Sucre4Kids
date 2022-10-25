@@ -4,6 +4,87 @@
 // Distance
 #include "Grove-Ultrasonic-Ranger.h"
 
+//---------------------------------------------------------------------------------------------------
+//------------------------------------- M O D O   0 -------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
+#define sensorLuz_PIN A2
+#define boton_PIN D2
+#define sensorSonido_PIN A4
+#define rotoryAngle_PIN A0
+
+boolean leerSensorLuz()
+{
+   if (analogRead(sensorLuz_PIN) >= 2500)
+      return true;
+   return false;
+}
+
+boolean leerBoton()
+{
+   // Serial.printlnf("Valor boton %d , %d", analogRead(boton_PIN), digitalRead(boton_PIN));
+   if (digitalRead(boton_PIN) == HIGH)
+      return true;
+   return false;
+}
+
+boolean leerAngulo()
+{
+   float voltage;
+   int sensor_value = analogRead(rotoryAngle_PIN);
+   voltage = (float)sensor_value * 5 / 1023;
+   float degrees = (voltage * 300) / 5;
+
+   if (degrees >= 680)
+   {
+      //Serial.println(degrees);
+      return true;
+   }
+
+   return false;
+}
+
+boolean leerSensorSonido()
+{
+   // Serial.printlnf("analogico: %d", analogRead(A4));
+   if (analogRead(sensorSonido_PIN) >= 700)
+      return true;
+   return false;
+}
+
+boolean leerSensor0(int sensor)
+{
+   switch (sensor)
+   {
+   case 2:
+      return leerSensorLuz();
+      break;
+
+   case 3:
+      return leerSensorSonido();
+      break;
+
+   case 4:
+      return leerBoton();
+      break;
+
+   case 5:
+      return leerAngulo();
+      break;
+
+   default:
+      Serial.println("No es valido");
+      return false;
+      break;
+   }
+}
+
+
+
+//---------------------------------------------------------------------------------------------------
+//------------------------------------- M O D O   1 -------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
 bool noDistancia(int puerto)
 {
     Ultrasonic ultrasonic(puerto);
@@ -213,7 +294,7 @@ bool tempCalor(int puerto)
         return false;
 }
 
-bool leerSensor(int id, int condicion, int puerto)
+bool leerSensor1(int id, int condicion, int puerto)
 {
     switch (id)
     {
