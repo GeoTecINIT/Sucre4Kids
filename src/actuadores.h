@@ -1,6 +1,12 @@
 // This #include statement was automatically added by the Particle IDE.
 #include <Grove_ChainableLED.h>
 
+#define Zumbador_PIN D6
+#define led_PIN1 4
+#define led_PIN2 5
+#define NUM_LEDS 5
+
+ChainableLED ledObject  = ChainableLED(led_PIN1, led_PIN2, NUM_LEDS);
 bool init = true;
 
 void ledApagar()
@@ -49,11 +55,6 @@ void ledArcoiris()
 //-------------------------------------------------------------------------------
 //--------------------------------- M O D O   0 ---------------------------------
 //-------------------------------------------------------------------------------
-
-#define Zumbador_PIN D6
-#define led_PIN1 4
-#define led_PIN2 5
-#define NUM_LEDS 5
 
 void 
 pitidoON0()
@@ -177,13 +178,14 @@ void zumbador(boolean estado)
    }
 }
 
-void activarActuador(int actuador, int opcion, boolean valor)
+void activarActuador(Actuador actuador, int opcion, boolean valor)
 {
-   switch (actuador)
+   switch (actuador.id)
    {
       pitidoOFF0();
    // Actuador led
    case 0:
+
       switch (opcion) {
          case 0:
             ledVerdeRojo(valor);

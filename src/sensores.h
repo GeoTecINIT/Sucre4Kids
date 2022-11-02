@@ -22,7 +22,6 @@ boolean leerSensorLuz()
 
 boolean leerBoton()
 {
-   // Serial.printlnf("Valor boton %d , %d", analogRead(boton_PIN), digitalRead(boton_PIN));
    if (digitalRead(boton_PIN) == HIGH)
       return true;
    return false;
@@ -110,6 +109,7 @@ bool siDistancia(int puerto)
 bool siLuz(int puerto)
 {
     int threshold = 1000;
+    
     switch (puerto)
     {
     case 0:
@@ -294,7 +294,7 @@ bool tempCalor(int puerto)
         return false;
 }
 
-bool leerSensor1(int id, int condicion, int puerto)
+bool leerSensor(int id, int condicion, int puerto)
 {
     switch (id)
     {

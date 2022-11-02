@@ -20,11 +20,7 @@
 // Internal assets.
 #include <controlador.h>
 
-#include <actuadoresKIDS.h>
-#include <actuadoresBLOQ.h>
-
-//#include <interface.h>
-//#include <splash.h>
+#include <actuadores.h>
 
 // Unconnected mode ON, evita conexion wifi.
 void setup();
@@ -36,14 +32,18 @@ bool isActuadorDual(int deviceID, int bloque);
 void resetMode();
 void ejecutarEvaluacion(bool evaluacion, int bloque);
 void loop();
-#line 25 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
+#line 21 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // Informacion de la tarjeta leida.
 int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
+int id;     // [0]
+int tipo;   // [1]
+int estado; // [2]
 boolean valor = false;
-int sensor = -1;
-int actuador = -1;
+
+// Variable intermedia para almacenar el puerto
+int puerto;
 
 Bloque bloques[2];
 
@@ -68,9 +68,13 @@ void setup()
   }
   // initializeBLocks(bloques);
 
-  if ( MODE == 0 ) {
-    leds.init();
-  }
+
+  ledObject.init();
+  pinMode(Zumbador_PIN, OUTPUT);
+
+  Bloque bloque;
+  numBloque++;
+  bloques[numBloque] = bloque;
   
 }
 
@@ -193,6 +197,7 @@ bool isActuadorDual(int deviceID, int bloque)
 
 void resetMode() 
 {
+
   IF_pasado = false;
   THEN_pasado = false;
   ELSE_pasado = false;
@@ -209,6 +214,20 @@ void resetMode()
 
   puertoDigital = 3;
   puertoAnalogico = 0;
+
+  if ( MODE == 1 ) {
+
+    init = true;
+
+  } else {
+
+    ledObject = ChainableLED(led_PIN1, led_PIN2, NUM_LEDS);
+    ledObject.init();
+    pinMode(Zumbador_PIN, OUTPUT);
+
+    numBloque++;
+  }
+
 }
 
 void ejecutarEvaluacion(bool evaluacion, int bloque) {
@@ -284,44 +303,73 @@ void loop()
 
       resetMode();
 
+    // Sensor o Actuador
     } else {
+      
+      id = tagInfo[0];
+      tipo = tagInfo[1];
+      estado = tagInfo[2];
 
       // Si la tag corresponde a un sensor:
-      if (tagInfo[0] >= 2)
-      {
-          sensor = tagInfo[0];
-          blinkAndSleep(true);  // Zumbador: confirmación sonara al pasar un tag
-          displayPrint0(sensor); // Actualizamos la información de la pantalla con el nuevo sensor.
-          tagInfo[0] = -1;
+      if (id >= 2) {
+        Serial.println("Sensor detectado: ");
+
+        Sensor sensor;
+        sensor.id = id;
+
+        // Sensores: A0 y D2
+        tipo == 0 ? sensor.puerto = 0 : sensor.puerto = 2;
+        
+        bloques[0].sensores[0] = sensor;
+        bloques[0].numSensores++;
+        numSensoresBloque++;
+
+        blinkAndSleep(true);  // Zumbador: confirmación sonara al pasar un tag
+        displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
+        tagInfo[0] = -1;
+        
       }
 
       // Si la tag corresponde a un actuador y se ha leido un sensor ( != -1 )
-      if (sensor != -1)
-      {
-          valor = leerSensor0(sensor);
-          if (tagInfo[0] == 0 || tagInfo[0] == 1)
-          {
-            actuador = tagInfo[0];
-            blinkAndSleep(true);    // Zumbador: confirmación sonara al pasar un tag
-            displayPrint0(actuador); // Actualizamos la información de la pantalla con el nuevo sensor.
-            tagInfo[0] = -1;
-          }
+      if ( numSensoresBloque > 0) {
+
+        valor = leerSensor(bloques[0].sensores[0].id, 1, bloques[0].sensores[0].puerto);
+        
+        valor ? Serial.println("TRUE") : Serial.println("FALSE");
+
+        if (tagInfo[0] == 0 || tagInfo[0] == 1) {
+          Serial.println("Actuador detectado: ");
+
+          Actuador actuador;
+          actuador.id = id;
+
+          // Actuadores: A2 y D4
+          tipo == 0 ? actuador.puerto = 2 : actuador.puerto = 4;
+
+          bloques[0].actuadores[0] = actuador;
+          bloques[0].numActuadores++;
+          numActuadoresBloque++;
+
+          blinkAndSleep(true);    // Zumbador: confirmación sonara al pasar un tag
+          displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
+          tagInfo[0] = -1;
+        }
+
       }
       else
       {
-          ledApagar0();
+          ledApagar();
       }
 
-      if (actuador != -1)
+      if (numActuadoresBloque > 0)
       {
-          activarActuador(actuador, tagInfo[1], valor);
+          activarActuador(bloques[0].actuadores[0], estado, valor);
       }
-
-      // Mostramos la información que hayamos actualizado de la pantalla.
-      display.display();
-      tagInfo[0] = -1;
 
     }
+
+    // Mostramos la información que hayamos actualizado de la pantalla.
+    display.display();
   
   // Modo BLOQUES
   } else {
@@ -344,7 +392,7 @@ void loop()
           int puerto = isNewSensor(deviceID);
           // Si el puerto es distinto de -1 el sensor ha sido usado previamente. Si es nuevo, obtenemos un puerto disponible.
           if (puerto == -1)
-            puerto = asignarPuerto(deviceID, tagInfo[1]);
+            puerto = asignarPuerto(tagInfo[1]);
 
           if (puerto != -1) {
 
@@ -397,7 +445,7 @@ void loop()
           int puerto = isNewActuador(deviceID);
 
           if (puerto == -1)
-            puerto = asignarPuerto(deviceID, tagInfo[1]);
+            puerto = asignarPuerto(tagInfo[1]);
 
           // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
           if (puerto != -1) {
@@ -422,7 +470,7 @@ void loop()
           int puerto = isNewActuador(deviceID);
 
           if (puerto == -1)
-            puerto = asignarPuerto(deviceID, tagInfo[1]);
+            puerto = asignarPuerto(tagInfo[1]);
 
           // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
           if (puerto != -1) {

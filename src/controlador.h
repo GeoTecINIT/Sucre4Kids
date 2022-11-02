@@ -59,13 +59,11 @@ int MODE = 0;
 
 // *** /Variables de Entorno ***
 
-unsigned char data[] = {"0#1#4#1#0#1"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
+unsigned char data[] = {"4#1"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
 char delim[] = "#";
 
 int puertoDigital = 3;
 int puertoAnalogico = 0;
-
-ChainableLED ledObject;
 
 bool haveSensor = false;
 
@@ -89,12 +87,12 @@ bool esAnalogico(int type)
 // en funcion de la condición que los une (AND u OR). Comenienzando por el primer sensor.
 bool makeEvaluate(Bloque bloque)
 {
-   bool valorEvaluado = leerSensor1(bloque.sensores[0].id, bloque.sensores[0].condicion, bloque.sensores[0].puerto);
+   bool valorEvaluado = leerSensor(bloque.sensores[0].id, bloque.sensores[0].condicion, bloque.sensores[0].puerto);
 
    for (int i = 1; i < bloque.numSensores; i++)
    {
       Sensor sigSensor = bloque.sensores[i];
-      bool nextValor = leerSensor1(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
+      bool nextValor = leerSensor(sigSensor.id, sigSensor.condicion, sigSensor.puerto);
 
       if (bloque.condiciones.condicionesBloque[i - 1])
          valorEvaluado = (valorEvaluado && nextValor);
@@ -366,7 +364,7 @@ void getTagID(int infoTag[])
    }
 
    // Write data to tag:
-   // writeDataToBLock(blockAddr);
+   //writeDataToBLock(blockAddr);
 
    // Read data from the block's Tag.
    byte buffer[18];
@@ -494,18 +492,15 @@ void asignarPuerto0(int dato)
 }*/
 
 
-int asignarPuerto(int id, int type)
+int asignarPuerto(int type)
 {
    int option;
-   // Serial.printf("Digital %d, Analogico %d\n", puertoDigital, puertoAnalogico);
+   
    if (esAnalogico(type))
    {
-      // Serial.print(" \t y es analógico\n");
-      Serial.println("Es analogico");
       option = puertoAnalogico;
    }
    else
-      // Serial.print(" \t y es digital\n");
       option = puertoDigital;
 
    switch (option)
