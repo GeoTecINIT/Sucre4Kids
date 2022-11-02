@@ -20,6 +20,9 @@
 // Unconnected mode ON, evita conexion wifi.
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
+// MODO de uso: 0 -> KIDS ; 1 -> SUCRE ;
+uint8_t MODE;
+
 // Informacion de la tarjeta leida.
 int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
 int id;     // [0]
@@ -53,15 +56,37 @@ void setup()
   }
   // initializeBLocks(bloques);
 
+  MODE = EEPROM.read(0);
 
-  ledObject.init();
-  pinMode(Zumbador_PIN, OUTPUT);
+  if ( MODE == 0xFF ) {
+    // EEPROM empty
+    Serial.println("EEPROM empty");
+    MODE = 0;
+    EEPROM.put(0, MODE);
 
-  Bloque bloque;
-  numBloque++;
-  bloques[numBloque] = bloque;
+  }
+
+  if ( MODE == 0 ) {
+
+    Serial.println("MODO BÁSICO iniciado");
+
+    ledObject.init();
+    pinMode(Zumbador_PIN, OUTPUT);
+
+    Bloque bloque;
+    numBloque++;
+    bloques[numBloque] = bloque;
+
+  } else if ( MODE == 1 ) {
+
+    Serial.println("MODO AVANZADO iniciado");
+
+  }
   
 }
+
+// Declaramos función reset en dirección 0.
+void(* resetFunc) (void) = 0;
 
 // TRUE Si el disposivo no ha sido utilizado en el bloque ACTUAL.
 bool isValidSensor(int deviceID)
@@ -93,25 +118,9 @@ int isNewSensor(int deviceID)
   return -1;
 }
 
-// TRUE cuando el actuador no ha sido empleado en el bloque anterior
-// Y cuando no se ha empleado en el mismo MODO en el bloque actual
-// FALSE cuando se ha empleado el mismo actuador con el mismo MODO en el bloque actual
-// Y cuando se ha empleado en el bloque anterior
+
 bool isValidActuador(int deviceState, int actuadorID)
 {
-  /**
-  for (int i = 0; i <= numBloque; i++)
-  {
-    BLOQUE bloque = bloques[i];
-    for (int j = 0; j < bloques[i].numActuadores; j++)
-    {
-      ACTUADOR actuador = bloques[i].actuadores[j];
-      if (actuador.evaluate == evalState && actuador.id == actuadorID)
-        return false;
-    }
-  }
-  return true;
-  */
 
   for (int i = 0; i <= numBloque; i++)
   {
@@ -246,7 +255,6 @@ void ejecutarEvaluacion(bool evaluacion, int bloque) {
 
 void loop()
 {
-
   // If tag detected
   if (mfrc522.PICC_IsNewCardPresent())
   {
@@ -278,6 +286,7 @@ void loop()
 
         Serial.println("Modo KIDS detectado");
         MODE = 0;
+        
 
       } else if (tagInfo[1] == 1) {
 
@@ -286,7 +295,9 @@ void loop()
 
       }
 
-      resetMode();
+      EEPROM.put(0, MODE);
+      resetFunc();
+      // resetMode();
 
     // Sensor o Actuador
     } else {
@@ -320,7 +331,6 @@ void loop()
 
         valor = leerSensor(bloques[0].sensores[0].id, 1, bloques[0].sensores[0].puerto);
         
-        valor ? Serial.println("TRUE") : Serial.println("FALSE");
 
         if (tagInfo[0] == 0 || tagInfo[0] == 1) {
           Serial.println("Actuador detectado: ");
@@ -358,7 +368,6 @@ void loop()
   
   // Modo BLOQUES
   } else {
-    
     // Si se ha pasado nueva tag; se limpia al finalizar su lectura.
     if (tagInfo[0] != -1)
     {
@@ -587,6 +596,7 @@ void loop()
       }
 
       case 6: {
+
         if (tagInfo[1] == 0 ) {
 
           Serial.println("Modo KIDS detectado");
@@ -599,7 +609,9 @@ void loop()
 
         }
         
-        resetMode();
+        EEPROM.put(0, MODE);
+        resetFunc();
+        // resetMode();
 
         break;
       }

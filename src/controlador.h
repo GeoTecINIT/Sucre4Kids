@@ -54,9 +54,6 @@ int numCondicionalesBloque = 0;
 int numSensoresBloque = 0;
 int numActuadoresBloque = 0;
 
-// MODO de uso: 0 -> KIDS ; 1 -> SUCRE ;
-int MODE = 0;
-
 // *** /Variables de Entorno ***
 
 unsigned char data[] = {"4#1"}; //{"1#1#1#1#0#0"};  //  //  {"0#1#4#1#0#1"}; //  // //
