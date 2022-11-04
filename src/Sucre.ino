@@ -187,6 +187,7 @@ bool isActuadorDual(int deviceID, int bloque)
   return false;
 }
 
+/**
 void resetMode() 
 {
 
@@ -221,6 +222,7 @@ void resetMode()
   }
 
 }
+*/
 
 void ejecutarEvaluacion(bool evaluacion, int bloque) {
 
