@@ -6,7 +6,7 @@
 #define led_PIN2 5
 #define NUM_LEDS 5
 
-ChainableLED ledObject  = ChainableLED(led_PIN1, led_PIN2, NUM_LEDS);
+ChainableLED ledObject = ChainableLED(led_PIN1, led_PIN2, NUM_LEDS);
 bool init = true;
 
 void ledApagar()
@@ -185,6 +185,12 @@ void activarActuador(Actuador actuador, int opcion, boolean valor)
       pitidoOFF0();
    // Actuador led
    case 0:
+      
+      if (init)
+      {
+         ledObject.init();
+         init = false;
+      }
 
       switch (opcion) {
          case 0:

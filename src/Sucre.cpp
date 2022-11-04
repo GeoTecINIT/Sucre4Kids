@@ -84,8 +84,6 @@ void setup()
   if ( MODE == 0 ) {
 
     Serial.println("MODO BÁSICO iniciado");
-
-    ledObject.init();
     pinMode(Zumbador_PIN, OUTPUT);
 
     Bloque bloque;
@@ -289,6 +287,8 @@ void loop()
     getTagID(tagInfo);
   }
 
+  Serial.print(MODE, DEC);
+
 
   // Modo KIDS
   if ( MODE == 0 ) 
@@ -311,6 +311,8 @@ void loop()
       }
 
       EEPROM.put(0, MODE);
+      ledApagar();
+      pitidoOFF0();
       resetFunc();
       // resetMode();
 
@@ -625,6 +627,10 @@ void loop()
         }
         
         EEPROM.put(0, MODE);
+        ledApagar();
+        pitidoOFF1(2);
+        pitidoOFF1(4);
+        pitidoOFF1(6);
         resetFunc();
         // resetMode();
 
