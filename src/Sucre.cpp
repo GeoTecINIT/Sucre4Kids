@@ -29,7 +29,6 @@ int isNewSensor(int deviceID);
 bool isValidActuador(int deviceState, int actuadorID);
 int isNewActuador(int deviceID);
 bool isActuadorDual(int deviceID, int bloque);
-void resetMode();
 void ejecutarEvaluacion(bool evaluacion, int bloque);
 void loop();
 #line 21 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
@@ -202,40 +201,6 @@ bool isActuadorDual(int deviceID, int bloque)
   return false;
 }
 
-void resetMode() 
-{
-
-  IF_pasado = false;
-  THEN_pasado = false;
-  ELSE_pasado = false;
-
-  numBloque = -1;
-  numCondicionalesBloque = 0;
-  numSensoresBloque = 0;
-  numActuadoresBloque = 0;
-
-  Bloque nuevoBloque;
-  bloques[0] = nuevoBloque;
-
-  haveSensor = false;
-
-  puertoDigital = 3;
-  puertoAnalogico = 0;
-
-  if ( MODE == 1 ) {
-
-    init = true;
-
-  } else {
-
-    ledObject = ChainableLED(led_PIN1, led_PIN2, NUM_LEDS);
-    ledObject.init();
-    pinMode(Zumbador_PIN, OUTPUT);
-
-    numBloque++;
-  }
-
-}
 
 void ejecutarEvaluacion(bool evaluacion, int bloque) {
 
@@ -290,38 +255,47 @@ void loop()
   Serial.print(MODE, DEC);
 
 
-  // Modo KIDS
+  // Modo BASICO
   if ( MODE == 0 ) 
   {
     
     // Cambio de modo
-    if (tagInfo[0] == 6 ) {
+    if (tagInfo[0] == 6) {
 
-      if (tagInfo[1] == 0 ) {
+      switch (tagInfo[1])
+      {
+        // Cambio de modo
+        case 0:
 
-        Serial.println("Modo KIDS detectado");
-        MODE = 0;
+          if (tagInfo[2] == 0 ) {
+
+            Serial.println("Modo BASICO detectado");
+            MODE = 0;
+
+          } else if (tagInfo[2] == 1) {
+
+            Serial.println("Modo AVANZADO detectado");
+            MODE = 1;
+
+          }
+
+          EEPROM.put(0, MODE);
+          ledApagar();
+          pitidoOFF0();
+          resetFunc();
+
+          break;
         
-
-      } else if (tagInfo[1] == 1) {
-
-        Serial.println("Modo SUCRE detectado");
-        MODE = 1;
-
+        default:
+          break;
       }
 
-      EEPROM.put(0, MODE);
-      ledApagar();
-      pitidoOFF0();
-      resetFunc();
-      // resetMode();
-
-    // Sensor o Actuador
-    } else {
+    // Sensor o Actuador MODO BASICO
+    } else if ( tagInfo[0] == 0 ) {
       
-      id = tagInfo[0];
-      tipo = tagInfo[1];
-      estado = tagInfo[2];
+      id = tagInfo[1];
+      tipo = tagInfo[2];
+      estado = tagInfo[3];
 
       // Si la tag corresponde a un sensor:
       if (id >= 2) {
@@ -349,7 +323,7 @@ void loop()
         valor = leerSensor(bloques[0].sensores[0].id, 1, bloques[0].sensores[0].puerto);
         
 
-        if (tagInfo[0] == 0 || tagInfo[0] == 1) {
+        if (tagInfo[1] == 0 || tagInfo[1] == 1) {
           Serial.println("Actuador detectado: ");
 
           Actuador actuador;
@@ -386,13 +360,13 @@ void loop()
   // Modo BLOQUES
   } else {
     // Si se ha pasado nueva tag; se limpia al finalizar su lectura.
-    if (tagInfo[0] != -1)
+    if (tagInfo[0] == 1)
     {
       
-      int deviceID = tagInfo[2];
+      int deviceID = tagInfo[3];
       Serial.print("Ejecutando tag --> ");
 
-      switch (tagInfo[0]) {
+      switch (tagInfo[1]) {
 
       // Sensor
       case 0: {
@@ -403,7 +377,7 @@ void loop()
           int puerto = isNewSensor(deviceID);
           // Si el puerto es distinto de -1 el sensor ha sido usado previamente. Si es nuevo, obtenemos un puerto disponible.
           if (puerto == -1)
-            puerto = asignarPuerto(tagInfo[1]);
+            puerto = asignarPuerto(tagInfo[2]);
 
           if (puerto != -1) {
 
@@ -417,7 +391,7 @@ void loop()
             bloques[numBloque].numSensores++;
             numSensoresBloque++;
 
-            displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newSensor.id, newSensor.condicion, newSensor.puerto);
+            displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newSensor.id, newSensor.condicion, newSensor.puerto);
           
           } else {
 
@@ -448,7 +422,7 @@ void loop()
       // Actuador: puede tratarse de un actuador de condicion TRUE o FALSE (para ser usado en el then o el else);
       case 1: {
         Serial.println("Actuador detectado");
-        int deviceState = tagInfo[3];
+        int deviceState = tagInfo[4];
 
         //  Tag ActuadorTrue: Secuencia actuadores cuando sensores del bloque evaluate a True
         if ( THEN_pasado && !ELSE_pasado && isValidActuador(deviceState, deviceID) ) {
@@ -456,7 +430,7 @@ void loop()
           int puerto = isNewActuador(deviceID);
 
           if (puerto == -1)
-            puerto = asignarPuerto(tagInfo[1]);
+            puerto = asignarPuerto(tagInfo[2]);
 
           // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
           if (puerto != -1) {
@@ -472,7 +446,7 @@ void loop()
             numActuadoresBloque++;
             bloques[numBloque].numActuadores++;
 
-            displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
+            displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newActuador.id, newActuador.condicion, newActuador.puerto);
           }
 
         //  Tag ActuadorFalse: Secuencia actuadores cuando sensores del bloque evaluate a False
@@ -481,14 +455,14 @@ void loop()
           int puerto = isNewActuador(deviceID);
 
           if (puerto == -1)
-            puerto = asignarPuerto(tagInfo[1]);
+            puerto = asignarPuerto(tagInfo[2]);
 
           // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
           if (puerto != -1) {
 
             Actuador newActuador;
             newActuador.id = deviceID;
-            newActuador.condicion = tagInfo[3];
+            newActuador.condicion = tagInfo[4];
             newActuador.bloque = numBloque;
             newActuador.puerto = puerto;
             newActuador.evaluate = false;
@@ -497,7 +471,7 @@ void loop()
             bloques[numBloque].numActuadores++;
             numActuadoresBloque++;
 
-            displayPrint(esSensor(tagInfo[0]), esAnalogico(tagInfo[1]), newActuador.id, newActuador.condicion, newActuador.puerto);
+            displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newActuador.id, newActuador.condicion, newActuador.puerto);
           }
 
         } else {
@@ -551,7 +525,7 @@ void loop()
         if ( (numCondicionalesBloque < numSensoresBloque) && numActuadoresBloque == 0) {
 
           // Tag condicional => 3#0 | 3#1 == OR | AND
-          bloques[numBloque].condiciones.condicionesBloque[numCondicionalesBloque] = tagInfo[1];
+          bloques[numBloque].condiciones.condicionesBloque[numCondicionalesBloque] = tagInfo[2];
           numCondicionalesBloque++;
         } else {
 
@@ -612,31 +586,6 @@ void loop()
         break;
       }
 
-      case 6: {
-
-        if (tagInfo[1] == 0 ) {
-
-          Serial.println("Modo KIDS detectado");
-          MODE = 0;
-
-        } else if (tagInfo[1] == 1) {
-
-          Serial.println("Modo SUCRE detectado");
-          MODE = 1;
-
-        }
-        
-        EEPROM.put(0, MODE);
-        ledApagar();
-        pitidoOFF1(2);
-        pitidoOFF1(4);
-        pitidoOFF1(6);
-        resetFunc();
-        // resetMode();
-
-        break;
-      }
-
       default:
 
         Serial.println("ID Tag incorrecta");
@@ -654,6 +603,39 @@ void loop()
 
       tagInfo[0] = -1;
       Serial.println();
+
+    } else if (tagInfo[0] == 6) {
+        
+      switch (tagInfo[1])
+      {
+        //Cambio de modo
+        case 0:
+          
+          if (tagInfo[2] == 0 ) {
+
+            Serial.println("Modo BASICO detectado");
+            MODE = 0;
+
+          } else if (tagInfo[2] == 1) {
+
+            Serial.println("Modo AVANZADO detectado");
+            MODE = 1;
+
+          }
+
+          EEPROM.put(0, MODE);
+          ledApagar();
+          pitidoOFF1(2);
+          pitidoOFF1(4);
+          pitidoOFF1(6);
+          resetFunc();
+
+          break;
+        
+        default:
+          break;
+      }
+      
     }
 
     display.display();

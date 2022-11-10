@@ -246,26 +246,35 @@ void loop()
   {
     
     // Cambio de modo
-    if (tagInfo[0] == 6 && tagInfo[1] == 1) {
+    if (tagInfo[0] == 6) {
 
-      if (tagInfo[2] == 0 ) {
+      switch (tagInfo[1])
+      {
+        // Cambio de modo
+        case 0:
 
-        Serial.println("Modo BASICO detectado");
-        MODE = 0;
+          if (tagInfo[2] == 0 ) {
+
+            Serial.println("Modo BASICO detectado");
+            MODE = 0;
+
+          } else if (tagInfo[2] == 1) {
+
+            Serial.println("Modo AVANZADO detectado");
+            MODE = 1;
+
+          }
+
+          EEPROM.put(0, MODE);
+          ledApagar();
+          pitidoOFF0();
+          resetFunc();
+
+          break;
         
-
-      } else if (tagInfo[2] == 1) {
-
-        Serial.println("Modo AVANZADO detectado");
-        MODE = 1;
-
+        default:
+          break;
       }
-
-      EEPROM.put(0, MODE);
-      ledApagar();
-      pitidoOFF0();
-      resetFunc();
-      // resetMode();
 
     // Sensor o Actuador MODO BASICO
     } else if ( tagInfo[0] == 0 ) {
@@ -588,32 +597,30 @@ void loop()
         //Cambio de modo
         case 0:
           
-          if (tagInfo[1] == 0 ) {
+          if (tagInfo[2] == 0 ) {
 
             Serial.println("Modo BASICO detectado");
             MODE = 0;
 
-          } else if (tagInfo[1] == 1) {
+          } else if (tagInfo[2] == 1) {
 
             Serial.println("Modo AVANZADO detectado");
             MODE = 1;
 
           }
 
+          EEPROM.put(0, MODE);
+          ledApagar();
+          pitidoOFF1(2);
+          pitidoOFF1(4);
+          pitidoOFF1(6);
+          resetFunc();
+
           break;
         
         default:
           break;
       }
-      
-      
-      EEPROM.put(0, MODE);
-      ledApagar();
-      pitidoOFF1(2);
-      pitidoOFF1(4);
-      pitidoOFF1(6);
-      resetFunc();
-      // resetMode();
       
     }
 
