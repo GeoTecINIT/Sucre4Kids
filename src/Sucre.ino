@@ -238,9 +238,6 @@ void loop()
     getTagID(tagInfo);
   }
 
-  Serial.print(MODE, DEC);
-
-
   // Modo BASICO
   if ( MODE == 0 ) 
   {
@@ -299,15 +296,12 @@ void loop()
 
         blinkAndSleep(true);  // Zumbador: confirmación sonara al pasar un tag
         displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
-        tagInfo[0] = -1;
+        tagInfo[1] = -1;
         
       }
 
       // Si la tag corresponde a un actuador y se ha leido un sensor ( != -1 )
       if ( numSensoresBloque > 0) {
-
-        valor = leerSensor(bloques[0].sensores[0].id, 1, bloques[0].sensores[0].puerto);
-        
 
         if (tagInfo[1] == 0 || tagInfo[1] == 1) {
           Serial.println("Actuador detectado: ");
@@ -324,7 +318,7 @@ void loop()
 
           blinkAndSleep(true);    // Zumbador: confirmación sonara al pasar un tag
           displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
-          tagInfo[0] = -1;
+          tagInfo[1] = -1;
         }
 
       }
@@ -332,12 +326,12 @@ void loop()
       {
           ledApagar();
       }
+    }
 
-      if (numActuadoresBloque > 0)
-      {
-          activarActuador(bloques[0].actuadores[0], estado, valor);
-      }
-
+    if (numActuadoresBloque > 0)
+    {
+      valor = leerSensor(bloques[0].sensores[0].id, 1, bloques[0].sensores[0].puerto);
+      activarActuador(bloques[0].actuadores[0], estado, valor);
     }
 
     // Mostramos la información que hayamos actualizado de la pantalla.
