@@ -34,8 +34,11 @@ void loop();
 #line 21 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
-// MODO de uso: 0 -> KIDS ; 1 -> SUCRE ;
+// MODO de uso
 uint8_t MODE;
+
+// Ejecucion ACTIVA/INActiva
+boolean play = false;
 
 // Informacion de la tarjeta leida.
 int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
@@ -251,6 +254,16 @@ void loop()
     display.setCursor(0, 0);
     // Leemos la tag y guardamos la informacion codificada en tagInfo.
     getTagID(tagInfo);
+
+    play = false;
+    ledApagar();
+    if ( MODE == 0 ) {
+      pitidoOFF0();
+    } else {
+      pitidoOFF1(2);
+      pitidoOFF1(4);
+      pitidoOFF1(6);
+    }
   }
 
   // Modo BASICO
@@ -263,7 +276,7 @@ void loop()
 
       // Tarjeta COMUN
       case 6:
-      
+        blinkAndSleep(true);
         switch (tagInfo[1])
         {
           // Cambio de MODO
@@ -288,6 +301,12 @@ void loop()
 
             break;
           
+          // Ejecucion
+          case 1:
+            play = true;
+            tagInfo[0] = -1;
+            break;
+
           default:
             break;
         }
@@ -358,7 +377,7 @@ void loop()
         break;
     }
 
-    if (numActuadoresBloque > 0)
+    if (numActuadoresBloque > 0 && play == true)
     {
       valor = leerSensor(bloques[0].sensores[0].id, 1, bloques[0].sensores[0].puerto);
       activarActuador(bloques[0].actuadores[0], estado, valor);

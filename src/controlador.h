@@ -56,7 +56,7 @@ int numActuadoresBloque = 0;
 
 // *** /Variables de Entorno ***
 
-unsigned char data[] = {"1#0#0#2#0"}; //{"1#1#1#1#0#0"};
+unsigned char data[] = {"6#1#0"}; //{"1#1#1#1#0#0"};
 char delim[] = "#";
 
 int puertoDigital = 3;
