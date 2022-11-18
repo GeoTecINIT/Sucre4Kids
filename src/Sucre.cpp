@@ -304,7 +304,6 @@ void loop()
           // Ejecucion
           case 1:
             play = true;
-            tagInfo[0] = -1;
             break;
 
           default:
@@ -336,7 +335,6 @@ void loop()
 
           blinkAndSleep(true);  // Zumbador: confirmación sonara al pasar un tag
           displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
-          tagInfo[1] = -1;
           
         }
 
@@ -358,7 +356,6 @@ void loop()
 
             blinkAndSleep(true);    // Zumbador: confirmación sonara al pasar un tag
             displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
-            tagInfo[0] = -1;
           }
 
         }
@@ -372,9 +369,12 @@ void loop()
       default:
         if ( tagInfo[0] != -1 ) {
           Serial.println("Tarjeta inválida para este modo");
-          tagInfo[0] = -1;
         }
         break;
+    }
+
+    if (tagInfo[0]!=-1) { 
+      tagInfo[0]=-1;
     }
 
     if (numActuadoresBloque > 0 && play == true)
@@ -422,6 +422,11 @@ void loop()
 
             break;
           
+          // Ejecucion
+          case 1:
+            play = true;
+            break;
+
           default:
             break;
         }
@@ -668,7 +673,6 @@ void loop()
         // Serial.printlnf("Num condicionesBLoque: %d", numCondicionalesBloque);
         // Serial.printlnf("Num ActuadoresBloque: %d", numActuadoresBloque);
 
-        tagInfo[0] = -1;
         Serial.println();
 
         break;
@@ -677,31 +681,34 @@ void loop()
       default: {
         if ( tagInfo[0] != -1 ) {
           Serial.println("Tarjeta inválida para este modo");
-          tagInfo[0] = -1;
         }
         break;
       }
 
     }
 
+    tagInfo[0] = -1;
     display.display();
 
-    // Evaluación primer bloque
-    if ( (numBloque==0 && THEN_pasado) || numBloque==1 ) {
-      Bloque bloque = bloques[0];
-      bool evaluacion = makeEvaluate(bloque);
+    if (play) {
+      // Bloque 1
+      if ( (numBloque==0 && THEN_pasado) || numBloque==1 ) {
+        Bloque bloque = bloques[0];
+        bool evaluacion = makeEvaluate(bloque);
       
-      ejecutarEvaluacion(evaluacion, 0);
-    }
+        ejecutarEvaluacion(evaluacion, 0);
+      }
 
-    // Evaluación segundo bloque
-    if ( numBloque==1 && THEN_pasado ) {
-      Bloque bloque = bloques[1];
-      bool evaluacion = makeEvaluate(bloques[1]);
+      // Bloque 2
+      if ( numBloque==1 && THEN_pasado ) {
+        Bloque bloque = bloques[1];
+        bool evaluacion = makeEvaluate(bloques[1]);
       
-      ejecutarEvaluacion(evaluacion, 1);
-    }
+        ejecutarEvaluacion(evaluacion, 1);
+      }
 
+    }
+  
   }
 
 }

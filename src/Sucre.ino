@@ -290,7 +290,6 @@ void loop()
           // Ejecucion
           case 1:
             play = true;
-            tagInfo[0] = -1;
             break;
 
           default:
@@ -322,7 +321,6 @@ void loop()
 
           blinkAndSleep(true);  // Zumbador: confirmación sonara al pasar un tag
           displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
-          tagInfo[1] = -1;
           
         }
 
@@ -344,7 +342,6 @@ void loop()
 
             blinkAndSleep(true);    // Zumbador: confirmación sonara al pasar un tag
             displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
-            tagInfo[0] = -1;
           }
 
         }
@@ -358,9 +355,12 @@ void loop()
       default:
         if ( tagInfo[0] != -1 ) {
           Serial.println("Tarjeta inválida para este modo");
-          tagInfo[0] = -1;
         }
         break;
+    }
+
+    if (tagInfo[0]!=-1) { 
+      tagInfo[0]=-1;
     }
 
     if (numActuadoresBloque > 0 && play == true)
@@ -408,6 +408,11 @@ void loop()
 
             break;
           
+          // Ejecucion
+          case 1:
+            play = true;
+            break;
+
           default:
             break;
         }
@@ -474,12 +479,12 @@ void loop()
             break;
           }
 
-          // Actuador: puede tratarse de un actuador de condicion TRUE o FALSE (para ser usado en el then o el else);
+          // Actuador - then/else
           case 1: {
             Serial.println("Actuador detectado");
             int deviceState = tagInfo[4];
 
-            //  Tag ActuadorTrue: Secuencia actuadores cuando sensores del bloque evaluate a True
+            //  Actuador then ( condicion = True )
             if ( THEN_pasado && !ELSE_pasado && isValidActuador(deviceState, deviceID) ) {
 
               int puerto = isNewActuador(deviceID);
@@ -504,7 +509,7 @@ void loop()
                 displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newActuador.id, newActuador.condicion, newActuador.puerto);
               }
 
-            //  Tag ActuadorFalse: Secuencia actuadores cuando sensores del bloque evaluate a False
+            //  Actuador else ( condicion = False )
             } else if ( THEN_pasado && ELSE_pasado && isValidActuador(deviceState, deviceID) ) {
 
               int puerto = isNewActuador(deviceID);
@@ -649,12 +654,6 @@ void loop()
         Serial.println("Fin Tag");
         Serial.println("# Bloque | # Sensores | # Condiciones | # Actuadores");
         Serial.printlnf("    %d \t|\t %d \t|\t %d \t|\t %d \t|\t %d", numBloque, numSensoresBloque, numCondicionalesBloque, numActuadoresBloque, bloques[numBloque].numActuadores);
-        // Serial.printlnf("Num bloques: %d", numBloque);
-        // Serial.printlnf("Num sensoresBLoque: %d", numSensoresBloque);
-        // Serial.printlnf("Num condicionesBLoque: %d", numCondicionalesBloque);
-        // Serial.printlnf("Num ActuadoresBloque: %d", numActuadoresBloque);
-
-        tagInfo[0] = -1;
         Serial.println();
 
         break;
@@ -663,31 +662,32 @@ void loop()
       default: {
         if ( tagInfo[0] != -1 ) {
           Serial.println("Tarjeta inválida para este modo");
-          tagInfo[0] = -1;
         }
         break;
       }
 
     }
 
+    tagInfo[0] = -1;
     display.display();
 
-    // Evaluación primer bloque
-    if ( (numBloque==0 && THEN_pasado) || numBloque==1 ) {
-      Bloque bloque = bloques[0];
-      bool evaluacion = makeEvaluate(bloque);
-      
-      ejecutarEvaluacion(evaluacion, 0);
-    }
+    if (play) {
+      // Bloque 1
+      if ( (numBloque==0 && THEN_pasado) || numBloque==1 ) {
 
-    // Evaluación segundo bloque
-    if ( numBloque==1 && THEN_pasado ) {
-      Bloque bloque = bloques[1];
-      bool evaluacion = makeEvaluate(bloques[1]);
-      
-      ejecutarEvaluacion(evaluacion, 1);
-    }
+        bool evaluacion = makeEvaluate(bloques[0]);
+        ejecutarEvaluacion(evaluacion, 0);
+      }
 
+      // Bloque 2
+      if ( numBloque==1 && THEN_pasado ) {
+
+        bool evaluacion = makeEvaluate(bloques[1]);
+        ejecutarEvaluacion(evaluacion, 1);
+      }
+
+    }
+  
   }
 
 }
