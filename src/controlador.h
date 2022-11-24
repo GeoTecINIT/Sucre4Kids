@@ -13,11 +13,27 @@
 #include <stdbool.h>
 
 #include <sensores.h>
-
+#include <actuadores.h>
+#include <interface.h>
 #include <splash.h>
 
-// struct
-#include <interface.h>
+// MODO de uso
+uint8_t MODE;
+
+// Ejecucion ACTIVA/INActiva
+boolean play = false;
+
+// Informacion de la tarjeta leida.
+int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
+int id;     // [1]
+int tipo;   // [2]
+int estado; // [3]
+boolean valor = false;
+
+// Variable intermedia para almacenar el puerto
+int puerto;
+
+Bloque bloques[2];
 
 // Memory sector chosen to r/w fron NFC Tag
 byte trailerBlock = 7;
@@ -80,6 +96,102 @@ bool esAnalogico(int type)
    return type == 0;
 }
 
+// TRUE Si el disposivo no ha sido utilizado en el bloque ACTUAL.
+bool isValidSensor(int deviceID)
+{
+  for (int i = 0; i < bloques[numBloque].numSensores; i++)
+  {
+    if (bloques[numBloque].sensores[i].id == deviceID)
+    {
+      Serial.println("Invalid sensor! -> Sensor repetido en el bloque");
+      return false;
+    }
+  };
+
+  return true;
+}
+
+// -1 si el sensor es nuevo, o el puerto donde esta siendo usado.
+int isNewSensor(int deviceID)
+{
+  for (int i = 0; i <= numBloque; i++)
+  {
+    for (int j = 0; j < bloques[i].numSensores; j++)
+    {
+      if (bloques[i].sensores[j].id == deviceID)
+        return bloques[i].sensores[j].puerto;
+    }
+  }
+  return -1;
+}
+
+
+bool isValidActuador(int deviceState, int actuadorID)
+{
+
+  for (int i = 0; i <= numBloque; i++)
+  {
+    // Comprobar que no se ha empleado el mismo estado en el bloque actual
+    if ( i == numBloque ) 
+    {
+      for (int j = 0; j < bloques[i].numActuadores; j++)
+      {
+        // Mismo actuador con el mismo estado
+        if (bloques[i].actuadores[j].condicion == deviceState && bloques[i].actuadores[j].id == actuadorID)
+          return false;
+      }
+    }
+    
+    // Comprobar que no se ha empleado en el bloque anterior, si existe
+    if ( numBloque == 1)
+    {
+      for (int j = 0; j < bloques[0].numActuadores; j++)
+      {
+        // Mismo actuador
+        if (bloques[0].actuadores[j].id == actuadorID)
+          return false;
+      }
+      
+    }
+  }
+  
+  return true;
+}
+
+
+// -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
+int isNewActuador(int deviceID)
+{
+  for (int j = 0; j <= numBloque; j++)
+  {
+    for (int i = 0; i < bloques[j].numActuadores; i++)
+    {
+      if (bloques[j].actuadores[i].id == deviceID)
+      {
+        return bloques[j].actuadores[i].puerto;
+      }
+    }
+  }
+
+  return -1;
+}
+
+// True si el actuador es usado tanto para THEN como ELSE; Necesario para no apagarlo y encenderlo constantemente.
+bool isActuadorDual(int deviceID, int bloque)
+{
+  int contador = 0;
+  for (int i = 0; i < bloques[bloque].numActuadores; i++)
+  {
+    if (bloques[bloque].actuadores[i].id == deviceID)
+      contador++;
+
+    if (contador > 1)
+      return true;
+  }
+
+  return false;
+}
+
 // Evaluate recorre el vector de sensores, leyendo su valor y concatenandolo con el valor del siguiente
 // en funcion de la condición que los une (AND u OR). Comenienzando por el primer sensor.
 bool makeEvaluate(Bloque bloque)
@@ -99,6 +211,53 @@ bool makeEvaluate(Bloque bloque)
 
    return valorEvaluado;
 }
+
+void ejecutarEvaluacion(bool evaluacion, int bloque) {
+
+  for (int j = 0; j < bloques[bloque].numActuadores; j++)
+  {
+    Actuador actuador = bloques[bloque].actuadores[j];
+    // Serial.printlnf("Actuandor: %d , %s", actuador.id, actuador.evaluate ? "True" : "False");
+    if (evaluacion == actuador.evaluate)
+    {
+      // Serial.println("ActivarActuador");
+      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+    }
+    
+    else
+    {
+      if (!isActuadorDual(actuador.id, bloque))
+      {
+        // Serial.println("ApagarActuador");
+        apagarActuador(actuador.id, actuador.puerto);
+      }
+      else
+      {
+        // Serial.printlnf("%d:%d -> Actuador se usa dos veces", actuador.id, actuador.condicion);
+      }
+    }
+    
+  }
+
+}
+
+
+void cambioModo(int modo)
+{
+   if (modo == 0 ) {
+
+      Serial.println("Modo BASICO detectado");
+      MODE = 0;
+
+   } else if (modo == 1) {
+
+      Serial.println("Modo AVANZADO detectado");
+      MODE = 1;
+
+   }
+   EEPROM.put(0, MODE);
+}
+
 
 void displayPrint0(int n)
 {
@@ -270,7 +429,7 @@ void printArray(byte *buffer, byte bufferSize)
 }
 
 int atoi(char *str)
-{ //}, int solution[], int j){
+{
    int num = 0;
    int i = 0;
    bool isNegetive = false;
@@ -410,84 +569,6 @@ void showBitmap(int mode) {
    delay(1000);
 }
 
-/**
-void asignarPuerto0(int dato)
-{
-   int option;
-   Serial.printf("Digital %d, Analogico %d\n", puertoDigital, puertoAnalogico);
-   if (dato)
-   {
-      Serial.print(" \t y es digital\n");
-      option = puertoDigital;
-   }
-   else
-   {
-      Serial.print(" \t y es analógico\n");
-      option = puertoAnalogico;
-   }
-   switch (option)
-   {
-      // declarations
-      // . . .
-
-   case 0:
-      Serial.print("Conectar al puerto A0\n");
-
-      puertoAnalogico++;
-      Disp[0].pin = A0;
-      Disp[0].pin2 = A1;
-
-      // statements executed if the expression equals the   p_A0
-      // value of this constant_expression                  p_A1
-      break;
-
-   case 1:
-      Serial.print("Conectar al puerto A2\n");
-      puertoAnalogico++;
-      Disp[0].pin = A2;
-      Disp[0].pin2 = A3;
-      // statements executed if the expression equals the p_A2
-      // value of this constant_expression                 p_A3
-      break;
-
-   case 2:
-      Serial.print("Conectar al puerto A4\n");
-
-      puertoAnalogico = -1;
-      Disp[0].pin = A4;
-      Disp[0].pin2 = A5;
-      // statements executed if the expression equals the p_A4
-      // value of this constant_expression                  p_A5
-      break;
-
-   case 3:
-      Serial.print("Conectar al puerto D2\n");
-
-      puertoDigital++;
-      //Disp[0].pin = D2;
-      // Disp[0].pin2 = D3;
-      // statements executed if the expression equals the  p_D2
-      // value of this constant_expression                  p_D3
-      break;
-
-   case 4:
-      Serial.print("Conectar al puerto D4\n");
-
-      puertoDigital = -1;
-      Disp[0].pin = D4;
-      Disp[0].pin2 = D5;
-      // statements executed if the expression equals the p_D4
-      // value of this constant_expression               p_D5
-      break;
-
-   default:
-      Serial.print("Error: No hay mas puertos disponibles \n");
-
-      // statements executed if expression does not equal
-      // any case constant_expression
-   }
-}*/
-
 
 int asignarPuerto(int type)
 {
@@ -537,8 +618,3 @@ int asignarPuerto(int type)
       return -1;
    }
 }
-
-
-// void initializeBLocks(Bloque bloques)
-// {
-// }

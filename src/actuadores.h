@@ -7,11 +7,11 @@
 #define NUM_LEDS 5
 
 ChainableLED ledObject = ChainableLED(led_PIN1, led_PIN2, NUM_LEDS);
-bool init = true;
+bool init = false;
 
 void ledApagar()
 {
-    ledObject.setColorRGB(0, 0, 0, 0);
+   ledObject.setColorRGB(0, 0, 0, 0);
 }
 void ledRojo()
 {
@@ -50,7 +50,6 @@ void ledArcoiris()
     }
 
 }
-
 
 //-------------------------------------------------------------------------------
 //--------------------------------- M O D O   0 ---------------------------------
@@ -178,19 +177,13 @@ void zumbador(boolean estado)
    }
 }
 
-void activarActuador(Actuador actuador, int opcion, boolean valor)
+void activarActuador(int id, int opcion, boolean valor)
 {
-   switch (actuador.id)
+   switch (id)
    {
       pitidoOFF0();
    // Actuador led
    case 0:
-      
-      if (init)
-      {
-         ledObject.init();
-         init = false;
-      }
 
       switch (opcion) {
          case 0:
@@ -285,13 +278,6 @@ void pitidoBlink1(int puerto)
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
 void activarLED(int opcion, int puerto)
 {
-    // Serial.println("Actiaver LED");
-    if (init)
-    {
-        ledObject = ChainableLED(puerto, puerto + 1, 5);
-        ledObject.init();
-        init = false;
-    }
 
     switch (opcion)
     {
@@ -359,3 +345,6 @@ void actuadorHandler(int id, int opcion, int puerto)
     if (id < 2)
         id == 0 ? activarLED(opcion, puerto) : activarZumbador(opcion, puerto);
 }
+
+// -------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------

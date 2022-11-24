@@ -15,28 +15,8 @@
 // Internal assets.
 #include <controlador.h>
 
-#include <actuadores.h>
-
 // Unconnected mode ON, evita conexion wifi.
 SYSTEM_MODE(SEMI_AUTOMATIC);
-
-// MODO de uso
-uint8_t MODE;
-
-// Ejecucion ACTIVA/INActiva
-boolean play = false;
-
-// Informacion de la tarjeta leida.
-int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
-int id;     // [1]
-int tipo;   // [2]
-int estado; // [3]
-boolean valor = false;
-
-// Variable intermedia para almacenar el puerto
-int puerto;
-
-Bloque bloques[2];
 
 void setup()
 {
@@ -57,7 +37,6 @@ void setup()
   {
     key.keyByte[i] = 0xFF;
   }
-  // initializeBLocks(bloques);
 
   MODE = EEPROM.read(0);
 
@@ -72,8 +51,10 @@ void setup()
 
   if ( MODE == 0 ) {
 
-    Serial.println("MODO BÁSICO iniciado");
+    // MODO BÁSICO iniciado
     pinMode(Zumbador_PIN, OUTPUT);
+    ledObject.init();
+    init = true;
 
     Bloque bloque;
     numBloque++;
@@ -81,7 +62,7 @@ void setup()
 
   } else if ( MODE == 1 ) {
 
-    Serial.println("MODO AVANZADO iniciado");
+    // MODO AVANZADO iniciado
 
   }
   
@@ -90,136 +71,6 @@ void setup()
 // Declaramos función reset en dirección 0.
 void(* resetFunc) (void) = 0;
 
-// TRUE Si el disposivo no ha sido utilizado en el bloque ACTUAL.
-bool isValidSensor(int deviceID)
-{
-  Bloque bloque = bloques[numBloque];
-  for (int i = 0; i < bloque.numSensores; i++)
-  {
-    if (bloque.sensores[i].id == deviceID)
-    {
-      Serial.println("Invalid sensor! -> Sensor repetido en el bloque");
-      return false;
-    }
-  };
-
-  return true;
-}
-
-// -1 si el sensor es nuevo, o el puerto donde esta siendo usado.
-int isNewSensor(int deviceID)
-{
-  for (int i = 0; i <= numBloque; i++)
-  {
-    for (int j = 0; j < bloques[i].numSensores; j++)
-    {
-      if (bloques[i].sensores[j].id == deviceID)
-        return bloques[i].sensores[j].puerto;
-    }
-  }
-  return -1;
-}
-
-
-bool isValidActuador(int deviceState, int actuadorID)
-{
-
-  for (int i = 0; i <= numBloque; i++)
-  {
-    // Comprobar que no se ha empleado el mismo estado en el bloque actual
-    if ( i == numBloque ) 
-    {
-      for (int j = 0; j < bloques[i].numActuadores; j++)
-      {
-        Actuador actuador = bloques[i].actuadores[j];
-        // Mismo actuador con el mismo estado
-        if (actuador.condicion == deviceState && actuador.id == actuadorID)
-          return false;
-      }
-    }
-    
-    // Comprobar que no se ha empleado en el bloque anterior, si existe
-    if ( numBloque == 1)
-    {
-      for (int j = 0; j < bloques[0].numActuadores; j++)
-      {
-        Actuador actuador = bloques[0].actuadores[j];
-        // Mismo actuador
-        if (actuador.id == actuadorID)
-          return false;
-      }
-      
-    }
-  }
-  
-  return true;
-}
-
-
-// -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
-int isNewActuador(int deviceID)
-{
-  for (int j = 0; j <= numBloque; j++)
-  {
-    for (int i = 0; i < bloques[j].numActuadores; i++)
-    {
-      Actuador actuador = bloques[j].actuadores[i];
-
-      if (actuador.id == deviceID)
-      {
-        return actuador.puerto;
-      }
-    }
-  }
-
-  return -1;
-}
-
-// True si el actuador es usado tanto para THEN como ELSE; Necesario para no apagarlo y encenderlo constantemente.
-bool isActuadorDual(int deviceID, int bloque)
-{
-  int contador = 0;
-  for (int i = 0; i < bloques[bloque].numActuadores; i++)
-  {
-    if (bloques[bloque].actuadores[i].id == deviceID)
-      contador++;
-
-    if (contador > 1)
-      return true;
-  }
-
-  return false;
-}
-
-
-void ejecutarEvaluacion(bool evaluacion, int bloque) {
-
-  for (int j = 0; j < bloques[bloque].numActuadores; j++)
-  {
-    Actuador actuador = bloques[bloque].actuadores[j];
-    // Serial.printlnf("Actuandor: %d , %s", actuador.id, actuador.evaluate ? "True" : "False");
-    if (evaluacion == actuador.evaluate)
-    {
-      // Serial.println("ActivarActuador");
-      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
-    }
-    
-    else
-    {
-      if (!isActuadorDual(actuador.id, bloque))
-      {
-        // Serial.println("ApagarActuador");
-        apagarActuador(actuador.id, actuador.puerto);
-      }
-      else
-      {
-        // Serial.printlnf("%d:%d -> Actuador se usa dos veces", actuador.id, actuador.condicion);
-      }
-    }
-    
-  }
-
-}
 
 void loop()
 {
@@ -242,7 +93,6 @@ void loop()
     getTagID(tagInfo);
 
     play = false;
-    ledApagar();
     if ( MODE == 0 ) {
       pitidoOFF0();
     } else {
@@ -250,7 +100,13 @@ void loop()
       pitidoOFF1(4);
       pitidoOFF1(6);
     }
+  
   }
+
+  if (!play && init) {
+    ledApagar();
+  }
+
 
   // Modo BASICO
   if ( MODE == 0 ) 
@@ -267,22 +123,8 @@ void loop()
         {
           // Cambio de MODO
           case 0:
-
-            if (tagInfo[2] == 0 ) {
-
-              Serial.println("Modo BASICO detectado");
-              MODE = 0;
-
-            } else if (tagInfo[2] == 1) {
-
-              Serial.println("Modo AVANZADO detectado");
-              MODE = 1;
-
-            }
-
-            EEPROM.put(0, MODE);
-            ledApagar();
-            pitidoOFF0();
+            
+            cambioModo(tagInfo[2]);
             resetFunc();
 
             break;
@@ -366,7 +208,7 @@ void loop()
     if (numActuadoresBloque > 0 && play == true)
     {
       valor = leerSensor(bloques[0].sensores[0].id, 1, bloques[0].sensores[0].puerto);
-      activarActuador(bloques[0].actuadores[0], estado, valor);
+      activarActuador(bloques[0].actuadores[0].id, estado, valor);
     }
 
     // Mostramos la información que hayamos actualizado de la pantalla.
@@ -387,23 +229,7 @@ void loop()
           //Cambio de modo
           case 0:
             
-            if (tagInfo[2] == 0 ) {
-
-              Serial.println("Modo BASICO detectado");
-              MODE = 0;
-
-            } else if (tagInfo[2] == 1) {
-
-              Serial.println("Modo AVANZADO detectado");
-              MODE = 1;
-
-            }
-
-            EEPROM.put(0, MODE);
-            ledApagar();
-            pitidoOFF1(2);
-            pitidoOFF1(4);
-            pitidoOFF1(6);
+            cambioModo(tagInfo[2]);
             resetFunc();
 
             break;
@@ -485,7 +311,7 @@ void loop()
             int deviceState = tagInfo[4];
 
             //  Actuador then ( condicion = True )
-            if ( THEN_pasado && !ELSE_pasado && isValidActuador(deviceState, deviceID) ) {
+            if ( THEN_pasado && !ELSE_pasado && isValidActuador(deviceState, deviceID) && numActuadoresBloque==0 ) {
 
               int puerto = isNewActuador(deviceID);
 
@@ -507,6 +333,15 @@ void loop()
                 bloques[numBloque].numActuadores++;
 
                 displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newActuador.id, newActuador.condicion, newActuador.puerto);
+
+                // Si es LED se inicia para mantenerlo apagado hasta el PLAY
+                if (deviceID == 0)
+                {
+                  ledObject = ChainableLED(puerto, puerto+1, 5);
+                  ledObject.init();
+                  init = true;
+                }
+                
               }
 
             //  Actuador else ( condicion = False )
@@ -532,6 +367,15 @@ void loop()
                 numActuadoresBloque++;
 
                 displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newActuador.id, newActuador.condicion, newActuador.puerto);
+
+                // Si es LED se inicia para mantenerlo apagado hasta el PLAY
+                if (deviceID == 0)
+                {
+                  ledObject = ChainableLED(puerto, puerto+1, 5);
+                  ledObject.init();
+                  init = true;
+                }
+
               }
 
             } else {
