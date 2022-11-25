@@ -108,7 +108,7 @@ void loop()
   }
 
 
-  // Modo BASICO
+  // ------------------------------ Modo BASICO --------------------------------------
   if ( MODE == 0 ) 
   {
     
@@ -132,6 +132,15 @@ void loop()
           // Ejecucion
           case 1:
             play = true;
+            break;
+
+          // Borrado (ALL)
+          case 2:
+            if ( tagInfo[2] == 1 ) {
+              borradoALL(0);
+            } else {
+              Serial.println("Borrado no permitido para este modo");
+            }
             break;
 
           default:
@@ -161,8 +170,8 @@ void loop()
           bloques[0].numSensores++;
           numSensoresBloque++;
 
-          blinkAndSleep(true);  // Zumbador: confirmación sonara al pasar un tag
-          displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
+          blinkAndSleep(true);
+          displayPrint0(id); // Update screen info
           
         }
 
@@ -182,8 +191,8 @@ void loop()
             bloques[0].numActuadores++;
             numActuadoresBloque++;
 
-            blinkAndSleep(true);    // Zumbador: confirmación sonara al pasar un tag
-            displayPrint0(id); // Actualizamos la información de la pantalla con el nuevo sensor.
+            blinkAndSleep(true);
+            displayPrint0(id);
           }
 
         }
@@ -211,10 +220,11 @@ void loop()
       activarActuador(bloques[0].actuadores[0].id, estado, valor);
     }
 
-    // Mostramos la información que hayamos actualizado de la pantalla.
     display.display();
   
-  // Modo AVANZADO
+
+
+  // ------------------------------- Modo AVANZADO --------------------------------------
   } else {
     
     // Tipo de tarjeta
@@ -228,16 +238,30 @@ void loop()
         {
           //Cambio de modo
           case 0:
-            
             cambioModo(tagInfo[2]);
             resetFunc();
-
             break;
           
-          // Ejecucion
+
+          // Ejecucion secuencia
           case 1:
             play = true;
             break;
+
+
+          // Borrado (ALL Y BLOQUE)
+          case 2:
+            if ( tagInfo[2] == 1 ) {
+              borradoALL(1);
+
+            } else if (tagInfo[2] == 2) {
+              //borradoBLOQUE(1);
+
+            } else {
+              Serial.println("Borrado no permitido para este modo");
+            }
+            break;
+
 
           default:
             break;
@@ -426,7 +450,7 @@ void loop()
           case 3: {
             Serial.println("AND/OR detectado");
 
-            if ( (numCondicionalesBloque < numSensoresBloque) && numActuadoresBloque == 0) {
+            if ( IF_pasado && (numCondicionalesBloque < numSensoresBloque) && numActuadoresBloque == 0) {
 
               // Tag condicional => 3#0 | 3#1 == OR | AND
               bloques[numBloque].condiciones.condicionesBloque[numCondicionalesBloque] = tagInfo[2];
@@ -450,7 +474,7 @@ void loop()
           case 4: {
             Serial.println("THEN detectado");
 
-            if ((numSensoresBloque > 0) && (numSensoresBloque > numCondicionalesBloque)) {
+            if ( IF_pasado && (numSensoresBloque > 0) && (numSensoresBloque > numCondicionalesBloque)) {
 
               THEN_pasado = true;
             
@@ -472,7 +496,7 @@ void loop()
           case 5: {
             Serial.println("ELSE detectado");
 
-            if (numActuadoresBloque > 0) {
+            if ( IF_pasado && (numActuadoresBloque > 0)) {
 
               ELSE_pasado = true;
             

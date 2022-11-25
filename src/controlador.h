@@ -72,7 +72,7 @@ int numActuadoresBloque = 0;
 
 // *** /Variables de Entorno ***
 
-unsigned char data[] = {"6#1#0"}; //{"1#1#1#1#0#0"};
+unsigned char data[] = {"6#2#2"}; //{"1#1#1#1#0#0"};
 char delim[] = "#";
 
 int puertoDigital = 3;
@@ -83,6 +83,39 @@ bool haveSensor = false;
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status;
+
+//--------------------------------  BORRADO  -------------------------------------
+
+// Borrado ALL
+void borradoALL(int modo)
+{
+   switch (modo)
+   {
+   case 0: {
+      Bloque bloque;
+      bloques[0] = bloque;
+      numSensoresBloque = 0;
+      numActuadoresBloque = 0;
+      break;
+   }
+   case 1: {
+      IF_pasado = false;
+      THEN_pasado = false;
+      ELSE_pasado = false;
+
+      numBloque = -1;
+      numCondicionalesBloque = 0;
+      numSensoresBloque = 0;
+      numActuadoresBloque = 0;
+
+      haveSensor = false;
+      puertoDigital = 3;
+      puertoAnalogico = 0;
+   }
+   default:
+      break;
+   }
+}
 
 // Recibe el primer valor del tagInfo, true si es sensor (0) o false si actuador (1)
 bool esSensor(int id)
