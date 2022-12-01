@@ -134,7 +134,6 @@ void loop()
             
             cambioModo(tagInfo[2]);
             resetFunc();
-
             break;
           
           // Ejecucion
@@ -263,7 +262,7 @@ void loop()
               borradoALL(1);
 
             } else if (tagInfo[2] == 2) {
-              //borradoBLOQUE(1);
+              borradoBLOQUE(1);
 
             } else {
               Serial.println("Borrado no permitido para este modo");
@@ -322,13 +321,10 @@ void loop()
               if ((!IF_pasado)) {
 
                 Serial.println("Se esperaba IF tag");
-                break;
                 
-              }
+              } else if (numSensoresBloque != numCondicionalesBloque) {
 
-              if (numSensoresBloque != numCondicionalesBloque) {
-
-                  Serial.println("Despues de un sensor se espera una concion: AND u OR");
+                Serial.println("Despues de un sensor se espera una concion: AND u OR");
               
               }
             
@@ -442,6 +438,9 @@ void loop()
               numSensoresBloque = 0;
               numActuadoresBloque = 0;
 
+              puertoAnalogico_bloque = 0;
+              puertoDigital_bloque = 0;
+
               Bloque nuevoBloque;
               bloques[numBloque] = nuevoBloque;
             
@@ -468,13 +467,14 @@ void loop()
               if (!IF_pasado) {
 
                 Serial.println("Se esperaba IF tag");
-                break;
+
+              } else if ( numSensoresBloque >= numCondicionalesBloque ) {
+
+                Serial.println("Una concicion solo puede ir seguida de un sensor.");
 
               }
-              Serial.println("Una concicion solo puede ir seguida de un sensor.");
 
             }
-            
             break;
           }
 
@@ -491,12 +491,14 @@ void loop()
               if (!IF_pasado) {
 
                 Serial.println("Se esperaba IF tag");
-                break;
+
+              } else {
+
+                Serial.println("Numero de sensores infucientes");
 
               }
-              Serial.println("Numero de sensores infucientes");
-            }
-            
+              
+            }           
             break;
           }
 
@@ -513,12 +515,14 @@ void loop()
               if (!IF_pasado) {
 
                 Serial.println("Se esperaba IF tag");
-                break;
               
+              } else {
+                
+                Serial.println("Introduce un Actuador para la evaluación a TRUE");
+
               }
 
-            }
-            
+            }           
             break;
           }
 

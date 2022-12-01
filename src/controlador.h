@@ -76,9 +76,9 @@ unsigned char data[] = {"6#2#2"}; //{"1#1#1#1#0#0"};
 char delim[] = "#";
 
 int puertoDigital = 3;
+int puertoDigital_bloque = 0;
 int puertoAnalogico = 0;
-
-bool haveSensor = false;
+int puertoAnalogico_bloque = 0;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
@@ -104,14 +104,52 @@ void borradoALL(int modo)
       ELSE_pasado = false;
 
       numBloque = -1;
-      numCondicionalesBloque = 0;
-      numSensoresBloque = 0;
-      numActuadoresBloque = 0;
 
-      haveSensor = false;
       puertoDigital = 3;
       puertoAnalogico = 0;
+      break;
    }
+   default:
+      break;
+   }
+}
+
+// Borrado del bloque/loop actual
+void borradoBLOQUE(int modo)
+{
+   switch (modo)
+   {
+   case 1:
+
+      if (numBloque==0) {
+         borradoALL(1);
+      
+      // Si borramos el segundo solo debemos resetear los puertos asignados en este
+      } else if (numBloque==1) {
+         IF_pasado = false;
+         numBloque = 0;
+         
+         THEN_pasado = true;           //Para permitir la ejecucion del primer bloque
+         numActuadoresBloque = 1;      //Para permitir iniciar el segundo bloque
+
+         // Caso en el que se hayan completado los puertos en el segundo bloque
+         if (puertoAnalogico == -1){   
+            puertoAnalogico=3;
+         }
+         if (puertoDigital == -1){
+            puertoDigital=6;
+         }
+         puertoAnalogico -= puertoAnalogico_bloque;
+         puertoDigital -= puertoDigital_bloque;
+
+      } else {
+         Serial.println("Nada que borrar");
+      }
+      break;
+   
+   case 2:
+      break;
+
    default:
       break;
    }
@@ -250,10 +288,9 @@ void ejecutarEvaluacion(bool evaluacion, int bloque) {
   for (int j = 0; j < bloques[bloque].numActuadores; j++)
   {
     Actuador actuador = bloques[bloque].actuadores[j];
-    // Serial.printlnf("Actuandor: %d , %s", actuador.id, actuador.evaluate ? "True" : "False");
+    
     if (evaluacion == actuador.evaluate)
     {
-      // Serial.println("ActivarActuador");
       actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
     }
     
@@ -261,12 +298,7 @@ void ejecutarEvaluacion(bool evaluacion, int bloque) {
     {
       if (!isActuadorDual(actuador.id, bloque))
       {
-        // Serial.println("ApagarActuador");
         apagarActuador(actuador.id, actuador.puerto);
-      }
-      else
-      {
-        // Serial.printlnf("%d:%d -> Actuador se usa dos veces", actuador.id, actuador.condicion);
       }
     }
     
@@ -493,9 +525,6 @@ void split(char cadena[], char delim[], int solution[])
       j++;
       ptr = strtok(NULL, delim);
    }
-
-   if (!solution[0])
-      haveSensor = true;
 }
 
 void print(int datos[])
@@ -619,31 +648,40 @@ int asignarPuerto(int type)
    case 0:
       Serial.print("Conectar al puerto A0\n");
       puertoAnalogico++;
+      puertoAnalogico_bloque++;
+      Serial.printlnf("%d,%d",puertoAnalogico,puertoAnalogico_bloque);
       return 0;
 
    case 1:
       Serial.print("Conectar al puerto A2\n");
       puertoAnalogico++;
+      puertoAnalogico_bloque++;
+      Serial.printlnf("%d,%d",puertoAnalogico,puertoAnalogico_bloque);
       return 2;
 
    case 2:
       Serial.print("Conectar al puerto A4\n");
       puertoAnalogico = -1;
+      puertoAnalogico_bloque++;
+      Serial.printlnf("%d,%d",puertoAnalogico,puertoAnalogico_bloque);
       return 4;
 
    case 3:
       Serial.print("Conectar al puerto D2\n");
       puertoDigital++;
+      puertoDigital_bloque++;
       return 2;
 
    case 4:
       Serial.print("Conectar al puerto D4\n");
       puertoDigital++;
+      puertoDigital_bloque++;
       return 4;
 
    case 5:
       Serial.print("Conectar al puerto D6\n");
       puertoDigital = -1;
+      puertoDigital_bloque++;
       return 6;
 
    default:
