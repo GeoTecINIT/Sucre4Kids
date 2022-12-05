@@ -61,28 +61,35 @@ disp Disp[8];
 // #define WIDTH 80
 
 // *** Variables de Entorno ***
-bool IF_pasado = false;
-bool THEN_pasado = false;
-bool ELSE_pasado = false;
+bool IF_pasado = false, THEN_pasado = false, ELSE_pasado = false;
 
 int numBloque = -1;
-int numCondicionalesBloque = 0;
-int numSensoresBloque = 0;
-int numActuadoresBloque = 0;
+int numCondicionalesBloque = 0, numSensoresBloque = 0, numActuadoresBloque = 0;
 
-// *** /Variables de Entorno ***
-
-unsigned char data[] = {"6#2#2"}; //{"1#1#1#1#0#0"};
+unsigned char data[] = {"6#0#2"};
 char delim[] = "#";
 
-int puertoDigital = 3;
-int puertoDigital_bloque = 0;
-int puertoAnalogico = 0;
-int puertoAnalogico_bloque = 0;
+int puertoDigital = 3, puertoDigital_bloque = 0;
+int puertoAnalogico = 0, puertoAnalogico_bloque = 0;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status;
+
+
+// ------- *** Variables MODO MUSICA *** --------------
+
+// NOTAS 4ta octava (Hz)
+int DO = 262, RE = 294, MI = 330, FA = 349, SOL = 392, LA = 440, SI = 494, DO_ = 523;
+
+int notas[200], duraciones[200];
+
+int posicion = 0;
+
+bool bucle = false;
+int tam_bucle = 0;
+
+
 
 //--------------------------------  BORRADO  -------------------------------------
 
@@ -154,6 +161,87 @@ void borradoBLOQUE(int modo)
       break;
    }
 }
+
+void borradoPOP(){
+   posicion--;
+
+   if (notas[posicion] == -2) { // Ultima es N iter
+      bucle = true;
+      tam_bucle = duraciones[posicion];
+
+   } else if (notas[posicion] == -1) { // Ultima es LOOP
+      bucle = false;
+
+   } else {
+      if (bucle) {
+         tam_bucle--;
+      }
+   }
+}
+
+//--------------------------------  REPRODUCCION  -------------------------------------
+
+int decodificarNOTA(int nota) {
+   switch (nota)
+   {
+   case 0:
+      return DO;
+   
+   case 1:
+      return RE;
+
+   case 2:
+      return MI;
+
+   case 3:
+      return FA;
+
+   case 4:
+      return SOL;
+
+   case 5:
+      return LA;
+
+   case 6:
+      return SI;
+
+   case 7:
+      return DO_;
+
+   default:
+      Serial.println("Nota inválida");
+      return -1;
+   }
+}
+
+int decodificarTIPO(int tipo) {
+   switch (tipo)
+   {
+   case 0:
+      return 250;
+      
+   case 1:
+      return 500;
+
+   case 2:
+      return 1000;
+
+   default:
+      Serial.println("Tipo inválido");
+      return -1;
+   }
+}
+
+void reproducirNOTA(int nota, int tipo) {
+
+   int frecuencia = decodificarNOTA(nota);
+   int duracion = decodificarTIPO(tipo);
+
+   tone(Zumbador_PIN, frecuencia);
+   delay(duracion);
+   noTone(Zumbador_PIN);
+}
+
 
 // Recibe el primer valor del tagInfo, true si es sensor (0) o false si actuador (1)
 bool esSensor(int id)
@@ -318,6 +406,11 @@ void cambioModo(int modo)
 
       Serial.println("Modo AVANZADO detectado");
       MODE = 1;
+
+   } else if (modo == 2) {
+
+      Serial.println("Modo MUSICA detectado");
+      MODE = 2;
 
    }
    EEPROM.put(0, MODE);

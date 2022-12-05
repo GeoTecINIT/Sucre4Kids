@@ -72,6 +72,10 @@ void setup()
 
     // MODO AVANZADO iniciado
 
+  } else {
+
+    // MODO MUSICA iniciado
+    pinMode(Zumbador_PIN, OUTPUT);
   }
   
 }
@@ -232,7 +236,7 @@ void loop()
 
 
   // ------------------------------- Modo AVANZADO --------------------------------------
-  } else {
+  } else if ( MODE == 1 ) {
     
     // Tipo de tarjeta
     switch (tagInfo[0])
@@ -568,6 +572,113 @@ void loop()
 
     }
   
+  // ------------------------------- Modo MUSICA --------------------------------------
+  } else {
+
+    switch (tagInfo[0])
+    {
+
+    // Tarjeta COMUN
+    case 6:
+      switch (tagInfo[1])
+      {
+        // Cambio de MODO
+        case 0:
+          
+          cambioModo(tagInfo[2]);
+          resetFunc();
+          break;
+        
+        // Ejecucion
+        case 1:
+          play = true;
+          break;
+
+        // Borrado (ALL)
+        case 2:
+          if ( tagInfo[2] == 0 ) {
+            //borradoPOP();
+          } else if ( tagInfo[2] == 1 ){
+            //borradoALL(2);
+          } else {
+            //borradoBLOQUE(2);
+          }
+          break;
+
+        default:
+          break;
+      }
+
+      break;
+    
+    // Tarjeta MODO MUSICA
+    case 2:
+
+      switch (tagInfo[1])
+      {
+
+      // NOTA
+      case 0:
+        reproducirNOTA(tagInfo[2], tagInfo[3]);
+        notas[posicion] = tagInfo[2];
+        duraciones[posicion] = tagInfo[3];
+
+        posicion++;
+
+        if (bucle) {
+          tam_bucle++;
+        }
+        break;
+      
+      // LOOP
+      case 1:
+        if (!bucle) {
+          notas[posicion] = -1;
+          duraciones[posicion] = -1;
+
+          posicion++;
+          bucle = true;
+
+        } else {
+          Serial.println("Para comenzar un loop hay que finalizar el anterior.");
+        }
+        break;
+
+      // N iteraciones
+      case 2:
+        if (bucle && tam_bucle>0) {
+          notas[posicion] = -2;
+          duraciones[posicion] = tagInfo[2];
+
+          posicion++;
+          tam_bucle = 0;
+          bucle = false;
+
+        } else {
+          Serial.println("Loop sin comenzar o sin contenido");
+        }
+        break;
+
+              
+      default:
+        break;
+      }
+      break;
+
+    default:
+      if ( tagInfo[0] != -1 ) {
+        Serial.println("Tarjeta inválida para este modo");
+      }
+      break;
+    }
+
+    tagInfo[0] = -1;
+
+    // Reproducir cancion
+    if (play) {
+      //reproducir();
+      play = false;
+    }
   }
 
 }
