@@ -66,7 +66,7 @@ bool IF_pasado = false, THEN_pasado = false, ELSE_pasado = false;
 int numBloque = -1;
 int numCondicionalesBloque = 0, numSensoresBloque = 0, numActuadoresBloque = 0;
 
-unsigned char data[] = {"6#0#2"};
+unsigned char data[] = {"2#2#8"};
 char delim[] = "#";
 
 int puertoDigital = 3, puertoDigital_bloque = 0;
@@ -116,6 +116,11 @@ void borradoALL(int modo)
       puertoAnalogico = 0;
       break;
    }
+   case 2: {
+      posicion = 0;
+      bucle = false;
+      tam_bucle = 0;
+   }
    default:
       break;
    }
@@ -126,6 +131,7 @@ void borradoBLOQUE(int modo)
 {
    switch (modo)
    {
+   // Modo avanzado (bloque)
    case 1:
 
       if (numBloque==0) {
@@ -154,7 +160,20 @@ void borradoBLOQUE(int modo)
       }
       break;
    
+   // Modo musica (loop)
    case 2:
+      if (bucle) {
+         posicion = posicion - (tam_bucle+1);
+
+      } else if ( notas[posicion-1] == -2 ) {
+         posicion = posicion - (duraciones[posicion-1]+2);
+      
+      } else {
+         Serial.println("Nada que borrar.");
+
+      }
+      bucle = false;
+      tam_bucle = 0;
       break;
 
    default:
@@ -242,6 +261,44 @@ void reproducirNOTA(int nota, int tipo) {
    noTone(Zumbador_PIN);
 }
 
+void reproducir() {
+   if (!bucle) {
+
+      int n;
+      int iteracion;
+      int inicio;
+
+      int i = 0;
+      while ( i < posicion) {
+
+         Serial.printlnf("%d - %d", notas[i], duraciones[i]);
+
+         if ( notas[i] == -1 ) {
+            n = duraciones[i];
+            iteracion = 0;            
+            inicio=i;
+
+         } else if ( notas[i] == -2 ) {
+            iteracion++;
+            if (iteracion < n) {
+               i = inicio;
+            }
+            
+         } else {
+            reproducirNOTA(notas[i],duraciones[i]);
+         }
+         
+         i++;
+
+      }
+
+   } else {
+      Serial.println("Finaliza el bucle antes de reproducir");
+   }
+   
+}
+
+// --------------------------------------------------------------------------------------
 
 // Recibe el primer valor del tagInfo, true si es sensor (0) o false si actuador (1)
 bool esSensor(int id)

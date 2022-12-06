@@ -597,11 +597,11 @@ void loop()
         // Borrado (ALL)
         case 2:
           if ( tagInfo[2] == 0 ) {
-            //borradoPOP();
+            borradoPOP();
           } else if ( tagInfo[2] == 1 ){
-            //borradoALL(2);
+            borradoALL(2);
           } else {
-            //borradoBLOQUE(2);
+            borradoBLOQUE(2);
           }
           break;
 
@@ -619,10 +619,11 @@ void loop()
 
       // NOTA
       case 0:
+        Serial.printlnf("Nota: %d, Tipo: %d", tagInfo[2], tagInfo[3]);
         reproducirNOTA(tagInfo[2], tagInfo[3]);
         notas[posicion] = tagInfo[2];
         duraciones[posicion] = tagInfo[3];
-
+        
         posicion++;
 
         if (bucle) {
@@ -633,9 +634,10 @@ void loop()
       // LOOP
       case 1:
         if (!bucle) {
+          Serial.println("Loop");
           notas[posicion] = -1;
-          duraciones[posicion] = -1;
-
+          duraciones[posicion] = 0;
+          
           posicion++;
           bucle = true;
 
@@ -647,12 +649,14 @@ void loop()
       // N iteraciones
       case 2:
         if (bucle && tam_bucle>0) {
+          Serial.println("END Loop");
           notas[posicion] = -2;
-          duraciones[posicion] = tagInfo[2];
-
+          duraciones[posicion] = tam_bucle; // Almacenamos el tamaño del bucle en la posicion donde acaba
+          duraciones[posicion - (tam_bucle+1)] = tagInfo[2]+2; // Almacenamos el num de iteraciones en la posicion de inicio del bucle
+          
           posicion++;
-          tam_bucle = 0;
           bucle = false;
+          tam_bucle = 0;
 
         } else {
           Serial.println("Loop sin comenzar o sin contenido");
@@ -676,7 +680,7 @@ void loop()
 
     // Reproducir cancion
     if (play) {
-      //reproducir();
+      reproducir();
       play = false;
     }
   }
