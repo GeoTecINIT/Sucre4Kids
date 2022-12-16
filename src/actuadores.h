@@ -9,6 +9,8 @@
 ChainableLED ledObject = ChainableLED(led_PIN1, led_PIN2, NUM_LEDS);
 bool init = false;
 
+int counter = 0;
+
 void ledApagar()
 {
    ledObject.setColorRGB(0, 0, 0, 0);
@@ -44,10 +46,48 @@ void ledBlanco()
 }
 void ledArcoiris()
 {
+   switch (counter)
+   {
+   case 0:
+      ledRojo();
+      counter++;
+      break;
+   
+   case 1:
+      ledNaranja();
+      counter++;
+      break;
+
+   case 2:
+      ledAmarillo();
+      counter++;
+      break;
+
+   case 3:
+      ledVerde();
+      counter++;
+      break;
+
+   case 4:
+      ledMorado();
+      counter++;
+      break;
+
+   case 5:
+      ledAzul();
+      counter = 0;
+      break;
+   
+   default:
+      break;
+   }
+
+   delay(150);
+   /**
     for (double i = 0; i < 1; i += 0.01)
     {
         ledObject.setColorHSB(0, i, 0.75, 0.75);
-    }
+    }*/
 
 }
 

@@ -565,7 +565,6 @@ void loop()
 
       // Bloque 2
       if ( numBloque==1 && THEN_pasado ) {
-
         bool evaluacion = makeEvaluate(bloques[1]);
         ejecutarEvaluacion(evaluacion, 1);
       }
