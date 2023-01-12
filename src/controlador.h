@@ -66,11 +66,28 @@ bool IF_pasado = false, THEN_pasado = false, ELSE_pasado = false;
 int numBloque = -1;
 int numCondicionalesBloque = 0, numSensoresBloque = 0, numActuadoresBloque = 0;
 
-unsigned char data[] = {"2#2#8"};
+unsigned char data[] = {"6#0#0"};
+
+// TODAS LAS TARJETAS MENOS: rotativo, de no rotativo hasta calortemp, rgb-naranja, off, de 4iter hasta 10iter (excel)
+String tarjetas[80] = { "0#2#0","0#3#0","0#4#1",
+                        "0#1#1#0","0#1#1#1","0#0#1#0","0#0#1#1","0#0#1#2","0#0#1#3","0#0#1#4","0#0#1#5",
+                        "6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2",
+                        "1#0#1#7#0","1#0#1#7#1","1#0#0#2#0","1#0#0#2#1","1#0#0#3#0","1#0#0#3#1","1#0#1#4#0","1#0#1#4#1",
+                        "1#1#1#1#0","1#1#1#1#1","1#1#1#0#0","1#1#1#0#1","1#1#1#0#2","1#1#1#0#3","1#1#1#0#4","1#1#1#0#6","1#1#1#0#7",
+                        "1#2","1#3#0","1#3#1","1#4","1#5",
+                        "2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1#1","2#0#1#2","2#0#2#0","2#0#2#1","2#0#2#2","2#0#3#0","2#0#3#1","2#0#3#2",
+                        "2#0#4#0","2#0#4#1","2#0#4#2","2#0#5#0","2#0#5#1","2#0#5#2","2#0#6#0","2#0#6#1","2#0#6#2","2#0#7#0","2#0#7#1","2#0#7#2",
+                        "2#1#0","2#2#0","2#2#1"};
+int tarjeta = 0;
 char delim[] = "#";
 
 int puertoDigital = 3, puertoDigital_bloque = 0;
 int puertoAnalogico = 0, puertoAnalogico_bloque = 0;
+
+unsigned long startTime;
+unsigned long currentTime;
+unsigned long limit = 4000;
+bool bitmap = false;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
@@ -89,6 +106,207 @@ int posicion = 0;
 bool bucle = false;
 int tam_bucle = 0;
 
+
+//--------------------------------  BITMAPS  -------------------------------------
+
+void showBitmap(int id1, int id2, String msg) {
+   display.clearDisplay();
+   display.setCursor(0, 0);
+   bitmap = true;
+   startTime = millis();
+
+   switch (id1)
+   {
+   // MODO (0): BASICO (0), AVANZADO (1), MUSICA (2)
+   case 0:
+
+      switch (id2)
+      {
+      case 0:
+         // display.drawBitmap(0,0, modoBasicoBitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "MODO BASICO");
+         break;
+      
+      case 1:
+         // display.drawBitmap(0,0, modoAvanzadoBitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "MODO AVANZADO");
+         break;
+
+      case 2:
+         // display.drawBitmap(0,0, modoMusicaBitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "MODO MUSICA");
+         break;
+
+      default:
+         snprintf(buf, sizeof(buf), "Bitmap not available.");
+         Serial.println("Bitmap not available.");
+         break;
+      }
+      
+      break;
+   
+   // CONEX. PUERTO (1): FIGURAS
+   case 1:
+
+      switch (id2)
+      {
+      case 0:
+         // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "CONECTAR A HEXAGONO");
+         break;
+      
+      case 1:
+         // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "CONECTAR A CUADRADO");
+         break;
+
+      case 2:
+         // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "CONECTAR A TRIANGULO");
+         break;
+
+      case 3:
+         // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "CONECTAR A ROMBO");
+         break;
+
+      case 4:
+         // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "CONECTAR A SEMICIRCULO");
+         break;
+
+      case 5:
+         // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "CONECTAR A CIRCULO");
+         break;
+
+      default:
+         snprintf(buf, sizeof(buf), "Bitmap not available.");
+         Serial.println("Bitmap not available.");
+         break;
+      }
+
+      break;
+
+   // TARJETA INVALIDA (2): MODO (0), BORRADO (1), ORDEN (2), PUERTO no disp. (3), PLAY no disp (4),...
+   case 2:
+
+      switch (id2)
+      {
+      case 0:
+         // display.drawBitmap(0,0, modoInvalido_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "Tarjeta invalida para este modo");
+         break;
+      
+      case 1:
+         // display.drawBitmap(0,0, borradoInvalido_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "Borrado invalido para este modo");
+         break;
+
+      case 2:
+         // display.drawBitmap(0,0, ordenInvalido_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "Orden de tarjetas invalido");
+         break;
+
+      case 3:
+         // display.drawBitmap(0,0, puertoInvalido_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "Puerto no disponible");
+         break;
+
+      case 4:
+         // display.drawBitmap(0,0, playInvalido_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "Play no disponible");
+         break;
+
+      case 5:
+         // display.drawBitmap(0,0, sensorInvalido_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "Sensor no disponible (en uso)");
+         break;
+
+      case 6:
+         // display.drawBitmap(0,0, actuadorInvalido_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "Actuador no disponible (en uso)");
+         break;
+
+      default:
+         snprintf(buf, sizeof(buf), "Bitmap not available.");
+         Serial.println("Bitmap not available.");
+         break;
+      }
+
+      break;
+
+   // TARJETA VÁLIDA (3)
+   case 3:
+
+      switch (id2)
+      {
+      case 0:
+         snprintf(buf, sizeof(buf), msg);
+         break;
+      
+      default:
+         snprintf(buf, sizeof(buf), "Bitmap not available.");
+         Serial.println("Bitmap not available.");
+         break;
+      }
+      break;
+
+   default:
+      snprintf(buf, sizeof(buf), "Bitmap not available.");
+      Serial.println("Bitmap not available.");
+      break;
+   }
+   
+   display.println(buf);
+   display.display();
+
+}
+
+void showPort(int id, int puerto ) {
+
+   if (tagInfo[2]==0) { // A0, A2, A4
+
+      switch (puerto)
+      {
+      case 0:
+         showBitmap(1,3,"");
+         break;
+      
+      case 2:
+         showBitmap(1,4,"");
+         break;
+
+      case 4:
+         showBitmap(1,5,"");
+         break;
+
+      default:
+         break;
+      }
+      
+   } else { // D2, D4, D6
+
+      switch (puerto)
+      {
+      case 2:
+         showBitmap(1,0,"");
+         break;
+      
+      case 4:
+         showBitmap(1,1,"");
+         break;
+
+      case 6:
+         showBitmap(1,2,"");
+         break;
+
+      default:
+         break;
+      }
+
+   }
+}
 
 
 //--------------------------------  BORRADO  -------------------------------------
@@ -136,7 +354,7 @@ void borradoBLOQUE(int modo)
 
       if (numBloque==0) {
          borradoALL(1);
-      
+         showBitmap(3,0,"Borrado de bloque realizado");
       // Si borramos el segundo solo debemos resetear los puertos asignados en este
       } else if (numBloque==1) {
          IF_pasado = false;
@@ -154,6 +372,7 @@ void borradoBLOQUE(int modo)
          }
          puertoAnalogico -= puertoAnalogico_bloque;
          puertoDigital -= puertoDigital_bloque;
+         showBitmap(3,0,"Borrado de bloque realizado");
 
       } else {
          Serial.println("Nada que borrar");
@@ -164,9 +383,11 @@ void borradoBLOQUE(int modo)
    case 2:
       if (bucle) {
          posicion = posicion - (tam_bucle+1);
+         showBitmap(3,0,"Borrado de loop realizado");
 
       } else if ( notas[posicion-1] == -2 ) {
          posicion = posicion - (duraciones[posicion-1]+2);
+         showBitmap(3,0,"Borrado de loop realizado");
       
       } else {
          Serial.println("Nada que borrar.");
@@ -251,6 +472,55 @@ int decodificarTIPO(int tipo) {
    }
 }
 
+String decodificarNOTA_msg(int nota) {
+   switch (nota)
+   {
+   case 0:
+      return "DO";
+   
+   case 1:
+      return "RE";
+
+   case 2:
+      return "MI";
+
+   case 3:
+      return "FA";
+
+   case 4:
+      return "SOL";
+
+   case 5:
+      return "LA";
+
+   case 6:
+      return "SI";
+
+   case 7:
+      return "DO'";
+
+   default:
+      return "Nota inválida";
+   }
+}
+
+String decodificarTIPO_msg(int tipo) {
+   switch (tipo)
+   {
+   case 0:
+      return "_C";
+      
+   case 1:
+      return "_N";
+
+   case 2:
+      return "_B";
+
+   default:
+      return "Tipo inválido";
+   }
+}
+
 void reproducirNOTA(int nota, int tipo) {
 
    int frecuencia = decodificarNOTA(nota);
@@ -294,6 +564,7 @@ void reproducir() {
 
    } else {
       Serial.println("Finaliza el bucle antes de reproducir");
+      showBitmap(2,4,"");
    }
    
 }
@@ -458,16 +729,18 @@ void cambioModo(int modo)
 
       Serial.println("Modo BASICO detectado");
       MODE = 0;
+      showBitmap(3,0,"Iniciando modo BASICO...");
 
    } else if (modo == 1) {
 
       Serial.println("Modo AVANZADO detectado");
       MODE = 1;
+      showBitmap(3,0,"Iniciando modo AVANZADO...");
 
    } else if (modo == 2) {
-
       Serial.println("Modo MUSICA detectado");
       MODE = 2;
+      showBitmap(3,0,"Iniciando modo MUSICA...");
 
    }
    EEPROM.put(0, MODE);
@@ -700,11 +973,18 @@ void print(int datos[])
 
 void writeDataToBLock(byte blockAddr)
 {
+   int condigo_length = tarjetas[tarjeta].length()+1;
+   char codigo[condigo_length];
+   tarjetas[tarjeta].toCharArray(codigo, condigo_length);
+
    status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(blockAddr, (byte *)data, 16);
    if (status != MFRC522::STATUS_OK)
    {
       Serial.print(F("MIFARE_Write() failed: "));
       Serial.println(mfrc522.GetStatusCodeName(status));
+   } else {
+      Serial.println(String(tarjeta));
+      tarjeta++;
    }
 }
 
@@ -764,24 +1044,6 @@ void getTagID(int infoTag[])
 }
 
 
-void showBitmap(int mode) {
-   display.clearDisplay();
-
-   switch (mode)
-   {
-   case 0:
-      display.drawBitmap(0,0, conexionBitmap, conexion_width, conexion_height, 1);
-      break;
-   
-   default:
-      break;
-   }
-   
-   display.display();
-   delay(1000);
-}
-
-
 int asignarPuerto(int type)
 {
    int option;
@@ -799,21 +1061,18 @@ int asignarPuerto(int type)
       Serial.print("Conectar al puerto A0\n");
       puertoAnalogico++;
       puertoAnalogico_bloque++;
-      Serial.printlnf("%d,%d",puertoAnalogico,puertoAnalogico_bloque);
       return 0;
 
    case 1:
       Serial.print("Conectar al puerto A2\n");
       puertoAnalogico++;
       puertoAnalogico_bloque++;
-      Serial.printlnf("%d,%d",puertoAnalogico,puertoAnalogico_bloque);
       return 2;
 
    case 2:
       Serial.print("Conectar al puerto A4\n");
       puertoAnalogico = -1;
       puertoAnalogico_bloque++;
-      Serial.printlnf("%d,%d",puertoAnalogico,puertoAnalogico_bloque);
       return 4;
 
    case 3:

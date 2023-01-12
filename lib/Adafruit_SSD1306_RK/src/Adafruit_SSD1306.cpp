@@ -467,7 +467,7 @@ boolean Adafruit_SSD1306::begin(uint8_t vcs, uint8_t addr, boolean reset,
     //drawBitmap((WIDTH - splash1_width) / 2, (HEIGHT - splash1_height) / 2,
     //splash1_data, splash1_width, splash1_height, 1);
 
-      drawBitmap(0,0, sucreLogoNew_data, sucreLogo_width, sucreLogo_height, 1);
+      drawBitmap(0,0, sucreLogo_data, sucreLogo_width, sucreLogo_height, 1);
   
   } else {
     drawBitmap((WIDTH - splash2_width) / 2, (HEIGHT - splash2_height) / 2,
