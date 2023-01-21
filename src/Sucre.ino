@@ -30,6 +30,8 @@ void setup()
 
   // Oled setup
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.display();
 
   // NFC Reader setup
   mfrc522.PCD_Init();
@@ -49,11 +51,6 @@ void setup()
 
   }
 
-  display.clearDisplay();
-  display.setTextSize(1.5);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-
   if ( MODE == 0 ) {
 
     // MODO BÁSICO iniciado
@@ -65,19 +62,23 @@ void setup()
     numBloque++;
     bloques[numBloque] = bloque;
 
-    showBitmap(0,0,"");
+    //showBitmap(0,0,"");
 
   } else if ( MODE == 1 ) {
 
     // MODO AVANZADO iniciado
-    showBitmap(0,1,"");
+    //showBitmap(0,1,"");
 
   } else {
 
     // MODO MUSICA iniciado
     pinMode(Zumbador_PIN, OUTPUT);
-    showBitmap(0,2,"");
+    //showBitmap(0,2,"");
   }
+
+  display.drawBitmap(0,0, sucreLogo_data, sucreLogo_width, sucreLogo_height, 1);
+  display.display();
+  startTime = millis();
   
 }
 
@@ -87,6 +88,39 @@ void(* resetFunc) (void) = 0;
 
 void loop()
 {
+  
+  if (iniciando) {
+    currentTime = millis();
+    while(currentTime-startTime<limit){
+      currentTime = millis();
+    }
+
+    display.clearDisplay();
+    display.setTextSize(1.5);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+
+    if( MODE == 0 )
+    {
+      showBitmap(0,0,"");
+
+    } else if (MODE == 1)
+    {
+      showBitmap(0,1,"");
+
+    } else
+    {
+      showBitmap(0,2,"");
+      bitmap=false;
+      while(currentTime-startTime<limit){
+        currentTime = millis();
+      }
+      showBitmap(1,3,"Zumbador:");
+      
+    }
+    iniciando = false;
+  }
+  
   // If tag detected
   if (mfrc522.PICC_IsNewCardPresent())
   {
@@ -318,9 +352,16 @@ void loop()
             if ( IF_pasado && (numSensoresBloque == numCondicionalesBloque) && isValidSensor(deviceID) ) {
 
               int puerto = isNewSensor(deviceID);
-              // Si el puerto es distinto de -1 el sensor ha sido usado previamente. Si es nuevo, obtenemos un puerto disponible.
-              if (puerto == -1)
+              
+              // -1 indica que se debe asignar un puerto
+              if (puerto == -1) {
                 puerto = asignarPuerto(tagInfo[2]);
+                showPort(tagInfo[2], puerto);
+
+              // !-1 indica ya asignado
+              } else {
+                showBitmap(1,6,"");
+              }
 
               if (puerto != -1) {
 
@@ -334,15 +375,8 @@ void loop()
                 bloques[numBloque].numSensores++;
                 numSensoresBloque++;
 
-                //displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newSensor.id, newSensor.condicion, newSensor.puerto);
-                
-                showPort(tagInfo[2], puerto);
-
               } else {
-
                 Serial.println("Puerto no disponible");
-                showBitmap(2,3,"");
-
               }
 
             } else {
@@ -380,8 +414,13 @@ void loop()
 
               int puerto = isNewActuador(deviceID);
 
-              if (puerto == -1)
+              if (puerto == -1) {
                 puerto = asignarPuerto(tagInfo[2]);
+                showPort(tagInfo[2], puerto);
+
+              } else {
+                showBitmap(1,6,"");
+              }
 
               // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
               if (puerto != -1) {
@@ -397,10 +436,6 @@ void loop()
                 numActuadoresBloque++;
                 bloques[numBloque].numActuadores++;
 
-                //displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newActuador.id, newActuador.condicion, newActuador.puerto);
-
-                showPort(tagInfo[2], puerto);
-
                 // Si es LED se inicia para mantenerlo apagado hasta el PLAY
                 if (deviceID == 0)
                 {
@@ -411,7 +446,6 @@ void loop()
                 
               } else {
                 Serial.println("Puerto no disponible");
-                showBitmap(2,3,"");
               }
 
             //  Actuador else ( condicion = False )
@@ -419,8 +453,13 @@ void loop()
 
               int puerto = isNewActuador(deviceID);
 
-              if (puerto == -1)
+              if (puerto == -1) {
                 puerto = asignarPuerto(tagInfo[2]);
+                showPort(tagInfo[2], puerto);
+              
+              } else {
+                showBitmap(1,6,"");
+              }
 
               // Si el puerto es distinto de -1 el actuador ha sido asignado correctamente.
               if (puerto != -1) {
@@ -436,10 +475,6 @@ void loop()
                 bloques[numBloque].numActuadores++;
                 numActuadoresBloque++;
 
-                //displayPrint(esSensor(tagInfo[1]), esAnalogico(tagInfo[2]), newActuador.id, newActuador.condicion, newActuador.puerto);
-
-                showPort(tagInfo[2], puerto);
-
                 // Si es LED se inicia para mantenerlo apagado hasta el PLAY
                 if (deviceID == 0)
                 {
@@ -450,7 +485,6 @@ void loop()
 
               } else {
                 Serial.println("Puerto no disponible");
-                showBitmap(2,3,"");
               }
 
             } else {

@@ -66,14 +66,23 @@ bool IF_pasado = false, THEN_pasado = false, ELSE_pasado = false;
 int numBloque = -1;
 int numCondicionalesBloque = 0, numSensoresBloque = 0, numActuadoresBloque = 0;
 
-unsigned char data[] = {"6#0#0"};
+unsigned char data[] = {"6#0#2"};
 
-// TODAS LAS TARJETAS MENOS: rotativo, de no rotativo hasta calortemp, rgb-naranja, off, de 4iter hasta 10iter (excel)
-String tarjetas[80] = { "0#2#0","0#3#0","0#4#1",
-                        "0#1#1#0","0#1#1#1","0#0#1#0","0#0#1#1","0#0#1#2","0#0#1#3","0#0#1#4","0#0#1#5",
-                        "6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2",
+String tarjetas_modoBasico[12] = { "0#2#0","0#3#0","0#4#1","0#1#1#0","0#1#1#1","0#0#1#0","0#0#1#1","0#0#1#2","0#0#1#3","0#0#1#4","0#0#1#5" };
+
+String tarjetas_modoAvanzado[28] = { "1#0#1#7#0","1#0#1#7#1","1#0#0#2#0","1#0#0#2#1","1#0#0#3#0","1#0#0#3#1","1#0#1#4#0","1#0#1#4#1","1#0#1#5#0","1#0#1#5#1","1#0#1#6#0","1#0#1#6#1","1#0#1#6#2",
+                        "1#1#1#1#0","1#1#1#1#1","1#1#1#0#0","1#1#1#0#1","1#1#1#0#2","1#1#1#0#3","1#1#1#0#4","1#1#1#0#5","1#1#1#0#6","1#1#1#0#7",
+                        "1#2","1#3#0","1#3#1","1#4","1#5" };
+
+String tarjetas_modoMusica[35] = {"2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1#1","2#0#1#2","2#0#2#0","2#0#2#1","2#0#2#2","2#0#3#0","2#0#3#1","2#0#3#2",
+                        "2#0#4#0","2#0#4#1","2#0#4#2","2#0#5#0","2#0#5#1","2#0#5#2","2#0#6#0","2#0#6#1","2#0#6#2","2#0#7#0","2#0#7#1","2#0#7#2",
+                        "2#1#0","2#2#0","2#2#1","2#2#2","2#2#3","2#2#4","2#2#5","2#2#6","2#2#7","2#2#8"};
+
+String tarjetas_comunes[8] = {"6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2"};
+
+String tarjetas[80] = { "6#1#0","6#2#0","6#2#1","6#2#2",
                         "1#0#1#7#0","1#0#1#7#1","1#0#0#2#0","1#0#0#2#1","1#0#0#3#0","1#0#0#3#1","1#0#1#4#0","1#0#1#4#1",
-                        "1#1#1#1#0","1#1#1#1#1","1#1#1#0#0","1#1#1#0#1","1#1#1#0#2","1#1#1#0#3","1#1#1#0#4","1#1#1#0#6","1#1#1#0#7",
+                        "1#1#1#1#0","1#1#1#1#1","1#1#1#0#0","1#1#1#0#1","1#1#1#0#2","1#1#1#0#3",
                         "1#2","1#3#0","1#3#1","1#4","1#5",
                         "2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1#1","2#0#1#2","2#0#2#0","2#0#2#1","2#0#2#2","2#0#3#0","2#0#3#1","2#0#3#2",
                         "2#0#4#0","2#0#4#1","2#0#4#2","2#0#5#0","2#0#5#1","2#0#5#2","2#0#6#0","2#0#6#1","2#0#6#2","2#0#7#0","2#0#7#1","2#0#7#2",
@@ -88,6 +97,7 @@ unsigned long startTime;
 unsigned long currentTime;
 unsigned long limit = 4000;
 bool bitmap = false;
+bool iniciando = true;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
@@ -152,32 +162,37 @@ void showBitmap(int id1, int id2, String msg) {
       {
       case 0:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "CONECTAR A HEXAGONO");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A HEXAGONO");
          break;
       
       case 1:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "CONECTAR A CUADRADO");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A CUADRADO");
          break;
 
       case 2:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "CONECTAR A TRIANGULO");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A TRIANGULO");
          break;
 
       case 3:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "CONECTAR A ROMBO");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A ROMBO");
          break;
 
       case 4:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "CONECTAR A SEMICIRCULO");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A SEMICIRCULO");
          break;
 
       case 5:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
          snprintf(buf, sizeof(buf), "CONECTAR A CIRCULO");
+         break;
+
+      case 6:
+         // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "YA CONECTADO");
          break;
 
       default:
@@ -282,6 +297,7 @@ void showPort(int id, int puerto ) {
          break;
 
       default:
+         showBitmap(2,3,""); //PUERTO NO DISPO.
          break;
       }
       
@@ -302,6 +318,7 @@ void showPort(int id, int puerto ) {
          break;
 
       default:
+         showBitmap(2,3,""); //PUERTO NO DISPO.
          break;
       }
 
