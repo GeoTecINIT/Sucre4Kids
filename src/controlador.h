@@ -66,7 +66,7 @@ bool IF_pasado = false, THEN_pasado = false, ELSE_pasado = false;
 int numBloque = -1;
 int numCondicionalesBloque = 0, numSensoresBloque = 0, numActuadoresBloque = 0;
 
-unsigned char data[] = {"6#0#2"};
+unsigned char data[] = {"6#1#0"};
 
 String tarjetas_modoBasico[12] = { "0#2#0","0#3#0","0#4#1","0#1#1#0","0#1#1#1","0#0#1#0","0#0#1#1","0#0#1#2","0#0#1#3","0#0#1#4","0#0#1#5" };
 
@@ -80,13 +80,7 @@ String tarjetas_modoMusica[35] = {"2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1
 
 String tarjetas_comunes[8] = {"6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2"};
 
-String tarjetas[80] = { "6#1#0","6#2#0","6#2#1","6#2#2",
-                        "1#0#1#7#0","1#0#1#7#1","1#0#0#2#0","1#0#0#2#1","1#0#0#3#0","1#0#0#3#1","1#0#1#4#0","1#0#1#4#1",
-                        "1#1#1#1#0","1#1#1#1#1","1#1#1#0#0","1#1#1#0#1","1#1#1#0#2","1#1#1#0#3",
-                        "1#2","1#3#0","1#3#1","1#4","1#5",
-                        "2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1#1","2#0#1#2","2#0#2#0","2#0#2#1","2#0#2#2","2#0#3#0","2#0#3#1","2#0#3#2",
-                        "2#0#4#0","2#0#4#1","2#0#4#2","2#0#5#0","2#0#5#1","2#0#5#2","2#0#6#0","2#0#6#1","2#0#6#2","2#0#7#0","2#0#7#1","2#0#7#2",
-                        "2#1#0","2#2#0","2#2#1"};
+String tarjetas[80] = { "2#0#1#0"};
 int tarjeta = 0;
 char delim[] = "#";
 
@@ -121,7 +115,7 @@ int tam_bucle = 0;
 
 void showBitmap(int id1, int id2, String msg) {
    display.clearDisplay();
-   display.setCursor(0, 0);
+   display.setCursor(0,0);
    bitmap = true;
    startTime = millis();
 
@@ -230,7 +224,7 @@ void showBitmap(int id1, int id2, String msg) {
 
       case 4:
          // display.drawBitmap(0,0, playInvalido_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "Play no disponible");
+         snprintf(buf, sizeof(buf), "Play no disponible"+msg);
          break;
 
       case 5:
@@ -273,7 +267,7 @@ void showBitmap(int id1, int id2, String msg) {
       break;
    }
    
-   display.println(buf);
+   display.print(buf);
    display.display();
 
 }
@@ -408,6 +402,7 @@ void borradoBLOQUE(int modo)
       
       } else {
          Serial.println("Nada que borrar.");
+         showBitmap(3,0,"Nada que borrar.");
 
       }
       bucle = false;
@@ -539,13 +534,13 @@ String decodificarTIPO_msg(int tipo) {
 }
 
 void reproducirNOTA(int nota, int tipo) {
-
    int frecuencia = decodificarNOTA(nota);
    int duracion = decodificarTIPO(tipo);
 
    tone(Zumbador_PIN, frecuencia);
    delay(duracion);
    noTone(Zumbador_PIN);
+   delay(30);
 }
 
 void reproducir() {
@@ -763,7 +758,7 @@ void cambioModo(int modo)
    EEPROM.put(0, MODE);
 }
 
-
+/**
 void displayPrint0(int n)
 {
    display.clearDisplay();
@@ -922,7 +917,7 @@ void displayPrint(bool isSensor, bool isAnalogico, int id, int condicion, int pu
    }
 
    display.setCursor(0, 0);
-}
+}*/
 
 void printArray(byte *buffer, byte bufferSize)
 {
@@ -990,9 +985,9 @@ void print(int datos[])
 
 void writeDataToBLock(byte blockAddr)
 {
-   int condigo_length = tarjetas[tarjeta].length()+1;
+   int condigo_length = tarjetas_modoBasico[tarjeta].length()+1;
    char codigo[condigo_length];
-   tarjetas[tarjeta].toCharArray(codigo, condigo_length);
+   tarjetas_modoBasico[tarjeta].toCharArray(codigo, condigo_length);
 
    status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(blockAddr, (byte *)data, 16);
    if (status != MFRC522::STATUS_OK)

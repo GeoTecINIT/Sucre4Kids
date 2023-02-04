@@ -99,7 +99,7 @@ void loop()
   
   if (iniciando) {
     currentTime = millis();
-    while(currentTime-startTime<4000){
+    while(currentTime-startTime<limit){
       currentTime = millis();
     }
 
@@ -115,11 +115,6 @@ void loop()
     } else if (MODE == 1)
     {
       showBitmap(0,1,"");
-      bitmap=false;
-      while(currentTime-startTime<limit){
-        currentTime = millis();
-      }
-      showBitmap(1,3,"Zumbador:");
 
     } else
     {
@@ -128,7 +123,7 @@ void loop()
       while(currentTime-startTime<limit){
         currentTime = millis();
       }
-      showBitmap(1,3,"Zumbador:");
+      showBitmap(1,2,"Zumbador:");
       
     }
     iniciando = false;
@@ -195,7 +190,7 @@ void loop()
           // Ejecucion
           case 1:
             play = true;
-            showBitmap(3,0,"Ejecutando...");
+            //showBitmap(3,0,"Ejecutando...");
             break;
 
           // Borrado (ALL)
@@ -298,6 +293,16 @@ void loop()
     {
       valor = leerSensor(bloques[0].sensores[0].id, 1, bloques[0].sensores[0].puerto);
       activarActuador(bloques[0].actuadores[0].id, estado, valor);
+
+      valor ? snprintf(buf, sizeof(buf), "TRUE") : snprintf(buf, sizeof(buf), "FALSE");
+      display.clearDisplay();
+      display.setCursor(0, 0);
+      display.print(buf);
+      display.display();
+
+    } else if (numActuadoresBloque==0 && play == true) {
+      showBitmap(2,4,"");
+      play=false;
     }
 
 
@@ -323,7 +328,7 @@ void loop()
           // Ejecucion secuencia
           case 1:
             play = true;
-            showBitmap(3,0,"Ejecutando...");
+            //showBitmap(3,0,"Ejecutando...");
             break;
 
 
@@ -364,7 +369,7 @@ void loop()
 
             if ( IF_pasado && (numSensoresBloque == numCondicionalesBloque) && isValidSensor(deviceID) ) {
 
-              int puerto = isNewSensor(deviceID);
+              puerto = isNewSensor(deviceID);
               
               // -1 indica que se debe asignar un puerto
               if (puerto == -1) {
@@ -425,7 +430,7 @@ void loop()
             //  Actuador then ( condicion = True )
             if ( THEN_pasado && !ELSE_pasado && isValidActuador(deviceState, deviceID) && numActuadoresBloque==0 ) {
 
-              int puerto = isNewActuador(deviceID);
+              puerto = isNewActuador(deviceID);
 
               if (puerto == -1) {
                 puerto = asignarPuerto(tagInfo[2]);
@@ -464,7 +469,7 @@ void loop()
             //  Actuador else ( condicion = False )
             } else if ( THEN_pasado && ELSE_pasado && isValidActuador(deviceState, deviceID) ) {
 
-              int puerto = isNewActuador(deviceID);
+              puerto = isNewActuador(deviceID);
 
               if (puerto == -1) {
                 puerto = asignarPuerto(tagInfo[2]);
@@ -668,21 +673,37 @@ void loop()
     }
 
     tagInfo[0] = -1;
-    display.display();
 
     if (play) {
       // Bloque 1
-      if ( (numBloque==0 && THEN_pasado) || numBloque==1 ) {
+      if ( (numBloque==0 && bloques[0].numActuadores>0) || numBloque==1 ) {
+        valor = makeEvaluate(bloques[0]);
+        ejecutarEvaluacion(valor, 0);
 
-        bool evaluacion = makeEvaluate(bloques[0]);
-        ejecutarEvaluacion(evaluacion, 0);
+        valor ? snprintf(buf, sizeof(buf), "BLOQUE 1: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 1: FALSE");
+        display.println(buf);
+
+      } else {
+        showBitmap(2,4,"  acaba bloque 1");
+        play = false;
       }
 
       // Bloque 2
-      if ( numBloque==1 && THEN_pasado ) {
-        bool evaluacion = makeEvaluate(bloques[1]);
-        ejecutarEvaluacion(evaluacion, 1);
+      if ( numBloque==1 && bloques[1].numActuadores>0 ) {
+        valor = makeEvaluate(bloques[1]);
+        ejecutarEvaluacion(valor, 1);
+
+        valor ? snprintf(buf, sizeof(buf), "BLOQUE 2: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 2: FALSE");
+        display.print(buf);
+
+      } else if (numBloque==1){
+        snprintf(buf, sizeof(buf), "BLOQUE 2:   no finalizado");
+        display.print(buf);
       }
+
+      display.display();
+      display.clearDisplay();
+      display.setCursor(0,0);
 
     }
   
@@ -812,7 +833,6 @@ void loop()
       play = false;
     }
   }
-
 }
 
   
