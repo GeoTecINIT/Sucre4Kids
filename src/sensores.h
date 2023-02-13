@@ -205,9 +205,9 @@ bool siRotativo(int puerto)
         break;
     }
 
-    voltage = (float)sensor_value * 5 / 1023;
+    voltage = (float)sensor_value * 3.3 / 1023;
     float degrees = (voltage * 300) / 5;
-    if (degrees >= 680)
+    if (degrees <= 360)
         return true;
     return false;
 }
@@ -229,10 +229,10 @@ bool noRotativo(int puerto)
         break;
     }
 
-    voltage = (float)sensor_value * 5 / 1023;
+    voltage = (float)sensor_value * 3.3 / 1023;
     float degrees = (voltage * 300) / 5;
 
-    if (degrees <= 680)
+    if (degrees >= 360)
         return true;
     return false;
 }
@@ -311,7 +311,7 @@ bool leerSensor(int id, int condicion, int puerto)
         return (condicion == 0 ? noBoton(puerto) : siBoton(puerto));
 
     case 5:
-        return (condicion == 0) ? noRotativo(puerto) : siRotativo(puerto);
+        return (condicion == 0 ? noRotativo(puerto) : siRotativo(puerto));
 
     case 6:
         switch (condicion)
@@ -324,7 +324,7 @@ bool leerSensor(int id, int condicion, int puerto)
             return tempCalor(puerto);
         }
     case 7:
-        return (condicion == 0) ? noDistancia(puerto) : siDistancia(puerto);
+        return (condicion == 0 ? noDistancia(puerto) : siDistancia(puerto));
 
     default:
         Serial.println("InvalidSensorError");

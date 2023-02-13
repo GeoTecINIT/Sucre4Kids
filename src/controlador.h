@@ -80,7 +80,7 @@ String tarjetas_modoMusica[35] = {"2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1
 
 String tarjetas_comunes[8] = {"6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2"};
 
-String tarjetas[80] = { "2#0#1#0"};
+String tarjetas[80] = {"6#2#1","6#2#2"};
 int tarjeta = 0;
 char delim[] = "#";
 
@@ -110,7 +110,7 @@ int posicion = 0;
 bool bucle = false;
 int tam_bucle = 0;
 
-
+String secuencia[30];
 //--------------------------------  BITMAPS  -------------------------------------
 
 void showBitmap(int id1, int id2, String msg) {
@@ -266,7 +266,7 @@ void showBitmap(int id1, int id2, String msg) {
       Serial.println("Bitmap not available.");
       break;
    }
-   
+   Serial.println(buf);
    display.print(buf);
    display.display();
 
@@ -509,7 +509,7 @@ String decodificarNOTA_msg(int nota) {
       return "SI";
 
    case 7:
-      return "DO'";
+      return "do";
 
    default:
       return "Nota inválida";
@@ -985,11 +985,11 @@ void print(int datos[])
 
 void writeDataToBLock(byte blockAddr)
 {
-   int condigo_length = tarjetas_modoBasico[tarjeta].length()+1;
+   int condigo_length = tarjetas[tarjeta].length()+1;
    char codigo[condigo_length];
-   tarjetas_modoBasico[tarjeta].toCharArray(codigo, condigo_length);
+   tarjetas[tarjeta].toCharArray(codigo, condigo_length);
 
-   status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(blockAddr, (byte *)data, 16);
+   status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(blockAddr, (byte *)codigo, 16);
    if (status != MFRC522::STATUS_OK)
    {
       Serial.print(F("MIFARE_Write() failed: "));

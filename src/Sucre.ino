@@ -119,6 +119,7 @@ void loop()
       
     }
     iniciando = false;
+    display.setCursor(0, 0);
   }
   
   // If tag detected
@@ -154,8 +155,20 @@ void loop()
     // Si han pasado 4 segundos quitamos el bitmap/mensaje
     if ( currentTime-startTime >= limit ) {
       bitmap=false;
+      display.setCursor(0, 0);
       display.clearDisplay();
       display.display();
+
+      for (int i = 0; i < posicion; i++)
+      {
+        if (i<23) {
+          snprintf(buf, sizeof(buf), secuencia[i]);
+        } else if (i==23){
+          snprintf(buf, sizeof(buf), "...");
+        }
+        display.print(buf);
+        display.display();
+      }
     }
   }
 
@@ -208,7 +221,6 @@ void loop()
 
         id = tagInfo[1];
         tipo = tagInfo[2];
-        estado = tagInfo[3];
 
         // Si la tag corresponde a un sensor:
         if (id >= 2) {
@@ -223,8 +235,6 @@ void loop()
           bloques[0].sensores[0] = sensor;
           bloques[0].numSensores++;
           numSensoresBloque++;
-
-          blinkAndSleep(true);
           
           if (sensor.puerto == 0) {
             showBitmap(1,3,""); //A0
@@ -241,6 +251,7 @@ void loop()
           if (tagInfo[1] == 0 || tagInfo[1] == 1) {
             Serial.println("Actuador detectado");
 
+            estado = tagInfo[3];
             Actuador actuador;
             actuador.id = id;
 
@@ -250,8 +261,6 @@ void loop()
             bloques[0].actuadores[0] = actuador;
             bloques[0].numActuadores++;
             numActuadoresBloque++;
-
-            blinkAndSleep(true);
 
             if (actuador.puerto == 0) {
               showBitmap(1,4,""); //A2
@@ -272,7 +281,6 @@ void loop()
       default:
         if ( tagInfo[0] != -1 ) {
           showBitmap(2,0,"");
-          Serial.println("Tarjeta inválida para este modo");
         }
         break;
     }
@@ -349,7 +357,7 @@ void loop()
       // Tarjeta MODO AVANZADO
       case 1: {
 
-        int deviceID = tagInfo[3];
+        id = tagInfo[3];
         Serial.print("Ejecutando tag --> ");
 
         switch (tagInfo[1])
@@ -359,9 +367,9 @@ void loop()
           case 0: {
             Serial.println("Sensor detectado");
 
-            if ( IF_pasado && (numSensoresBloque == numCondicionalesBloque) && isValidSensor(deviceID) ) {
+            if ( IF_pasado && (numSensoresBloque == numCondicionalesBloque) && isValidSensor(id) ) {
 
-              puerto = isNewSensor(deviceID);
+              puerto = isNewSensor(id);
               
               // -1 indica que se debe asignar un puerto
               if (puerto == -1) {
@@ -376,7 +384,7 @@ void loop()
               if (puerto != -1) {
 
                 Sensor newSensor;
-                newSensor.id = deviceID;
+                newSensor.id = id;
                 newSensor.condicion = tagInfo[4];
                 newSensor.bloque = numBloque;
                 newSensor.puerto = puerto;
@@ -417,12 +425,12 @@ void loop()
           // Actuador - then/else
           case 1: {
             Serial.println("Actuador detectado");
-            int deviceState = tagInfo[4];
+            estado = tagInfo[4];
 
             //  Actuador then ( condicion = True )
-            if ( THEN_pasado && !ELSE_pasado && isValidActuador(deviceState, deviceID) && numActuadoresBloque==0 ) {
+            if ( THEN_pasado && !ELSE_pasado && isValidActuador(estado, id) && numActuadoresBloque==0 ) {
 
-              puerto = isNewActuador(deviceID);
+              puerto = isNewActuador(id);
 
               if (puerto == -1) {
                 puerto = asignarPuerto(tagInfo[2]);
@@ -436,8 +444,8 @@ void loop()
               if (puerto != -1) {
 
                 Actuador newActuador;
-                newActuador.id = deviceID;
-                newActuador.condicion = deviceState;
+                newActuador.id = id;
+                newActuador.condicion = estado;
                 newActuador.bloque = numBloque;
                 newActuador.puerto = puerto;
                 newActuador.evaluate = true;
@@ -447,7 +455,7 @@ void loop()
                 bloques[numBloque].numActuadores++;
 
                 // Si es LED se inicia para mantenerlo apagado hasta el PLAY
-                if (deviceID == 0)
+                if (id == 0)
                 {
                   ledObject = ChainableLED(puerto, puerto+1, 5);
                   ledObject.init();
@@ -459,9 +467,9 @@ void loop()
               }
 
             //  Actuador else ( condicion = False )
-            } else if ( THEN_pasado && ELSE_pasado && isValidActuador(deviceState, deviceID) ) {
+            } else if ( THEN_pasado && ELSE_pasado && isValidActuador(estado, id) ) {
 
-              puerto = isNewActuador(deviceID);
+              puerto = isNewActuador(id);
 
               if (puerto == -1) {
                 puerto = asignarPuerto(tagInfo[2]);
@@ -475,8 +483,8 @@ void loop()
               if (puerto != -1) {
 
                 Actuador newActuador;
-                newActuador.id = deviceID;
-                newActuador.condicion = tagInfo[4];
+                newActuador.id = id;
+                newActuador.condicion = estado;
                 newActuador.bloque = numBloque;
                 newActuador.puerto = puerto;
                 newActuador.evaluate = false;
@@ -486,7 +494,7 @@ void loop()
                 numActuadoresBloque++;
 
                 // Si es LED se inicia para mantenerlo apagado hasta el PLAY
-                if (deviceID == 0)
+                if (id == 0)
                 {
                   ledObject = ChainableLED(puerto, puerto+1, 5);
                   ledObject.init();
@@ -509,7 +517,7 @@ void loop()
               
               } else {
 
-                if (!isValidActuador(deviceState, deviceID)) {
+                if (!isValidActuador(estado, id)) {
                   Serial.println("Invalid Actuador");
                   showBitmap(2,6,"");
 
@@ -752,7 +760,18 @@ void loop()
 
       // NOTA
       case 0:
-        showBitmap(3,0,decodificarNOTA_msg(tagInfo[2])+decodificarTIPO_msg(tagInfo[3]));
+        //showBitmap(3,0,decodificarNOTA_msg(tagInfo[2])+decodificarTIPO_msg(tagInfo[3]));
+        secuencia[posicion] = decodificarNOTA_msg(tagInfo[2])+decodificarTIPO_msg(tagInfo[3])+" - ";
+        if (posicion<23) {
+          snprintf(buf, sizeof(buf), secuencia[posicion]);
+          display.print(buf);
+          display.display();
+        } else if (posicion==23){
+          snprintf(buf, sizeof(buf), "...");
+          display.print(buf);
+          display.display();
+        }
+
         Serial.printlnf(decodificarNOTA_msg(tagInfo[2])+decodificarTIPO_msg(tagInfo[3]));
 
         reproducirNOTA(tagInfo[2], tagInfo[3]);
@@ -764,13 +783,25 @@ void loop()
         if (bucle) {
           tam_bucle++;
         }
+
         break;
       
       // LOOP
       case 1:
         if (!bucle) {
           Serial.println("Loop");
-          showBitmap(3,0,"Loop");
+          //showBitmap(3,0,"Loop");
+          secuencia[posicion] = "Loop - ";
+          if (posicion<23) {
+            snprintf(buf, sizeof(buf), secuencia[posicion]);
+            display.print(buf);
+            display.display();
+          } else if (posicion==23){
+            snprintf(buf, sizeof(buf), "...");
+            display.print(buf);
+            display.display();
+          }
+
           notas[posicion] = -1;
           duraciones[posicion] = 0;
           
@@ -787,7 +818,17 @@ void loop()
       case 2:
         if (bucle && tam_bucle>0) {
           Serial.println("END Loop");
-          showBitmap(3,0,String(tagInfo[2]+2)+" iteraciones");
+          //showBitmap(3,0,String(tagInfo[2]+2)+" iteraciones");
+          secuencia[posicion] = String(tagInfo[2]+2)+"rep - ";
+          if (posicion<23) {
+            snprintf(buf, sizeof(buf), secuencia[posicion]);
+            display.print(buf);
+            display.display();
+          } else if (posicion==23){
+            snprintf(buf, sizeof(buf), "...");
+            display.print(buf);
+            display.display();
+          }
 
           notas[posicion] = -2;
           duraciones[posicion] = tam_bucle; // Almacenamos el tamaño del bucle en la posicion donde acaba
@@ -807,6 +848,16 @@ void loop()
       default:
         break;
       }
+      /**
+      display.setCursor(0,0);
+      for (int i = 0; i < posicion; i++)
+      {
+        snprintf(buf, sizeof(buf), secuencia[i]);
+        display.print(buf);
+        display.display();
+      }
+      display.clearDisplay();
+      */
       break;
 
     default:
@@ -818,7 +869,7 @@ void loop()
     }
 
     tagInfo[0] = -1;
-
+    
     // Reproducir cancion
     if (play) {
       reproducir();
