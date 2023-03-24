@@ -1,16 +1,23 @@
 // This #include statement was automatically added by the Particle IDE.
 #include <Grove_ChainableLED.h>
 
-bool init = true;
+#define Zumbador_PIN D6
+#define led_PIN1 4
+#define led_PIN2 5
+#define NUM_LEDS 5
 
-ChainableLED ledObject = ChainableLED(0, 0, 5);
+ChainableLED ledObject = ChainableLED(led_PIN1, led_PIN2, NUM_LEDS);
+bool init = false;
+
+int counter = 0;
 
 void ledApagar()
 {
-    ledObject.setColorRGB(0, 0, 0, 0);
+   ledObject.setColorRGB(0, 0, 0, 0);
 }
 void ledRojo()
 {
+    // Serial.println("LedRojo");
     ledObject.setColorRGB(0, 255, 0, 0);
 }
 void ledVerde()
@@ -37,77 +44,270 @@ void ledBlanco()
 {
     ledObject.setColorRGB(0, 255, 255, 255);
 }
+void ledArcoiris()
+{
+   switch (counter)
+   {
+   case 0:
+      ledRojo();
+      counter++;
+      break;
+   
+   case 1:
+      ledNaranja();
+      counter++;
+      break;
+
+   case 2:
+      ledAmarillo();
+      counter++;
+      break;
+
+   case 3:
+      ledVerde();
+      counter++;
+      break;
+
+   case 4:
+      ledMorado();
+      counter++;
+      break;
+
+   case 5:
+      ledAzul();
+      counter = 0;
+      break;
+   
+   default:
+      break;
+   }
+
+   delay(150);
+   /**
+    for (double i = 0; i < 1; i += 0.01)
+    {
+        ledObject.setColorHSB(0, i, 0.75, 0.75);
+    }*/
+
+}
+
+//-------------------------------------------------------------------------------
+//--------------------------------- M O D O   0 ---------------------------------
+//-------------------------------------------------------------------------------
+
+void 
+pitidoON0()
+{
+   //Serial.println("Zumbador ON");
+   digitalWrite(Zumbador_PIN, 1);
+   digitalWrite(Zumbador_PIN, HIGH);
+   digitalWrite(D7, HIGH);
+   digitalWrite(D7, 1);
+}
+
+void pitidoOFF0()
+{
+   //Serial.println("Zumbador OFF");
+   digitalWrite(Zumbador_PIN, 0);
+   digitalWrite(Zumbador_PIN, LOW);
+   digitalWrite(D7, LOW);
+   digitalWrite(D7, 0);
+}
+
+void pitidoBlink0()
+{
+   pitidoON0();
+   delay(100);
+   pitidoOFF0();
+   delay(100);
+}
 
 void ledAzulNaranja(boolean estado)
 {
-    if (estado)
-        ledAzul();
-    else
-        ledNaranja();
+   if (estado)
+   {
+      ledAzul();
+   }
+   else
+   {
+      ledNaranja();
+   }
 }
-
 void ledMoradoAmarillo(boolean estado)
 {
-
-    if (estado)
-        ledMorado();
-    else
-        ledAmarillo();
+   if (estado)
+   {
+      ledAmarillo();
+   }
+   else
+   {
+      ledMorado();
+   }
 }
-
 void ledVerdeRojo(boolean estado)
 {
-    if (estado)
-        ledRojo();
-    else
-        ledVerde();
+   if (estado)
+   {
+      ledVerde();
+   }
+   else
+   {
+      ledRojo();
+   }
 }
-
-void ledBlink(boolean estado)
+void ledBlink0(boolean estado)
 {
-    if (estado)
-    {
-        ledBlanco();
-        delay(400);
-        ledApagar();
-        delay(200);
-    }
-    else
-        ledApagar();
+   if (estado)
+   {
+      ledBlanco();
+      delay(400);
+      ledApagar();
+      delay(200);
+   }
+   else
+   {
+      ledApagar();
+   }
 }
 
 void ledOnOff(boolean estado)
 {
-    if (estado)
-        ledBlanco();
-    else
-        ledApagar();
+   if (estado)
+   {
+      ledBlanco();
+   }
+   else
+   {
+      ledApagar();
+   }
 }
 
-void ledArcoiris(boolean estado)
+void ledArcoiris0(boolean estado)
 {
-
-    if (estado)
-    {
-        ledRojo();
-        delay(200);
-        ledNaranja();
-        delay(200);
-        ledAmarillo();
-        delay(200);
-        ledVerde();
-        delay(200);
-        ledMorado();
-        delay(200);
-        ledAzul();
-        delay(200);
-    }
-    else
-        ledApagar();
+   if (estado)
+   {
+      ledArcoiris();
+   }
+   else
+   {
+      ledApagar();
+   }
 }
 
-// Acciones del zumbador
-void pitidoON(int puerto)
+void blinkAndSleep(boolean estado)
+{
+   if (estado)
+   {
+      pitidoBlink0();
+   }
+   else
+   {
+      pitidoOFF0();
+   }
+}
+void zumbador(boolean estado)
+{
+   if (estado)
+   {
+      pitidoON0();
+   }
+   else
+   {
+      pitidoOFF0();
+   }
+}
+
+void activarActuador(int id, int opcion, boolean valor)
+{
+   switch (id)
+   {
+      pitidoOFF0();
+   // Actuador led
+   case 0:
+
+      switch (opcion) {
+         case 0:
+            ledVerdeRojo(valor);
+            break;
+
+         case 1:
+            ledMoradoAmarillo(valor);
+            break;
+
+         case 2:
+            ledAzulNaranja(valor);
+            break;
+
+         case 3:
+            ledBlink0(valor);
+            break;
+
+         case 4:
+            ledArcoiris0(valor);
+            break;
+
+         case 5:
+            ledOnOff(valor);
+            break;
+
+         default:
+            Serial.println("Valor no valido");
+            break;
+      }
+      break;
+
+   //Zumbador
+   case 1:
+      ledApagar();
+      switch (opcion) {
+         case 0:
+            zumbador(valor);
+            break;
+         case 1:
+            blinkAndSleep(valor);
+            break;
+         default:
+            Serial.println("Valor no valido");
+            break;
+      }
+      break;
+
+   //Ventilador
+   case 13:
+      pitidoOFF0();
+      ledApagar();
+      pinMode(A2, OUTPUT);
+      if (valor) {
+         analogWrite(A2, 50, 40);
+         //analogWrite(A3, 50, 15);
+      }
+      else{
+         analogWrite(A2, 0, 0);
+         //analogWrite(A3, 0, 0);
+      }
+      break;
+
+      
+   default:
+      Serial.println("Valor no valido");
+      break;
+   }
+}
+
+//-------------------------------------------------------------------------------
+//--------------------------------- M O D O   1 ---------------------------------
+//-------------------------------------------------------------------------------
+
+void ledBlink()
+{
+    ledBlanco();
+    delay(400);
+    ledApagar();
+    delay(200);
+}
+
+// Acciones del zumbador MODO 1
+void pitidoON1(int puerto)
 {
     digitalWrite(puerto, 1);
     digitalWrite(puerto, HIGH);
@@ -115,7 +315,7 @@ void pitidoON(int puerto)
     digitalWrite(puerto + 1, 1);
 }
 
-void pitidoOFF(int puerto)
+void pitidoOFF1(int puerto)
 {
     digitalWrite(puerto, 0);
     digitalWrite(puerto, LOW);
@@ -123,65 +323,48 @@ void pitidoOFF(int puerto)
     digitalWrite(puerto + 1, 0);
 }
 
-void pitidoBlink(int puerto)
+void pitidoBlink1(int puerto)
 {
-    pitidoON(puerto);
+    pitidoON1(puerto);
     delay(100);
-    pitidoOFF(puerto);
+    pitidoOFF1(puerto);
     delay(100);
-}
-
-void blinkAndSleep(boolean estado, int puerto)
-{
-    if (estado)
-        pitidoBlink(puerto);
-    else
-        pitidoOFF(puerto);
-}
-
-void zumbador(boolean estado, int puerto)
-{
-    if (estado)
-        pitidoON(puerto);
-    else
-        pitidoOFF(puerto);
 }
 
 // Recive el actuador que es, el tipo de actuador, el puerto al que esta conectado, el valor de los sensores para actuar en consecuencia y los puertos de dichos sensores.
-void activarLED(int opcion, int puerto, bool valor)
+void activarLED(int opcion, int puerto)
 {
-
-    if (init)
-    {
-        ledObject = ChainableLED(puerto, puerto + 1, 5);
-        ledObject.init();
-        init = false;
-    }
 
     switch (opcion)
     {
     case 0:
-        ledVerdeRojo(valor);
+        ledVerde();
         break;
 
     case 1:
-        ledMoradoAmarillo(valor);
+        ledRojo();
         break;
 
     case 2:
-        ledAzulNaranja(valor);
+        ledAmarillo();
         break;
 
     case 3:
-        ledBlink(valor);
+        ledMorado();
         break;
 
     case 4:
-        ledArcoiris(valor);
+        ledAzul();
         break;
 
     case 5:
-        ledOnOff(valor);
+        ledNaranja();
+        break;
+    case 6:
+        ledBlink();
+        break;
+    case 7:
+        ledArcoiris();
         break;
 
     default:
@@ -190,20 +373,66 @@ void activarLED(int opcion, int puerto, bool valor)
     }
 }
 
-void activarZumbador(int opcion, int puerto, bool valor)
+void activarZumbador(int opcion, int puerto)
 {
     pinMode(puerto, OUTPUT);
 
     switch (opcion)
     {
     case 0:
-        zumbador(valor, puerto);
+        pitidoON1(puerto);
         break;
     case 1:
-        blinkAndSleep(valor, puerto);
+        pitidoBlink1(puerto);
         break;
     default:
         Serial.println("Valor no valido");
         break;
     }
 }
+
+void activarVentilador(int opcion, int puerto)
+{
+   Serial.println(A0);
+   Serial.println(A1);
+   pitidoOFF0();
+   ledApagar();
+   pinMode(A0, OUTPUT);
+    switch (opcion)
+    {
+    case 0:
+      Serial.println("C0");
+      analogWrite(puerto, 50, 50);
+      break;
+    case 1:
+      Serial.println("C1");
+      analogWrite(A0, 50, 50);
+      //analogWrite(A1, 50, 50);
+      break;
+   default:
+      Serial.println("Valor no valido");
+      break;
+    }
+
+
+}
+
+void apagarActuador(int id, int puerto)
+{
+    id == 0 ? ledApagar() : digitalWrite(puerto, 0);
+    if (id == 13){
+      analogWrite(A0, 0, 0);
+    }
+
+}
+
+void actuadorHandler(int id, int opcion, int puerto)
+{
+    if (id < 2)
+        id == 0 ? activarLED(opcion, puerto) : activarZumbador(opcion, puerto);
+   if (id == 13)
+      activarVentilador(opcion, puerto);
+}
+
+// -------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
