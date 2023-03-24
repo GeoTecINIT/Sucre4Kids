@@ -4,30 +4,112 @@
 // Distance
 #include "Grove-Ultrasonic-Ranger.h"
 
-boolean noDistancia(int puerto)
+//---------------------------------------------------------------------------------------------------
+//------------------------------------- M O D O   0 -------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
+#define sensorLuz_PIN A2
+#define boton_PIN D2
+#define sensorSonido_PIN A4
+#define rotoryAngle_PIN A0
+
+boolean leerSensorLuz()
+{
+   if (analogRead(sensorLuz_PIN) >= 2500)
+      return true;
+   return false;
+}
+
+boolean leerBoton()
+{
+   if (digitalRead(boton_PIN) == HIGH)
+      return true;
+   return false;
+}
+
+boolean leerAngulo()
+{
+   float voltage;
+   int sensor_value = analogRead(rotoryAngle_PIN);
+   voltage = (float)sensor_value * 5 / 1023;
+   float degrees = (voltage * 300) / 5;
+
+   if (degrees >= 680)
+   {
+      //Serial.println(degrees);
+      return true;
+   }
+
+   return false;
+}
+
+boolean leerSensorSonido()
+{
+   // Serial.printlnf("analogico: %d", analogRead(A4));
+   if (analogRead(sensorSonido_PIN) >= 700)
+      return true;
+   return false;
+}
+
+boolean leerSensor0(int sensor)
+{
+   switch (sensor)
+   {
+   case 2:
+      return leerSensorLuz();
+      break;
+
+   case 3:
+      return leerSensorSonido();
+      break;
+
+   case 4:
+      return leerBoton();
+      break;
+
+   case 5:
+      return leerAngulo();
+      break;
+
+   default:
+      Serial.println("No es valido");
+      return false;
+      break;
+   }
+}
+
+
+
+//---------------------------------------------------------------------------------------------------
+//------------------------------------- M O D O   1 -------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
+bool noDistancia(int puerto)
 {
     Ultrasonic ultrasonic(puerto);
     long range = ultrasonic.MeasureInCentimeters();
-    Serial.printlnf("Distancia: %d", range);
+    // Serial.printlnf("Distancia: %d", range);
     if (range >= 0 && range < 10)
         return true;
     else
         return false;
 }
-boolean siDistancia(int puerto)
+
+bool siDistancia(int puerto)
 {
     Ultrasonic ultrasonic(puerto);
     long range = ultrasonic.MeasureInCentimeters();
-    Serial.printlnf("Distancia: %d", range);
+    // Serial.printlnf("Distancia: %d", range);
     if (range > 10)
         return true;
     else
         return false;
 }
 
-boolean siLuz(int puerto)
+bool siLuz(int puerto)
 {
     int threshold = 1000;
+    
     switch (puerto)
     {
     case 0:
@@ -50,7 +132,7 @@ boolean siLuz(int puerto)
     }
 }
 
-boolean noLuz(int puerto)
+bool noLuz(int puerto)
 {
     int threshold = 1000;
     switch (puerto)
@@ -75,29 +157,22 @@ boolean noLuz(int puerto)
     }
 }
 
-// boolean leerSensorSonido(int puerto)
-// {
-//     // Serial.printlnf("analogico: %d", analogRead(A4));
-//     if (analogRead(puerto) >= 700)
-//         return true;
-//     return false;
-// }
-
-boolean siRuido(int puerto)
+bool siRuido(int puerto)
 {
-    if (analogRead(puerto) >= 700)
+    int sonido = analogRead(puerto);
+    if (sonido >= 700)
         return true;
     return false;
 }
 
-boolean noRuido(int puerto)
+bool noRuido(int puerto)
 {
     if (analogRead(puerto) <= 700)
         return true;
     return false;
 }
 
-boolean siBoton(int puerto)
+bool siBoton(int puerto)
 {
     pinMode(puerto, INPUT);
     if (digitalRead(puerto) == HIGH)
@@ -105,7 +180,7 @@ boolean siBoton(int puerto)
     return false;
 }
 
-boolean noBoton(int puerto)
+bool noBoton(int puerto)
 {
     pinMode(puerto, INPUT);
     if (digitalRead(puerto) == LOW)
@@ -113,31 +188,164 @@ boolean noBoton(int puerto)
     return false;
 }
 
-boolean siRotativo(int puerto)
+bool siRotativo(int puerto)
 {
     float voltage;
-    int sensor_value = analogRead(puerto);
-    voltage = (float)sensor_value * 5 / 1023;
-    float degrees = (voltage * 300) / 5;
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
 
-    if (degrees >= 680)
+    voltage = (float)sensor_value * 3.3 / 1023;
+    float degrees = (voltage * 300) / 5;
+    if (degrees <= 360)
         return true;
     return false;
 }
 
-boolean noRotativo(int puerto)
+bool noRotativo(int puerto)
 {
     float voltage;
-    int sensor_value = analogRead(puerto);
-    voltage = (float)sensor_value * 5 / 1023;
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+
+    voltage = (float)sensor_value * 3.3 / 1023;
     float degrees = (voltage * 300) / 5;
 
-    if (degrees <= 680)
+    if (degrees >= 360)
         return true;
     return false;
 }
 
-boolean tempFrio(int puerto)
+bool siBotonDualA(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == LOW)
+        return true;
+    return false;
+}
+
+bool noBotonDualA(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == HIGH)
+        return true;
+    return false;
+}
+
+bool siBotonDualB(int puerto)
+{
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto+1) == LOW)
+        return true;
+    return false;
+}
+
+bool noBotonDualB(int puerto)
+{
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto+1) == HIGH)
+        return true;
+    return false;
+}
+
+bool siBotonDual2(int puerto)
+{
+    pinMode(puerto, INPUT);
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto) == LOW && digitalRead(puerto+1) == LOW)
+        return true;
+    return false;
+}
+
+bool noBotonDual2(int puerto)
+{
+    pinMode(puerto, INPUT);
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto) == HIGH || digitalRead(puerto+1) == HIGH)
+        return true;
+    return false;
+}
+
+bool siAgua(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == LOW)
+        return true;
+    return false;
+}
+
+bool noAgua(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == HIGH)
+        return true;
+    return false;
+}
+
+
+bool siTurbia(int puerto)
+{
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+    Serial.println(sensor_value);
+    if (sensor_value < 2000)
+        return true;
+    return false;
+}
+
+bool noTurbia(int puerto)
+{
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+    if (sensor_value >= 2000)
+        return true;
+    return false;
+}
+
+bool tempFrio(int puerto)
 {
     DHT dht(puerto, DHT11);
     dht.begin();
@@ -155,14 +363,15 @@ boolean tempFrio(int puerto)
     else
         return false;
 }
-boolean tempTemplado(int puerto)
+
+bool tempTemplado(int puerto)
 {
     DHT dht(puerto, DHT11);
     dht.begin();
     float t = dht.getTempCelcius();
 
     // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
-    while (isnan(t) | t == 0.0)
+    while (isnan(t) || (t == 0.0))
     {
         t = dht.getTempCelcius();
     }
@@ -173,7 +382,8 @@ boolean tempTemplado(int puerto)
     else
         return false;
 }
-boolean tempCalor(int puerto)
+
+bool tempCalor(int puerto)
 {
     DHT dht(puerto, DHT11);
     dht.begin();
@@ -192,7 +402,7 @@ boolean tempCalor(int puerto)
         return false;
 }
 
-boolean leerSensor(int id, int condicion, int puerto)
+bool leerSensor(int id, int condicion, int puerto)
 {
     switch (id)
     {
@@ -209,7 +419,7 @@ boolean leerSensor(int id, int condicion, int puerto)
         return (condicion == 0 ? noBoton(puerto) : siBoton(puerto));
 
     case 5:
-        return (condicion == 0) ? noRotativo(puerto) : siRotativo(puerto);
+        return (condicion == 0 ? noRotativo(puerto) : siRotativo(puerto));
 
     case 6:
         switch (condicion)
@@ -222,7 +432,23 @@ boolean leerSensor(int id, int condicion, int puerto)
             return tempCalor(puerto);
         }
     case 7:
-        return (condicion == 0) ? noDistancia(puerto) : siDistancia(puerto);
+        return (condicion == 0 ? noDistancia(puerto) : siDistancia(puerto));
+
+    case 8:
+        return (condicion == 0 ? noAgua(puerto) : siAgua(puerto));
+
+    case 9:
+        return (condicion == 0 ? noBotonDualA(puerto) : siBotonDualA(puerto));
+
+    case 10:
+        return (condicion == 0 ? noBotonDualB(puerto) : siBotonDualB(puerto));
+
+    case 11:
+        return (condicion == 0 ? noBotonDual2(puerto) : siBotonDual2(puerto));
+
+    case 12:
+        return (condicion == 0 ? noTurbia(puerto) : siTurbia(puerto));
+        
 
     default:
         Serial.println("InvalidSensorError");
