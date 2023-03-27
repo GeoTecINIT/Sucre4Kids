@@ -237,6 +237,114 @@ bool noRotativo(int puerto)
     return false;
 }
 
+bool siBotonDualA(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == LOW)
+        return true;
+    return false;
+}
+
+bool noBotonDualA(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == HIGH)
+        return true;
+    return false;
+}
+
+bool siBotonDualB(int puerto)
+{
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto+1) == LOW)
+        return true;
+    return false;
+}
+
+bool noBotonDualB(int puerto)
+{
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto+1) == HIGH)
+        return true;
+    return false;
+}
+
+bool siBotonDual2(int puerto)
+{
+    pinMode(puerto, INPUT);
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto) == LOW && digitalRead(puerto+1) == LOW)
+        return true;
+    return false;
+}
+
+bool noBotonDual2(int puerto)
+{
+    pinMode(puerto, INPUT);
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto) == HIGH || digitalRead(puerto+1) == HIGH)
+        return true;
+    return false;
+}
+
+bool siAgua(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == LOW)
+        return true;
+    return false;
+}
+
+bool noAgua(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == HIGH)
+        return true;
+    return false;
+}
+
+
+bool siTurbia(int puerto)
+{
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+    Serial.println(sensor_value);
+    if (sensor_value < 2000)
+        return true;
+    return false;
+}
+
+bool noTurbia(int puerto)
+{
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+    if (sensor_value >= 2000)
+        return true;
+    return false;
+}
+
 bool tempFrio(int puerto)
 {
     DHT dht(puerto, DHT11);
@@ -325,6 +433,22 @@ bool leerSensor(int id, int condicion, int puerto)
         }
     case 7:
         return (condicion == 0 ? noDistancia(puerto) : siDistancia(puerto));
+
+    case 8:
+        return (condicion == 0 ? noAgua(puerto) : siAgua(puerto));
+
+    case 9:
+        return (condicion == 0 ? noBotonDualA(puerto) : siBotonDualA(puerto));
+
+    case 10:
+        return (condicion == 0 ? noBotonDualB(puerto) : siBotonDualB(puerto));
+
+    case 11:
+        return (condicion == 0 ? noBotonDual2(puerto) : siBotonDual2(puerto));
+
+    case 12:
+        return (condicion == 0 ? noTurbia(puerto) : siTurbia(puerto));
+        
 
     default:
         Serial.println("InvalidSensorError");
