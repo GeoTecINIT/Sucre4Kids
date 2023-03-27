@@ -20,6 +20,7 @@
 // MODO de uso
 uint8_t MODE;
 
+
 // Ejecucion ACTIVA/INActiva
 boolean play = false;
 
@@ -68,7 +69,8 @@ int numCondicionalesBloque = 0, numSensoresBloque = 0, numActuadoresBloque = 0;
 
 unsigned char data[] = {"6#1#0"};
 
-String tarjetas_modoBasico[12] = { "0#2#0","0#3#0","0#4#1","0#1#1#0","0#1#1#1","0#0#1#0","0#0#1#1","0#0#1#2","0#0#1#3","0#0#1#4","0#0#1#5" };
+
+String tarjetas_modoBasico[16] = { "0#2#0","0#3#0","0#4#1","0#9#1","0#10#1","0#11#1","0#1#1#0","0#1#1#1","0#0#1#0","0#0#1#1","0#0#1#2","0#0#1#3","0#0#1#4","0#0#1#5"};
 
 String tarjetas_modoAvanzado[28] = { "1#0#1#7#0","1#0#1#7#1","1#0#0#2#0","1#0#0#2#1","1#0#0#3#0","1#0#0#3#1","1#0#1#4#0","1#0#1#4#1","1#0#1#5#0","1#0#1#5#1","1#0#1#6#0","1#0#1#6#1","1#0#1#6#2",
                         "1#1#1#1#0","1#1#1#1#1","1#1#1#0#0","1#1#1#0#1","1#1#1#0#2","1#1#1#0#3","1#1#1#0#4","1#1#1#0#5","1#1#1#0#6","1#1#1#0#7",
@@ -80,7 +82,7 @@ String tarjetas_modoMusica[35] = {"2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1
 
 String tarjetas_comunes[8] = {"6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2"};
 
-String tarjetas[80] = {"6#2#1","6#2#2"};
+String tarjetas[80] = {"1#0#1#9#1","1#0#1#11#1", "1#0#1#8#1", "1#0#0#12#1", "1#1#0#13#1"};
 int tarjeta = 0;
 char delim[] = "#";
 
@@ -156,32 +158,42 @@ void showBitmap(int id1, int id2, String msg) {
       {
       case 0:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A HEXAGONO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillTriangle(40, 40, 50, 20, 50, 60,WHITE);
+         display.fillRect(50,20,20,40,WHITE);
+         display.fillTriangle(70, 20, 80, 40, 70, 60,WHITE);
          break;
       
       case 1:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A CUADRADO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillRect(40,20,40,40,WHITE);
          break;
 
       case 2:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A TRIANGULO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillTriangle(60, 20, 30, 100, 90, 100,WHITE);
          break;
 
       case 3:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A ROMBO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillTriangle(60, 20, 52, 40, 67, 40,WHITE);
+         display.fillTriangle(60, 60, 52, 40, 67, 40,WHITE);
          break;
 
       case 4:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A SEMICIRCULO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillCircle(60,50,15,WHITE);
+         display.fillRect(10,50,90,40,BLACK);
          break;
 
       case 5:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "CONECTAR A CIRCULO");
+         snprintf(buf, sizeof(buf), "     CONECTAR A:");
+         display.fillCircle(60,40,15,WHITE);
          break;
 
       case 6:
@@ -995,6 +1007,8 @@ void writeDataToBLock(byte blockAddr)
       Serial.print(F("MIFARE_Write() failed: "));
       Serial.println(mfrc522.GetStatusCodeName(status));
    } else {
+      //Serial.println(String(blockAddr));
+      
       Serial.println(String(tarjeta));
       tarjeta++;
    }
