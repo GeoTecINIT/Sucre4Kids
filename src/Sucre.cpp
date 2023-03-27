@@ -2,7 +2,7 @@
 //       THIS IS A GENERATED FILE - DO NOT EDIT       //
 /******************************************************/
 
-#line 1 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
+#line 1 "c:/Users/SVO/Test/Sucre4Kids-FUSION/src/Sucre.ino"
 // This #include statement was automatically added by the Particle IDE.
 #include <Grove_ChainableLED.h>
 
@@ -21,9 +21,10 @@
 #include <controlador.h>
 
 // Unconnected mode ON, evita conexion wifi.
+
 void setup();
 void loop();
-#line 19 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
+#line 20 "c:/Users/SVO/Test/Sucre4Kids-FUSION/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 void setup()
@@ -227,11 +228,11 @@ void loop()
       // Tarjeta MODO BASICO
       case 0:
 
-        id = tagInfo[1];
+        id = tagInfo[3];
         tipo = tagInfo[2];
 
         // Si la tag corresponde a un sensor:
-        if (id >= 2) {
+        if (tagInfo[1] == 0) {
           Serial.println("Sensor detectado");
 
           Sensor sensor;
@@ -243,8 +244,6 @@ void loop()
           bloques[0].sensores[0] = sensor;
           bloques[0].numSensores++;
           numSensoresBloque++;
-
-          blinkAndSleep(true);
           
           if (sensor.puerto == 0) {
             showBitmap(1,3,""); //A0
@@ -258,10 +257,10 @@ void loop()
         // Si la tag corresponde a un actuador y se ha leido un sensor ( != -1 )
         if ( numSensoresBloque > 0) {
 
-          if (tagInfo[1] == 0 || tagInfo[1] == 1) {
+          if (tagInfo[1] == 1) {
             Serial.println("Actuador detectado");
 
-            estado = tagInfo[3];
+            estado = tagInfo[4];
             Actuador actuador;
             actuador.id = id;
 
@@ -272,9 +271,7 @@ void loop()
             bloques[0].numActuadores++;
             numActuadoresBloque++;
 
-            blinkAndSleep(true);
-
-            if (actuador.puerto == 0) {
+            if (actuador.puerto == 2) {
               showBitmap(1,4,""); //A2
             } else {
               showBitmap(1,1,""); //D4
