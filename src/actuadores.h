@@ -279,11 +279,9 @@ void activarActuador(int id, int opcion, boolean valor)
       pinMode(A2, OUTPUT);
       if (valor) {
          analogWrite(A2, 50, 40);
-         //analogWrite(A3, 50, 15);
       }
       else{
          analogWrite(A2, 0, 0);
-         //analogWrite(A3, 0, 0);
       }
       break;
 
@@ -393,21 +391,35 @@ void activarZumbador(int opcion, int puerto)
 
 void activarVentilador(int opcion, int puerto)
 {
-   Serial.println(A0);
-   Serial.println(A1);
    pitidoOFF0();
    ledApagar();
-   pinMode(A0, OUTPUT);
+
+   int p;
+   switch (puerto)
+    {
+    case 0:
+        p = A0;
+        break;
+    case 2:
+        p = A2;
+        break;
+    case 4:
+        p = A4;
+        break;
+
+    default:
+        p = -1;
+        break;
+    }
+
+   pinMode(p, OUTPUT);
     switch (opcion)
     {
     case 0:
-      Serial.println("C0");
-      analogWrite(puerto, 50, 50);
+      analogWrite(p, 50, 50);
       break;
     case 1:
-      Serial.println("C1");
-      analogWrite(A0, 50, 50);
-      //analogWrite(A1, 50, 50);
+      analogWrite(p, 50, 50);
       break;
    default:
       Serial.println("Valor no valido");
@@ -417,11 +429,34 @@ void activarVentilador(int opcion, int puerto)
 
 }
 
+void ventApagar(int puerto)
+{
+      int p;
+      switch (puerto)
+      {
+      case 0:
+         p = A0;
+         break;
+      case 2:
+         p = A2;
+         break;
+      case 4:
+         p = A4;
+         break;
+
+      default:
+         p = -1;
+         break;
+      }
+      pinMode(p, OUTPUT);
+      analogWrite(p, 0, 0);
+}
+
 void apagarActuador(int id, int puerto)
 {
     id == 0 ? ledApagar() : digitalWrite(puerto, 0);
     if (id == 13){
-      analogWrite(A0, 0, 0);
+      ventApagar(puerto);
     }
 
 }
