@@ -395,7 +395,7 @@ void loop()
                 numSensoresBloque++;
 
               } else {
-                Serial.println("Puerto no disponible");
+                Serial.println("Puerto no disponibleeee");
               }
 
             } else {
