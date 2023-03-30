@@ -82,7 +82,7 @@ String tarjetas_modoMusica[35] = {"2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1
 
 String tarjetas_comunes[8] = {"6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2"};
 
-String tarjetas[80] = {"1#0#1#9#1","1#0#1#11#1", "1#0#1#8#1", "1#0#0#12#1", "1#1#0#13#1"};
+String tarjetas[80] = {"1#0#1#9#0","1#0#1#9#2", "1#0#1#9#3", "1#0#0#12#1", "1#1#0#13#1"};
 int tarjeta = 0;
 char delim[] = "#";
 
@@ -1034,33 +1034,7 @@ void getTagID(int infoTag[])
    if (status != MFRC522::STATUS_OK)
    {
       Serial.print(F("PCD_Authenticate() failed: "));
-      Serial.println(mfrc522.GetStatusCodeName(status));
-   }
-
-   // Write data to tag:
-   //writeDataToBLock(blockAddr);
-
-   // Read data from the block's Tag.
-   byte buffer[18];
-   byte size = sizeof(buffer);
-   if (!readDataFromBlock(blockAddr, buffer, size))
-   {
-      return;
-   }
-   
-
-   // Conversión y almacenamiento
-   // Convert from hex to String:
-   char tagInfo[16];
-   int i = 0;
-   for (byte j = 0; j < sizeof(buffer); j++)
-   {
-      tagInfo[i] = (char)buffer[j];
-      i++;
-      // Serial.write(buffer[j]);
-      // tagInfo += Serial.write(buffer[j]);
-   }
-   Serial.printlnf("TagInfo: %s", tagInfo);
+         Serial.println(mfrc522.GetStatusCodeName(status)º
    split(tagInfo, delim, infoTag);
 
    // Evitamos seguir leyendo la misma tag.
