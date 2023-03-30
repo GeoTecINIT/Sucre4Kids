@@ -435,7 +435,10 @@ bool leerSensor(int id, int condicion, int puerto)
         case 3:
             return BotonDual2(puerto);
         }
-
+    case 10:
+        return BotonDualB(puerto);
+    case 11:
+        return BotonDual2(puerto);
     case 12:
         return (condicion == 0 ? noTurbia(puerto) : siTurbia(puerto));
         

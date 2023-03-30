@@ -1839,11 +1839,11 @@ bool leerSensor(int id, int condicion, int puerto)
    b4e70:	3b01      	subs	r3, #1
    b4e72:	4610      	mov	r0, r2
    b4e74:	2b0b      	cmp	r3, #11
-   b4e76:	d866      	bhi.n	b4f46 <_Z10leerSensoriii+0xda>
+   b4e76:	d865      	bhi.n	b4f44 <_Z10leerSensoriii+0xd8>
    b4e78:	e8df f003 	tbb	[pc, r3]
    b4e7c:	1d140b06 	.word	0x1d140b06
    b4e80:	40062b22 	.word	0x40062b22
-   b4e84:	5c656546 	.word	0x5c656546
+   b4e84:	5b575346 	.word	0x5b575346
     switch (id)
     {
     case 1:
@@ -1911,36 +1911,38 @@ bool leerSensor(int id, int condicion, int puerto)
         return (condicion == 0 ? noBoton(puerto) : siBoton(puerto));
    b4f04:	f7ff bd9c 	b.w	b4a40 <_Z7siBotoni>
         switch (condicion)
-   b4f08:	2903      	cmp	r1, #3
-   b4f0a:	d818      	bhi.n	b4f3e <_Z10leerSensoriii+0xd2>
-   b4f0c:	e8df f001 	tbb	[pc, r1]
-   b4f10:	0e0a0602 	.word	0x0e0a0602
-   b4f14:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
+   b4f08:	2901      	cmp	r1, #1
+   b4f0a:	d006      	beq.n	b4f1a <_Z10leerSensoriii+0xae>
+   b4f0c:	2903      	cmp	r1, #3
+   b4f0e:	d00c      	beq.n	b4f2a <_Z10leerSensoriii+0xbe>
+   b4f10:	b939      	cbnz	r1, b4f22 <_Z10leerSensoriii+0xb6>
+   b4f12:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
             return noBotonDual(puerto);
-   b4f18:	f7ff be85 	b.w	b4c26 <_Z11noBotonDuali>
-   b4f1c:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
+   b4f16:	f7ff be86 	b.w	b4c26 <_Z11noBotonDuali>
+   b4f1a:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
             return BotonDualA(puerto);
-   b4f20:	f7ff be36 	b.w	b4b90 <_Z10BotonDualAi>
-   b4f24:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
+   b4f1e:	f7ff be37 	b.w	b4b90 <_Z10BotonDualAi>
+   b4f22:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
             return BotonDualB(puerto);
-   b4f28:	f7ff be4b 	b.w	b4bc2 <_Z10BotonDualBi>
-   b4f2c:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
+   b4f26:	f7ff be4c 	b.w	b4bc2 <_Z10BotonDualBi>
+   b4f2a:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
             return BotonDual2(puerto);
-   b4f30:	f7ff be60 	b.w	b4bf4 <_Z10BotonDual2i>
+   b4f2e:	f7ff be61 	b.w	b4bf4 <_Z10BotonDual2i>
         return (condicion == 0 ? noTurbia(puerto) : siTurbia(puerto));
-   b4f34:	b919      	cbnz	r1, b4f3e <_Z10leerSensoriii+0xd2>
-   b4f36:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
+   b4f32:	b919      	cbnz	r1, b4f3c <_Z10leerSensoriii+0xd0>
+   b4f34:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
         return (condicion == 0 ? noTurbia(puerto) : siTurbia(puerto));
-   b4f3a:	f7ff beb4 	b.w	b4ca6 <_Z8noTurbiai>
-   b4f3e:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
+   b4f38:	f7ff beb5 	b.w	b4ca6 <_Z8noTurbiai>
+   b4f3c:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
         return (condicion == 0 ? noTurbia(puerto) : siTurbia(puerto));
-   b4f42:	f7ff be8a 	b.w	b4c5a <_Z8siTurbiai>
+   b4f40:	f7ff be8b 	b.w	b4c5a <_Z8siTurbiai>
         Serial.println("InvalidSensorError");
-   b4f46:	f005 faff 	bl	ba548 <_Z16_fetch_usbserialv>
-   b4f4a:	4902      	ldr	r1, [pc, #8]	; (b4f54 <_Z10leerSensoriii+0xe8>)
-   b4f4c:	f005 f8fb 	bl	ba146 <_ZN5Print7printlnEPKc>
-   b4f50:	2000      	movs	r0, #0
-   b4f52:	bd08      	pop	{r3, pc}
+   b4f44:	f005 fb00 	bl	ba548 <_Z16_fetch_usbserialv>
+   b4f48:	4902      	ldr	r1, [pc, #8]	; (b4f54 <_Z10leerSensoriii+0xe8>)
+   b4f4a:	f005 f8fc 	bl	ba146 <_ZN5Print7printlnEPKc>
+   b4f4e:	2000      	movs	r0, #0
+   b4f50:	bd08      	pop	{r3, pc}
+   b4f52:	bf00      	nop
    b4f54:	000bae52 	.word	0x000bae52
 
 000b4f58 <_Z9ledApagarv>:
