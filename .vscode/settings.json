@@ -1,6 +1,6 @@
 {
-    "particle.targetDevice": "e00fce68d39dd303f495a970",
-    "particle.firmwareVersion": "3.3.0",
+    "particle.targetDevice": "e00fce6877e7f05ccceaed53",
+    "particle.firmwareVersion": "5.3.0",
     "particle.targetPlatform": "argon",
     "files.associations": {
         "__bit_reference": "cpp",
@@ -15,5 +15,6 @@
         "vector": "cpp",
         "algorithm": "cpp",
         "cmath": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": true
 }

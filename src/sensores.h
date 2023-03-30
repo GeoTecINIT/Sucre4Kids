@@ -237,39 +237,25 @@ bool noRotativo(int puerto)
     return false;
 }
 
-bool siBotonDualA(int puerto)
+bool BotonDualA(int puerto)
 {
     pinMode(puerto, INPUT);
-    if (digitalRead(puerto) == LOW)
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto) == LOW && digitalRead(puerto+1) == HIGH)
         return true;
     return false;
 }
 
-bool noBotonDualA(int puerto)
+bool BotonDualB(int puerto)
 {
+    pinMode(puerto+1, INPUT);
     pinMode(puerto, INPUT);
-    if (digitalRead(puerto) == HIGH)
+    if (digitalRead(puerto+1) == LOW && digitalRead(puerto) == HIGH)
         return true;
     return false;
 }
 
-bool siBotonDualB(int puerto)
-{
-    pinMode(puerto+1, INPUT);
-    if (digitalRead(puerto+1) == LOW)
-        return true;
-    return false;
-}
-
-bool noBotonDualB(int puerto)
-{
-    pinMode(puerto+1, INPUT);
-    if (digitalRead(puerto+1) == HIGH)
-        return true;
-    return false;
-}
-
-bool siBotonDual2(int puerto)
+bool BotonDual2(int puerto)
 {
     pinMode(puerto, INPUT);
     pinMode(puerto+1, INPUT);
@@ -278,11 +264,11 @@ bool siBotonDual2(int puerto)
     return false;
 }
 
-bool noBotonDual2(int puerto)
+bool noBotonDual(int puerto)
 {
     pinMode(puerto, INPUT);
     pinMode(puerto+1, INPUT);
-    if (digitalRead(puerto) == HIGH || digitalRead(puerto+1) == HIGH)
+    if (digitalRead(puerto) == HIGH && digitalRead(puerto+1) == HIGH)
         return true;
     return false;
 }
@@ -438,13 +424,17 @@ bool leerSensor(int id, int condicion, int puerto)
         return (condicion == 0 ? noAgua(puerto) : siAgua(puerto));
 
     case 9:
-        return (condicion == 0 ? noBotonDualA(puerto) : siBotonDualA(puerto));
-
-    case 10:
-        return (condicion == 0 ? noBotonDualB(puerto) : siBotonDualB(puerto));
-
-    case 11:
-        return (condicion == 0 ? noBotonDual2(puerto) : siBotonDual2(puerto));
+        switch (condicion)
+        {
+        case 0:
+            return noBotonDual(puerto);
+        case 1:
+            return BotonDualA(puerto);
+        case 2:
+            return BotonDualB(puerto);
+        case 3:
+            return BotonDual2(puerto);
+        }
 
     case 12:
         return (condicion == 0 ? noTurbia(puerto) : siTurbia(puerto));

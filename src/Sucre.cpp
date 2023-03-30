@@ -2,7 +2,7 @@
 //       THIS IS A GENERATED FILE - DO NOT EDIT       //
 /******************************************************/
 
-#line 1 "c:/Users/SVO/Test/Sucre4Kids-FUSION/src/Sucre.ino"
+#line 1 "c:/Users/SVO/GITSUCRE/Sucre4Kids/src/Sucre.ino"
 // This #include statement was automatically added by the Particle IDE.
 #include <Grove_ChainableLED.h>
 
@@ -24,7 +24,7 @@
 
 void setup();
 void loop();
-#line 20 "c:/Users/SVO/Test/Sucre4Kids-FUSION/src/Sucre.ino"
+#line 20 "c:/Users/SVO/GITSUCRE/Sucre4Kids/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 void setup()
@@ -403,7 +403,7 @@ void loop()
                 numSensoresBloque++;
 
               } else {
-                Serial.println("Puerto no disponible");
+                Serial.println("Puerto no disponibleeee");
               }
 
             } else {
@@ -885,6 +885,4 @@ void loop()
       play = false;
     }
   }
-}
-
-  
+}  
