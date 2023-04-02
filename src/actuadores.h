@@ -319,37 +319,43 @@ void pitidoBlink1(int puerto)
 void activarLED(int opcion, int puerto)
 {
 
-    switch (opcion)
-    {
-    case 0:
-        ledVerde();
-        break;
+   switch (opcion)
+   {
+   case 0:
+      ledVerde();
+      break;
 
-    case 1:
-        ledRojo();
-        break;
+   case 1:
+      ledRojo();
+      break;
 
-    case 2:
-        ledAmarillo();
-        break;
+   case 2:
+      ledAmarillo();
+      break;
 
-    case 3:
-        ledMorado();
-        break;
+   case 3:
+      ledMorado();
+      break;
 
-    case 4:
-        ledAzul();
-        break;
+   case 4:
+      ledAzul();
+      break;
 
-    case 5:
-        ledNaranja();
-        break;
-    case 6:
-        ledBlink();
-        break;
-    case 7:
-        ledArcoiris();
-        break;
+   case 5:
+      ledNaranja();
+      break;
+
+   case 6:
+      ledBlink();
+      break;
+
+   case 7:
+      ledArcoiris();
+      break;
+   
+   case 8:
+      ledApagar();
+      break;
 
     default:
         Serial.println("LedErrorOption");

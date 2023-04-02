@@ -156,11 +156,37 @@ bool noLuz(int puerto)
         return false;
     }
 }
+/**
+bool siRuido(int puerto)
+{
+    int startTime = millis();
+    int currentTime = millis();
+
+    // Escuchar durante 0.5 segundos
+    while (currentTime-startTime<8000){
+        int sonido = analogRead(puerto);
+        Serial.println(sonido);
+        
+        if (sonido >= 700) {
+            return true;
+        }
+        currentTime = millis();
+    }
+    
+    return false;
+}*/
+
 
 bool siRuido(int puerto)
 {
-    int sonido = analogRead(puerto);
-    if (sonido >= 700)
+    int soundValue = 0; //create variable to store many different readings
+    for (int i = 0; i < 32; i++) //create a for loop to read 
+    { soundValue += analogRead(puerto);  } //read the sound sensor
+ 
+    soundValue >>= 5; //bitshift operation 
+    Serial.println(soundValue);
+    
+    if (soundValue > 500)
         return true;
     return false;
 }
@@ -249,13 +275,33 @@ bool tempFrio(int puerto)
         t = dht.getTempCelcius();
     }
 
-    Serial.printlnf("Temp: %f", t);
-    if (t > 0.0 && t < 8)
+    Serial.println(t, 1);
+    if (t <= 16)
         return true;
     else
         return false;
 }
 
+bool tempCalor(int puerto)
+{
+    DHT dht(puerto, DHT11);
+    dht.begin();
+    float t = dht.getTempCelcius();
+
+    // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
+    while (isnan(t) | t == 0.0)
+    {
+        t = dht.getTempCelcius();
+    }
+
+    Serial.println(t, 1);
+    if (t > 16)
+        return true;
+    else
+        return false;
+}
+
+/**
 bool tempTemplado(int puerto)
 {
     DHT dht(puerto, DHT11);
@@ -274,25 +320,7 @@ bool tempTemplado(int puerto)
     else
         return false;
 }
-
-bool tempCalor(int puerto)
-{
-    DHT dht(puerto, DHT11);
-    dht.begin();
-    float t = dht.getTempCelcius();
-
-    // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
-    while (isnan(t) | t == 0.0)
-    {
-        t = dht.getTempCelcius();
-    }
-
-    Serial.printlnf("Temp: %f", t);
-    if (t > 25 && t < 50)
-        return true;
-    else
-        return false;
-}
+*/
 
 bool leerSensor(int id, int condicion, int puerto)
 {
@@ -314,6 +342,8 @@ bool leerSensor(int id, int condicion, int puerto)
         return (condicion == 0 ? noRotativo(puerto) : siRotativo(puerto));
 
     case 6:
+        return (condicion == 0 ? tempFrio(puerto) : tempCalor(puerto));
+        /**
         switch (condicion)
         {
         case 0:
@@ -323,6 +353,7 @@ bool leerSensor(int id, int condicion, int puerto)
         case 2:
             return tempCalor(puerto);
         }
+        */
     case 7:
         return (condicion == 0 ? noDistancia(puerto) : siDistancia(puerto));
 

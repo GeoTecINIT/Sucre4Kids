@@ -243,8 +243,6 @@ void loop()
           bloques[0].sensores[0] = sensor;
           bloques[0].numSensores++;
           numSensoresBloque++;
-
-          blinkAndSleep(true);
           
           if (sensor.puerto == 0) {
             showBitmap(1,3,""); //A0
@@ -271,8 +269,6 @@ void loop()
             bloques[0].actuadores[0] = actuador;
             bloques[0].numActuadores++;
             numActuadoresBloque++;
-
-            blinkAndSleep(true);
 
             if (actuador.puerto == 0) {
               showBitmap(1,4,""); //A2
