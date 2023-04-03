@@ -1006,9 +1006,7 @@ void writeDataToBLock(byte blockAddr)
    {
       Serial.print(F("MIFARE_Write() failed: "));
       Serial.println(mfrc522.GetStatusCodeName(status));
-   } else {
-      //Serial.println(String(blockAddr));
-      
+   } else {      
       Serial.println(String(tarjeta));
       tarjeta++;
    }
@@ -1016,7 +1014,6 @@ void writeDataToBLock(byte blockAddr)
 
 bool readDataFromBlock(byte blockAddr, byte buffer[], byte size)
 {
-   // Serial.print(F("Leer datos del sector ")); Serial.print(blockAddr);
    status = (MFRC522::StatusCode)mfrc522.MIFARE_Read(blockAddr, buffer, &size);
    if (status != MFRC522::STATUS_OK)
    {
@@ -1034,33 +1031,32 @@ void getTagID(int infoTag[])
    if (status != MFRC522::STATUS_OK)
    {
       Serial.print(F("PCD_Authenticate() failed: "));
-         Serial.println(mfrc522.GetStatusCodeName(status));
-      }
+      Serial.println(mfrc522.GetStatusCodeName(status));
+   }
 
-      // Write data to tag:
-      //writeDataToBLock(blockAddr);
+   // Write data to tag:
+   //writeDataToBLock(blockAddr);
 
-      // Read data from the block's Tag.
-      byte buffer[18];
-      byte size = sizeof(buffer);
-      if (!readDataFromBlock(blockAddr, buffer, size))
-      {
-         return;
-      }
-      
-
-      // Conversión y almacenamiento
-      // Convert from hex to String:
-      char tagInfo[16];
-      int i = 0;
-      for (byte j = 0; j < sizeof(buffer); j++)
-      {
-         tagInfo[i] = (char)buffer[j];
-         i++;
-         // Serial.write(buffer[j]);
-         // tagInfo += Serial.write(buffer[j]);
-      }
-      Serial.printlnf("TagInfo: %s", tagInfo);
+   // Read data from the block's Tag.
+   byte buffer[18];
+   byte size = sizeof(buffer);
+   if (!readDataFromBlock(blockAddr, buffer, size))
+   {
+      return;
+   }
+   
+   // Conversión y almacenamiento
+   // Convert from hex to String:
+   char tagInfo[16];
+   int i = 0;
+   for (byte j = 0; j < sizeof(buffer); j++)
+   {
+      tagInfo[i] = (char)buffer[j];
+      i++;
+      // Serial.write(buffer[j]);
+      // tagInfo += Serial.write(buffer[j]);
+   }
+   Serial.printlnf("TagInfo: %s", tagInfo);
    split(tagInfo, delim, infoTag);
 
    // Evitamos seguir leyendo la misma tag.
