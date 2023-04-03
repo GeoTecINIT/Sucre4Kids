@@ -20,6 +20,7 @@
 // MODO de uso
 uint8_t MODE;
 
+
 // Ejecucion ACTIVA/INActiva
 boolean play = false;
 
@@ -157,32 +158,42 @@ void showBitmap(int id1, int id2, String msg) {
       {
       case 0:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A HEXAGONO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillTriangle(40, 40, 50, 20, 50, 60,WHITE);
+         display.fillRect(50,20,20,40,WHITE);
+         display.fillTriangle(70, 20, 80, 40, 70, 60,WHITE);
          break;
       
       case 1:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A CUADRADO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillRect(40,20,40,40,WHITE);
          break;
 
       case 2:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A TRIANGULO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillTriangle(60, 20, 30, 100, 90, 100,WHITE);
          break;
 
       case 3:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A ROMBO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillTriangle(60, 20, 52, 40, 67, 40,WHITE);
+         display.fillTriangle(60, 60, 52, 40, 67, 40,WHITE);
          break;
 
       case 4:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+" CONECTAR A SEMICIRCULO");
+         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         display.fillCircle(60,50,15,WHITE);
+         display.fillRect(10,50,90,40,BLACK);
          break;
 
       case 5:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "CONECTAR A CIRCULO");
+         snprintf(buf, sizeof(buf), "     CONECTAR A:");
+         display.fillCircle(60,40,15,WHITE);
          break;
 
       case 6:
@@ -996,6 +1007,8 @@ void writeDataToBLock(byte blockAddr)
       Serial.print(F("MIFARE_Write() failed: "));
       Serial.println(mfrc522.GetStatusCodeName(status));
    } else {
+      //Serial.println(String(blockAddr));
+      
       Serial.println(String(tarjeta));
       tarjeta++;
    }
@@ -1021,33 +1034,33 @@ void getTagID(int infoTag[])
    if (status != MFRC522::STATUS_OK)
    {
       Serial.print(F("PCD_Authenticate() failed: "));
-      Serial.println(mfrc522.GetStatusCodeName(status));
-   }
+         Serial.println(mfrc522.GetStatusCodeName(status));
+      }
 
-   // Write data to tag:
-   //writeDataToBLock(blockAddr);
+      // Write data to tag:
+      //writeDataToBLock(blockAddr);
 
-   // Read data from the block's Tag.
-   byte buffer[18];
-   byte size = sizeof(buffer);
-   if (!readDataFromBlock(blockAddr, buffer, size))
-   {
-      return;
-   }
-   
+      // Read data from the block's Tag.
+      byte buffer[18];
+      byte size = sizeof(buffer);
+      if (!readDataFromBlock(blockAddr, buffer, size))
+      {
+         return;
+      }
+      
 
-   // Conversión y almacenamiento
-   // Convert from hex to String:
-   char tagInfo[16];
-   int i = 0;
-   for (byte j = 0; j < sizeof(buffer); j++)
-   {
-      tagInfo[i] = (char)buffer[j];
-      i++;
-      // Serial.write(buffer[j]);
-      // tagInfo += Serial.write(buffer[j]);
-   }
-   Serial.printlnf("TagInfo: %s", tagInfo);
+      // Conversión y almacenamiento
+      // Convert from hex to String:
+      char tagInfo[16];
+      int i = 0;
+      for (byte j = 0; j < sizeof(buffer); j++)
+      {
+         tagInfo[i] = (char)buffer[j];
+         i++;
+         // Serial.write(buffer[j]);
+         // tagInfo += Serial.write(buffer[j]);
+      }
+      Serial.printlnf("TagInfo: %s", tagInfo);
    split(tagInfo, delim, infoTag);
 
    // Evitamos seguir leyendo la misma tag.
