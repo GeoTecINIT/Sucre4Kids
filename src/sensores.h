@@ -290,7 +290,7 @@ bool noAgua(int puerto)
 }
 
 
-bool siTurbia(int puerto)
+bool Cafe(int puerto)
 {
     int sensor_value;
     switch (puerto)
@@ -311,7 +311,7 @@ bool siTurbia(int puerto)
     return false;
 }
 
-bool noTurbia(int puerto)
+bool AguaClara(int puerto)
 {
     int sensor_value;
     switch (puerto)
@@ -326,7 +326,7 @@ bool noTurbia(int puerto)
         sensor_value = analogRead(A4);
         break;
     }
-    if (sensor_value >= 2000)
+    if (sensor_value > 2500)
         return true;
     return false;
 }
@@ -388,6 +388,71 @@ bool tempCalor(int puerto)
         return false;
 }
 
+//---------------------------------------------------------------------------------------------------
+//------------------------------------- M O D O   3 -------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
+int DistanciaExp(int puerto)
+{
+    Ultrasonic ultrasonic(puerto);
+    int range = ultrasonic.MeasureInCentimeters();
+    // Serial.printlnf("Distancia: %d", range);
+    return range;
+}
+
+int AnguloExp()
+{
+   float voltage;
+   int sensor_value = analogRead(rotoryAngle_PIN);
+   voltage = (float)sensor_value * 5 / 1023;
+   float degrees = (voltage * 300) / 5;
+
+   return (int) degrees;
+}
+
+int LuzExp()
+{
+   return analogRead(sensorLuz_PIN);
+}
+
+int SensorSonidoExp()
+{
+   return analogRead(sensorSonido_PIN);
+}
+
+int SensorTempExp(int puerto)
+{
+    DHT dht(puerto, DHT11);
+    dht.begin();
+    float t = dht.getTempCelcius();
+
+    // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
+    while (isnan(t) | t == 0.0)
+    {
+        t = dht.getTempCelcius();
+    }
+    return t;
+}
+
+bool TurbiaExp(int puerto)
+{
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+    return sensor_value;
+}
+
+
 bool leerSensor(int id, int condicion, int puerto)
 {
     switch (id)
@@ -440,7 +505,13 @@ bool leerSensor(int id, int condicion, int puerto)
     case 11:
         return BotonDual2(puerto);
     case 12:
-        return (condicion == 0 ? noTurbia(puerto) : siTurbia(puerto));
+        switch (condicion)
+        {
+        case 0:
+            return Cafe(puerto);
+        case 1:
+            return AguaClara(puerto);           
+        }
         
 
     default:
@@ -448,3 +519,27 @@ bool leerSensor(int id, int condicion, int puerto)
         return false;
     }
 }
+
+int leerSensorExp(int id, int puerto){
+    switch (id)
+    {
+    case 2:
+        return LuzExp();
+    case 3:
+        return SensorSonidoExp();
+    case 5:
+        return AnguloExp();
+    case 6:
+        return SensorTempExp(puerto);
+    case 7:
+        return DistanciaExp(puerto);
+    case 12:
+        return TurbiaExp(puerto);
+
+    
+    default:
+        Serial.println("InvalidSensorError");
+        return 0;
+    }
+}
+

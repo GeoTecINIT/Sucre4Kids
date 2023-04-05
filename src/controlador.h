@@ -30,6 +30,7 @@ int id;     // [1]
 int tipo;   // [2]
 int estado; // [3]
 boolean valor = false;
+int val = 0;
 
 // Variable intermedia para almacenar el puerto
 int puerto;
@@ -82,7 +83,7 @@ String tarjetas_modoMusica[35] = {"2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1
 
 String tarjetas_comunes[8] = {"6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2"};
 
-String tarjetas[80] = {"1#0#1#9#0","1#0#1#9#2", "1#0#1#9#3", "1#0#0#12#1", "1#1#0#13#1"};
+String tarjetas[80] = {"3#0#0#3#0","3#0#1#6#0", "1#0#1#9#3", "1#0#0#12#1", "1#1#0#13#1"};
 int tarjeta = 0;
 char delim[] = "#";
 
@@ -141,6 +142,11 @@ void showBitmap(int id1, int id2, String msg) {
       case 2:
          // display.drawBitmap(0,0, modoMusicaBitmap, bitmap_width, bitmap_height, 1);
          snprintf(buf, sizeof(buf), "MODO MUSICA");
+         break;
+
+      case 3:
+         // display.drawBitmap(0,0, modoMusicaBitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "MODO EXPLORATORIO");
          break;
 
       default:
@@ -765,6 +771,11 @@ void cambioModo(int modo)
       Serial.println("Modo MUSICA detectado");
       MODE = 2;
       showBitmap(3,0,"Iniciando modo MUSICA...");
+
+   } else if (modo == 3) {
+      Serial.println("Modo EXPLORACION detectado");
+      MODE = 3;
+      showBitmap(3,0,"Iniciando modo EXPLORACION...");
 
    }
    EEPROM.put(0, MODE);

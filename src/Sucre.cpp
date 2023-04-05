@@ -117,6 +117,10 @@ void loop()
     {
       showBitmap(0,1,"");
 
+    } else if (MODE == 3)
+    {
+      showBitmap(0,3,"");
+
     } else
     {
       showBitmap(0,2,"");
@@ -717,7 +721,7 @@ void loop()
     }
   
   // ------------------------------- Modo MUSICA --------------------------------------
-  } else {
+  } else if (MODE == 2) {
 
     switch (tagInfo[0])
     {
@@ -884,5 +888,106 @@ void loop()
       reproducir();
       play = false;
     }
+  }
+    // ------------------------------ Modo EXPLORACION --------------------------------------
+  else //if ( MODE == 3 ) 
+  {
+    
+    // Tipo de tarjeta
+    switch (tagInfo[0])
+    {
+
+      // Tarjeta COMUN
+      case 6:
+        blinkAndSleep(true);
+        switch (tagInfo[1])
+        {
+          // Cambio de MODO
+          case 0:
+            
+            cambioModo(tagInfo[2]);
+            resetFunc();
+            break;
+          // Ejecucion
+          case 1:
+            play = true;
+            //showBitmap(3,0,"Ejecutando...");
+            break;
+
+          // Borrado (ALL)
+          case 2:
+            if ( tagInfo[2] == 1 ) {
+              borradoALL(0);
+              showBitmap(3,0,"Borrado completo realizado");
+
+            } else {
+              showBitmap(2,1,"");
+              Serial.println("Borrado no permitido para este modo");
+            }
+            break;
+
+          default:
+            break;
+        }
+        break;
+
+      case 3:
+        
+        id = tagInfo[3];
+        tipo = tagInfo[2];
+
+        // Si la tag corresponde a un sensor:
+        if (tagInfo[1] == 0) {
+          Serial.println("Sensor detectado");
+
+          Sensor sensor;
+          sensor.id = id;
+
+          // Sensores: A0 y D2
+          tipo == 0 ? sensor.puerto = 0 : sensor.puerto = 2;
+          
+          bloques[0].sensores[0] = sensor;
+          bloques[0].numSensores++;
+          numSensoresBloque++;
+          
+          if (sensor.puerto == 0) {
+            showBitmap(1,3,""); //A0
+          } else {
+            showBitmap(1,0,""); //D2
+          }
+          //displayPrint0(id); // Update screen info
+          
+        }
+
+
+        break;
+
+
+      default:
+        if ( tagInfo[0] != -1 ) {
+          showBitmap(2,0,"");
+        }
+        break;
+    }
+
+    
+
+    if (tagInfo[0]!=-1) { 
+      tagInfo[0]=-1;
+    }
+
+    if ( numSensoresBloque > 0 &&  play == true) {
+          val = leerSensorExp(bloques[0].sensores[0].id, bloques[0].sensores[0].puerto);
+
+          snprintf(buf, sizeof(buf), "%d", val);
+          display.clearDisplay();
+          display.setCursor(0, 0);
+          display.print(buf);
+          display.display();
+        }  else if (numSensoresBloque==0 && play == true) {
+              showBitmap(2,4,"");
+              play=false;
+        }
+
   }
 }  
