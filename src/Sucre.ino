@@ -881,7 +881,7 @@ void loop()
       play = false;
     }
   }
-    // ------------------------------ Modo EXPLORACION --------------------------------------
+    // ------------------------------ Modo EXPLORA --------------------------------------
   else //if ( MODE == 3 ) 
   {
     
@@ -971,10 +971,47 @@ void loop()
     if ( numSensoresBloque > 0 &&  play == true) {
           val = leerSensorExp(bloques[0].sensores[0].id, bloques[0].sensores[0].puerto);
 
-          snprintf(buf, sizeof(buf), "%d", val);
+          switch (tagInfo[3])
+          {
+            case 2:
+              snprintf(buf, sizeof(buf), "Luz:");
+              break;
+            case 3:
+              snprintf(buf, sizeof(buf), "Ruido (decibelios):");
+              break;
+            case 5:
+              snprintf(buf, sizeof(buf), "Angulo (grados):");
+              break;
+            case 6:
+              snprintf(buf, sizeof(buf), "Temperatura (grados):");
+              break;
+            case 7:
+              snprintf(buf, sizeof(buf), "Distancia (cm):");
+              break;
+            case 12:
+              snprintf(buf, sizeof(buf), "Turbicidad:");
+              break;
+          }
+          Serial.println(val);
+          if (tagInfo[3] == 6){
+            val = ajusta_temp(val);
+          }
+
+          Serial.println(temp_rep);
+          Serial.println(temp_prev);
+          Serial.println("------------------");
+
           display.clearDisplay();
           display.setCursor(0, 0);
+          
           display.print(buf);
+
+          snprintf(buf, sizeof(buf), "%d", val);
+          display.setCursor(10, 25);
+          display.setTextSize(4);
+          display.print(buf);
+          display.setTextSize(1);
+
           display.display();
         }  else if (numSensoresBloque==0 && play == true) {
               showBitmap(2,4,"");

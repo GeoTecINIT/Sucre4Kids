@@ -8,9 +8,9 @@
 //------------------------------------- M O D O   0 -------------------------------------------------
 //---------------------------------------------------------------------------------------------------
 
-#define sensorLuz_PIN A2
+#define sensorLuz_PIN A0
 #define boton_PIN D2
-#define sensorSonido_PIN A4
+#define sensorSonido_PIN A0
 #define rotoryAngle_PIN A0
 
 boolean leerSensorLuz()
@@ -417,8 +417,36 @@ int LuzExp()
 
 int SensorSonidoExp()
 {
-   return analogRead(sensorSonido_PIN);
-}
+    //return analogRead(sensorSonido_PIN);
+    const int sampleWindow = 50;                              // Sample window width in mS (50 mS = 20Hz)
+    unsigned int sample;
+    unsigned long startMillis= millis();                   // Start of sample window
+    double peakToPeak = 0;                                  // peak-to-peak level
+    
+    unsigned int signalMax = 0;                            //minimum value
+    unsigned int signalMin = 1024;                         //maximum value
+    
+                                                            // collect data for 50 mS
+    while (millis() - startMillis < sampleWindow)
+    {
+        sample = analogRead(sensorSonido_PIN);                    //get reading from microphone
+        if (sample < 1024)                                  // toss out spurious readings
+        {
+            if (sample > signalMax)
+            {
+                signalMax = sample;                           // save just the max levels
+            }
+            else if (sample < signalMin)
+            {
+                signalMin = sample;                           // save just the min levels
+            }
+        }
+    }
+        
+    peakToPeak = signalMax - signalMin;                    // max - min = peak-peak amplitude
+    int db = map(peakToPeak,20.0,900.0,49.5,90.0); 
+    return db;
+    }
 
 int SensorTempExp(int puerto)
 {
@@ -434,12 +462,12 @@ int SensorTempExp(int puerto)
     return t;
 }
 
-bool TurbiaExp(int puerto)
+int TurbiaExp(int puerto)
 {
     int sensor_value;
     switch (puerto)
     {
-    case 0:
+    case 0: 
         sensor_value = analogRead(A0);
         break;
     case 2:
@@ -539,7 +567,7 @@ int leerSensorExp(int id, int puerto){
     
     default:
         Serial.println("InvalidSensorError");
-        return 0;
+        return -1;
     }
 }
 

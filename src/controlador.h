@@ -114,6 +114,12 @@ bool bucle = false;
 int tam_bucle = 0;
 
 String secuencia[30];
+
+// ------- *** Variables MODO Explora *** --------------
+
+  int temp_prev = -1;
+  int temp_rep = 0;
+
 //--------------------------------  BITMAPS  -------------------------------------
 
 void showBitmap(int id1, int id2, String msg) {
@@ -146,7 +152,7 @@ void showBitmap(int id1, int id2, String msg) {
 
       case 3:
          // display.drawBitmap(0,0, modoMusicaBitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "MODO EXPLORATORIO");
+         snprintf(buf, sizeof(buf), "MODO EXPLORA");
          break;
 
       default:
@@ -773,9 +779,9 @@ void cambioModo(int modo)
       showBitmap(3,0,"Iniciando modo MUSICA...");
 
    } else if (modo == 3) {
-      Serial.println("Modo EXPLORACION detectado");
+      Serial.println("Modo EXPLORA detectado");
       MODE = 3;
-      showBitmap(3,0,"Iniciando modo EXPLORACION...");
+      showBitmap(3,0,"Iniciando modo EXPLORA...");
 
    }
    EEPROM.put(0, MODE);
@@ -1134,4 +1140,19 @@ int asignarPuerto(int type)
       Serial.print("Error: No hay mas puertos disponibles \n");
       return -1;
    }
+
 }
+
+// Eliminar 'outliers' de la temperatura
+   int ajusta_temp(int val)
+   {
+      if (temp_rep == 0){
+         temp_prev = val;
+         temp_rep++;}
+      else if (temp_prev == val && temp_rep < 6)
+         temp_rep++;
+      else
+         temp_rep--;
+         val = temp_prev;
+      return val;
+   }
