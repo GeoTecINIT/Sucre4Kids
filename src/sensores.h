@@ -13,6 +13,8 @@
 #define sensorSonido_PIN A0
 #define rotoryAngle_PIN A0
 
+int ruid = 0;
+
 boolean leerSensorLuz()
 {
    if (analogRead(sensorLuz_PIN) >= 2500)
@@ -46,7 +48,10 @@ boolean leerAngulo()
 boolean leerSensorSonido()
 {
    // Serial.printlnf("analogico: %d", analogRead(A4));
-   if (analogRead(sensorSonido_PIN) >= 700)
+
+   unsigned int sample = analogRead(sensorSonido_PIN);
+   Serial.println(sample);
+   if (sample >= 700)
       return true;
    return false;
 }
@@ -159,9 +164,32 @@ bool noLuz(int puerto)
 
 bool siRuido(int puerto)
 {
-    int sonido = analogRead(puerto);
-    if (sonido >= 700)
-        return true;
+    int p;
+    switch (puerto)
+    {
+    case 0:
+        p = A0;
+        break;
+
+    case 2:
+        p = A2;
+        break;
+
+    case 4:
+        p = A4;
+        break;
+
+    default:
+        return false;
+    }
+
+    int sonido = analogRead(p);
+    Serial.println(sonido);
+    if (sonido >= 1600)
+        ruid = 32;
+    if (ruid > 0){
+        ruid--;
+        return true;}
     return false;
 }
 
@@ -430,6 +458,7 @@ int SensorSonidoExp()
     while (millis() - startMillis < sampleWindow)
     {
         sample = analogRead(sensorSonido_PIN);                    //get reading from microphone
+        Serial.println(sample);
         if (sample < 1024)                                  // toss out spurious readings
         {
             if (sample > signalMax)
@@ -459,6 +488,9 @@ int SensorTempExp(int puerto)
     {
         t = dht.getTempCelcius();
     }
+
+    //t = ajusta_temp(t); 
+    
     return t;
 }
 

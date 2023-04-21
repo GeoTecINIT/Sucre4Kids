@@ -984,6 +984,7 @@ void loop()
               break;
             case 6:
               snprintf(buf, sizeof(buf), "Temperatura (grados):");
+              val = ajusta_temp(val);
               break;
             case 7:
               snprintf(buf, sizeof(buf), "Distancia (cm):");
@@ -993,12 +994,9 @@ void loop()
               break;
           }
           Serial.println(val);
-          if (tagInfo[3] == 6){
-            val = ajusta_temp(val);
-          }
 
-          Serial.println(temp_rep);
-          Serial.println(temp_prev);
+          //Serial.println(temp_rep);
+          //Serial.println(temp_prev);
           Serial.println("------------------");
 
           display.clearDisplay();
