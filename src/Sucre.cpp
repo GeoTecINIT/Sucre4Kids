@@ -185,6 +185,13 @@ void loop()
     }
   }
 
+  Serial.println(tagInfo[0]);
+  Serial.println(tagInfo[1]);
+  Serial.println(tagInfo[2]);
+  Serial.println(tagInfo[3]);
+  Serial.println(tagInfo[4]);
+  Serial.println(tagInfo[5]);
+
   // ------------------------------ Modo BASICO --------------------------------------
   if ( MODE == 0 ) 
   {
@@ -348,6 +355,7 @@ void loop()
           // Borrado (ALL Y BLOQUE)
           case 2:
             if ( tagInfo[2] == 1 ) {
+              borradoALL(0);
               borradoALL(1);
               showBitmap(3,0,"Borrado completo realizado");
 
@@ -439,9 +447,36 @@ void loop()
           case 1: {
             Serial.println("Actuador detectado");
             estado = tagInfo[4];
+              if (!IF_pasado) {
+
+              puerto = isNewActuador(id);
+
+              if (puerto == -1) {
+                puerto = asignarPuerto(tagInfo[2]);
+                showPort(tagInfo[2], puerto);
+              
+              } else {
+                showBitmap(1,6,"");
+              }
+
+              if (puerto != -1) {
+
+                Actuador newActuador;
+                newActuador.id = id;
+                newActuador.condicion = estado;
+                newActuador.bloque = numBloque;
+                newActuador.puerto = puerto;
+                newActuador.evaluate = true;
+
+                bloque2[0].actuadores[numActuadoresBloque] = newActuador;
+                numActuadoresBloque++;
+                bloque2[0].numActuadores++;
+                Serial.println(bloque2[0].numActuadores);
+              }
+            }
 
             //  Actuador then ( condicion = True )
-            if ( THEN_pasado && !ELSE_pasado && isValidActuador(estado, id) && numActuadoresBloque==0 ) {
+            if ( THEN_pasado && !ELSE_pasado) {
 
               puerto = isNewActuador(id);
 
@@ -521,8 +556,8 @@ void loop()
             } else {
 
               if (!IF_pasado) {
-                Serial.println("Se esperaba IF tag");
-                showBitmap(2,2,"");
+                //Serial.println("Se esperaba IF tag");
+                //showBitmap(2,2,"");
 
               } else if (!THEN_pasado) {
                 Serial.println("Se esperaba THEN tag");
@@ -688,6 +723,8 @@ void loop()
     tagInfo[0] = -1;
 
     if (play) {
+      serieBefore(0);
+
       // Bloque 1
       if ( (numBloque==0 && bloques[0].numActuadores>0) || numBloque==1 ) {
         valor = makeEvaluate(bloques[0]);
@@ -982,30 +1019,30 @@ void loop()
           switch (tagInfo[3])
           {
             case 2:
-              snprintf(buf, sizeof(buf), "Luz:");
+              snprintf(buf, sizeof(buf), "         Luz:");
               break;
             case 3:
-              snprintf(buf, sizeof(buf), "Ruido (decibelios):");
+              snprintf(buf, sizeof(buf), "  Ruido (decibelios):");
               break;
             case 5:
-              snprintf(buf, sizeof(buf), "Angulo (grados):");
+              snprintf(buf, sizeof(buf), "   Angulo (grados):");
               break;
             case 6:
-              snprintf(buf, sizeof(buf), "Temperatura (grados):");
+              snprintf(buf, sizeof(buf), "  Temperatura (grados):");
               val = ajusta_temp(val);
               break;
             case 7:
-              snprintf(buf, sizeof(buf), "Distancia (cm):");
+              snprintf(buf, sizeof(buf), "   Distancia (cm):");
               break;
             case 12:
-              snprintf(buf, sizeof(buf), "Turbicidad:");
+              snprintf(buf, sizeof(buf), "      Turbidez:");
               break;
           }
-          Serial.println(val);
+          //Serial.println(val);
 
           //Serial.println(temp_rep);
           //Serial.println(temp_prev);
-          Serial.println("------------------");
+          //Serial.println("------------------");
 
           display.clearDisplay();
           display.setCursor(0, 0);
@@ -1013,7 +1050,17 @@ void loop()
           display.print(buf);
 
           snprintf(buf, sizeof(buf), "%d", val);
-          display.setCursor(10, 25);
+
+          if (val <= 9){
+            display.setCursor(53, 25);
+          } else if (val <= 99){
+            display.setCursor(40, 25);
+          } else if (val <= 999){
+            display.setCursor(27, 25);
+          } else{
+            display.setCursor(10, 25);
+          }
+
           display.setTextSize(4);
           display.print(buf);
           display.setTextSize(1);

@@ -26,6 +26,7 @@ boolean play = false;
 
 // Informacion de la tarjeta leida.
 int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
+int tagAnt[6] = {-1, -1, -1, -1, -1, -1};
 int id;     // [1]
 int tipo;   // [2]
 int estado; // [3]
@@ -36,6 +37,7 @@ int val = 0;
 int puerto;
 
 Bloque bloques[2];
+Bloque bloque2[2];
 
 // Memory sector chosen to r/w fron NFC Tag
 byte trailerBlock = 7;
@@ -83,7 +85,7 @@ String tarjetas_modoMusica[35] = {"2#0#0#0","2#0#0#1","2#0#0#2","2#0#1#0","2#0#1
 
 String tarjetas_comunes[8] = {"6#0#0","6#0#1","6#0#2","6#1#0","6#2#0","6#2#1","6#2#2"};
 
-String tarjetas[80] = {"3#0#0#3#0","3#0#1#6#0", "1#0#1#9#3", "1#0#0#12#1", "1#1#0#13#1"};
+String tarjetas[80] = {"3#0#0#12#0","3#0#1#6#0", "1#0#1#9#3", "1#0#0#12#1", "1#1#0#13#1"};
 int tarjeta = 0;
 char delim[] = "#";
 
@@ -354,6 +356,7 @@ void borradoALL(int modo)
    case 0: {
       Bloque bloque;
       bloques[0] = bloque;
+      bloque2[0] = bloque;
       numSensoresBloque = 0;
       numActuadoresBloque = 0;
       break;
@@ -685,6 +688,7 @@ bool isValidActuador(int deviceState, int actuadorID)
 // -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
 int isNewActuador(int deviceID)
 {
+
   for (int j = 0; j <= numBloque; j++)
   {
     for (int i = 0; i < bloques[j].numActuadores; i++)
@@ -696,6 +700,15 @@ int isNewActuador(int deviceID)
     }
   }
 
+
+   for (int i = 0; i < bloque2[0].numActuadores; i++)
+    {
+      if (bloque2[0].actuadores[i].id == deviceID)
+      {
+        return bloque2[0].actuadores[i].puerto;
+      }
+    }
+  
   return -1;
 }
 
@@ -735,15 +748,33 @@ bool makeEvaluate(Bloque bloque)
    return valorEvaluado;
 }
 
+void serieBefore(int bloque){
+   int esp;
+   for (int j = 0; j < bloque2[bloque].numActuadores; j++)
+  {
+   esp = 100;
+   Actuador actuador = bloque2[bloque].actuadores[j];
+      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+      
+      while (esp > 0){
+         esp--;
+         getTagID(tagInfo);
+      }
+      apagarActuador(actuador.id, actuador.puerto);
+   }
+}
+
 void ejecutarEvaluacion(bool evaluacion, int bloque) {
 
   for (int j = 0; j < bloques[bloque].numActuadores; j++)
   {
     Actuador actuador = bloques[bloque].actuadores[j];
-    
+    //Serial.println(actuador.condicion);
     if (evaluacion == actuador.evaluate)
     {
       actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+      delay(1000);
+      apagarActuador(actuador.id, actuador.puerto);
     }
     
     else
@@ -760,6 +791,7 @@ void ejecutarEvaluacion(bool evaluacion, int bloque) {
 
 
 void cambioModo(int modo)
+
 {
    if (modo == 0 ) {
 

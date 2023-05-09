@@ -16,5 +16,6 @@
         "algorithm": "cpp",
         "cmath": "cpp"
     },
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
+    "C_Cpp.default.configurationProvider": "particle.particle-vscode-core"
 }

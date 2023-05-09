@@ -186,7 +186,7 @@ bool siRuido(int puerto)
     int sonido = analogRead(p);
     Serial.println(sonido);
     if (sonido >= 1600)
-        ruid = 32;
+        ruid = 12;
     if (ruid > 0){
         ruid--;
         return true;}
@@ -431,25 +431,40 @@ int DistanciaExp(int puerto)
 int AnguloExp()
 {
    float voltage;
-   int sensor_value = analogRead(rotoryAngle_PIN);
-   voltage = (float)sensor_value * 5 / 1023;
+    int sensor_value;
+    for (int i = 0; i < 50; i++){
+        sensor_value = analogRead(rotoryAngle_PIN);
+        voltage += (float)sensor_value * 5 / 1023;
+    }
+    voltage = voltage/50;
    float degrees = (voltage * 300) / 5;
+   degrees = degrees * 270 / 1200;
+   degrees = 270 - degrees;
+   if (degrees < 0)
+    degrees = 0;
 
    return (int) degrees;
 }
 
 int LuzExp()
 {
-   return analogRead(sensorLuz_PIN);
+    int value = 0;
+    for (int i = 0; i < 50; i++){
+        value += analogRead(sensorLuz_PIN);
+    }
+    value = value/50;
+    value = map(value, 0, 4095, 0, 100);
+    return value;
+   
 }
 
 int SensorSonidoExp()
 {
     //return analogRead(sensorSonido_PIN);
-    const int sampleWindow = 50;                              // Sample window width in mS (50 mS = 20Hz)
+    const int sampleWindow = 50;                           // Sample window width in mS (50 mS = 20Hz)
     unsigned int sample;
     unsigned long startMillis= millis();                   // Start of sample window
-    double peakToPeak = 0;                                  // peak-to-peak level
+    double peakToPeak = 0;                                 // peak-to-peak level
     
     unsigned int signalMax = 0;                            //minimum value
     unsigned int signalMin = 1024;                         //maximum value
@@ -457,7 +472,7 @@ int SensorSonidoExp()
                                                             // collect data for 50 mS
     while (millis() - startMillis < sampleWindow)
     {
-        sample = analogRead(sensorSonido_PIN);                    //get reading from microphone
+        sample = analogRead(sensorSonido_PIN);              //get reading from microphone
         Serial.println(sample);
         if (sample < 1024)                                  // toss out spurious readings
         {
