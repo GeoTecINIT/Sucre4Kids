@@ -748,47 +748,6 @@ bool makeEvaluate(Bloque bloque)
    return valorEvaluado;
 }
 
-void serieBefore(int bloque){
-   int esp;
-   for (int j = 0; j < bloque2[bloque].numActuadores; j++)
-  {
-   esp = 100;
-   Actuador actuador = bloque2[bloque].actuadores[j];
-      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
-      
-      while (esp > 0){
-         esp--;
-         getTagID(tagInfo);
-      }
-      apagarActuador(actuador.id, actuador.puerto);
-   }
-}
-
-void ejecutarEvaluacion(bool evaluacion, int bloque) {
-
-  for (int j = 0; j < bloques[bloque].numActuadores; j++)
-  {
-    Actuador actuador = bloques[bloque].actuadores[j];
-    //Serial.println(actuador.condicion);
-    if (evaluacion == actuador.evaluate)
-    {
-      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
-      delay(1000);
-      apagarActuador(actuador.id, actuador.puerto);
-    }
-    
-    else
-    {
-      if (!isActuadorDual(actuador.id, bloque))
-      {
-        apagarActuador(actuador.id, actuador.puerto);
-      }
-    }
-    
-  }
-
-}
-
 
 void cambioModo(int modo)
 
@@ -1118,6 +1077,67 @@ void getTagID(int infoTag[])
    mfrc522.PCD_StopCrypto1();
 }
 
+void serieBefore(int bloque){
+   int esp;
+         Serial.println("WWW");
+
+   for (int j = 0; j < bloque2[bloque].numActuadores; j++)
+  {
+
+
+   esp = 30;
+   Actuador actuador = bloque2[bloque].actuadores[j];
+
+
+      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+      
+      while (esp > 0){   
+           esp--;
+           if (mfrc522.PICC_IsNewCardPresent()){
+            apagarActuador(actuador.id, actuador.puerto);
+            mfrc522.PICC_ReadCardSerial();
+            getTagID(tagInfo);
+            play = false;
+         return;}
+      }
+      apagarActuador(actuador.id, actuador.puerto);
+   }
+}
+
+void ejecutarEvaluacion(bool evaluacion, int bloque) {
+int esp;
+  for (int j = 0; j < bloques[bloque].numActuadores; j++)
+  {
+    Actuador actuador = bloques[bloque].actuadores[j];
+    //Serial.println(actuador.condicion);
+    if (evaluacion == actuador.evaluate)
+    {
+      esp = 30;
+      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+      while (esp > 0){
+         esp--;
+         if (mfrc522.PICC_IsNewCardPresent()){
+            apagarActuador(actuador.id, actuador.puerto);
+            mfrc522.PICC_ReadCardSerial();
+            getTagID(tagInfo);
+            play = false;
+         return;}
+      }
+      apagarActuador(actuador.id, actuador.puerto);
+    }
+    
+    else
+    {
+      if (!isActuadorDual(actuador.id, bloque))
+      {
+        apagarActuador(actuador.id, actuador.puerto);
+      }
+    }
+    
+  }
+
+}
+
 
 int asignarPuerto(int type)
 {
@@ -1187,4 +1207,12 @@ int asignarPuerto(int type)
          temp_rep--;
          val = temp_prev;
       return val;
+   }
+
+
+   void borra_POP_Avanzado (){
+      if (!IF_pasado){
+            numActuadoresBloque--;
+            bloque2[0].numActuadores--;
+      }
    }

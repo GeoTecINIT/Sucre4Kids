@@ -177,13 +177,6 @@ void loop()
     }
   }
 
-  Serial.println(tagInfo[0]);
-  Serial.println(tagInfo[1]);
-  Serial.println(tagInfo[2]);
-  Serial.println(tagInfo[3]);
-  Serial.println(tagInfo[4]);
-  Serial.println(tagInfo[5]);
-
   // ------------------------------ Modo BASICO --------------------------------------
   if ( MODE == 0 ) 
   {
@@ -354,7 +347,10 @@ void loop()
             } else if (tagInfo[2] == 2) {
               borradoBLOQUE(1);
 
-            } else {
+            } else if(tagInfo[2] == 0) {
+              borra_POP_Avanzado();
+            }
+              else {
               Serial.println("Borrado no permitido para este modo");
               showBitmap(2,1,"");
             }
@@ -507,7 +503,7 @@ void loop()
               }
 
             //  Actuador else ( condicion = False )
-            } else if ( THEN_pasado && ELSE_pasado && isValidActuador(estado, id) ) {
+            } else if ( THEN_pasado && ELSE_pasado) {
 
               puerto = isNewActuador(id);
 
@@ -715,32 +711,41 @@ void loop()
     tagInfo[0] = -1;
 
     if (play) {
-      serieBefore(0);
-
-      // Bloque 1
-      if ( (numBloque==0 && bloques[0].numActuadores>0) || numBloque==1 ) {
-        valor = makeEvaluate(bloques[0]);
-        ejecutarEvaluacion(valor, 0);
-
-        valor ? snprintf(buf, sizeof(buf), "BLOQUE 1: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 1: FALSE");
-        display.println(buf);
-
-      } else {
-        showBitmap(2,4,"  acaba bloque 1");
-        play = false;
+      if (!IF_pasado){
+          ledObject = ChainableLED(puerto, puerto+1, 5);
+          ledObject.init();
       }
 
-      // Bloque 2
-      if ( numBloque==1 && bloques[1].numActuadores>0 ) {
-        valor = makeEvaluate(bloques[1]);
-        ejecutarEvaluacion(valor, 1);
+      serieBefore(0);
 
-        valor ? snprintf(buf, sizeof(buf), "BLOQUE 2: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 2: FALSE");
-        display.print(buf);
+      if (IF_pasado){
+        // Bloque 1
+        if ( (numBloque==0 && bloques[0].numActuadores>0) || numBloque==1 ) {
+          valor = makeEvaluate(bloques[0]);
+          if (play){
+          ejecutarEvaluacion(valor, 0);}
 
-      } else if (numBloque==1){
-        snprintf(buf, sizeof(buf), "BLOQUE 2:   no finalizado");
-        display.print(buf);
+          valor ? snprintf(buf, sizeof(buf), "BLOQUE 1: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 1: FALSE");
+          display.println(buf);
+
+        } else {
+          showBitmap(2,4,"  acaba bloque 1");
+          play = false;
+        }
+
+        // Bloque 2
+        if ( numBloque==1 && bloques[1].numActuadores>0 ) {
+          valor = makeEvaluate(bloques[1]);
+          ejecutarEvaluacion(valor, 1);
+
+          valor ? snprintf(buf, sizeof(buf), "BLOQUE 2: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 2: FALSE");
+          display.print(buf);
+
+        } else if (numBloque==1){
+          snprintf(buf, sizeof(buf), "BLOQUE 2:   no finalizado");
+          display.print(buf);
+        }
+
       }
 
       display.display();
