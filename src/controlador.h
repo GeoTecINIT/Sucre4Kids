@@ -33,6 +33,11 @@ int estado; // [3]
 boolean valor = false;
 int val = 0;
 
+int scroll = 0;
+int scroll_timer = 0;
+
+bool if1 = false, if2 = false, then1 = false, then2 = false, else1 = false, else2 = false;
+
 // Variable intermedia para almacenar el puerto
 int puerto;
 
@@ -365,6 +370,8 @@ void borradoALL(int modo)
       IF_pasado = false;
       THEN_pasado = false;
       ELSE_pasado = false;
+      if1 = false; if2 = false; then1 = false; then2 = false; else1 = false; else2 = false;
+      scroll = 0;
 
       numBloque = -1;
 
@@ -397,7 +404,10 @@ void borradoBLOQUE(int modo)
       } else if (numBloque==1) {
          IF_pasado = false;
          numBloque = 0;
-         
+         if2 = false; then2 = false; else2 = false;
+         bloques[1].numActuadores = 0;
+         bloques[1].numSensores = 0;
+
          THEN_pasado = true;           //Para permitir la ejecucion del primer bloque
          numActuadoresBloque = 1;      //Para permitir iniciar el segundo bloque
 
@@ -1077,19 +1087,209 @@ void getTagID(int infoTag[])
    mfrc522.PCD_StopCrypto1();
 }
 
+String identificar(int id, int cond){
+      String res;
+      if (id == 0){
+            switch (cond){
+               case 0:{
+                  res = "      Luz verde ";
+                  break;
+               }
+               case 1:{
+                  res = "      Luz Roja ";
+                  break;
+               }
+               case 2:{
+                  res = "    Luz Amarilla ";
+                  break;
+               }
+               case 3:{
+                  res = "     Luz Morada ";
+                  break;
+               }
+               case 4:{
+                  res = "      Luz Azul ";
+                  break;
+               }
+               case 5:{
+                  res = "    Luz Naranja ";
+                  break;
+               }
+               case 6:{
+                  res = "    Luz parpadea ";
+                  break;
+               }
+               case 7:{
+                  res = "    Luz Arcoiris ";
+                  break;
+               }
+               case 8:{
+                  res = "    Luz apagada ";
+                  break;
+               }
+            }
+         } switch (id){
+               case 1:{
+                  if (cond == 1){res = "Zumbador intermitente ";}
+                  else{res = "      Zumbador ";}
+                  break;
+               }
+               case 2:{
+                  if (cond == 1){res = "      Mucha luz ";}
+                  else{res = "      Poca luz ";}
+                  break;
+               }
+               case 3:{
+                  if (cond == 1){res = "     Mucho ruido ";}
+                  else{res = "     Poco ruido ";}
+                  break;
+               }
+               case 4:{
+                  if (cond == 1){res = "   Boton activado ";}
+                  else{res = "  Boton desactivado ";}
+                  break;
+               }
+               case 5:{
+                  if (cond == 1){res = "     Giro pequeño ";}
+                  else{res = "    Giro grande ";}
+                  break;
+               }
+               case 6:{
+                  if (cond == 2){res = "      Calor ";}
+                  else{res = "      Frio ";}
+                  break;
+               }
+               case 7:{
+                  if (cond == 1){res = "   Mucha distancia ";}
+                  else{res = "   Poca distancia ";}
+                  break;
+               }
+               case 8:{
+                  if (cond == 1){res = "    Hay agua ";}
+                  else{res = " No hay agua ";}
+                  break;
+               }
+               case 9:{
+                  if (cond == 0 ){res = "Boton dual no activado";}
+                  else if (cond == 1){res = "Boton dual derecho";}
+                  else if (cond ==2){res = "Boton dual izquierdo";}
+                  else {res = "Boton dual doble";}
+                  break;
+               }
+               case 12:{
+                  res = "   Agua turbia ";
+                  break;
+               }
+               case 13:{
+                  res = "   Ventilador ";
+                  break;
+               }
+            
+         }
+
+         return res;
+}
+
+void listar(){
+      int elems = bloque2[0].numActuadores + bloques[0].numActuadores + bloques[0].numSensores + bloques[1].numActuadores + bloques[1].numSensores - 3;
+      String st;
+      int pos = 0;
+      int i;
+
+      int c;
+      display.clearDisplay();
+
+      for (c = 0; c < bloque2[0].numActuadores; c++){
+         st = identificar(bloque2[0].actuadores[c].id, bloque2[0].actuadores[c].condicion);
+         display.setCursor(0, (c*10) - scroll + 3);
+         snprintf(buf, sizeof(buf), st);
+         display.print(buf);
+         pos+=10;
+      }
+
+      for(i = 0; i <= numBloque; i++){
+
+         if ((if1 && i == 0) || if2){
+            elems++;
+            display.setCursor(0, 0 - scroll + 3 + pos);
+            snprintf(buf, sizeof(buf), "         IF");
+            display.print(buf);
+            pos+=10;
+
+            for (c = 0; c < bloques[i].numSensores; c++){
+               if (c != 0){
+                  display.setCursor(0, 0 - scroll + 3 + pos);
+                  if (bloques[i].condiciones.condicionesBloque[c - 1]){
+                     snprintf(buf, sizeof(buf), "         AND");  
+                  } else {
+                     snprintf(buf, sizeof(buf), "         OR");
+                  }
+                  display.print(buf);
+                  elems++;
+                  pos+=10; 
+               }
+               st = identificar(bloques[i].sensores[c].id, bloques[i].sensores[c].condicion);
+               display.setCursor(0, 0 - scroll + 3 + pos);
+               snprintf(buf, sizeof(buf), st);
+               display.print(buf);
+               pos+=10;
+            }
+         }
+
+         if ((then1 && i == 0) || then2){
+            elems++;
+            display.setCursor(0, 0 - scroll + 3 + pos);
+            snprintf(buf, sizeof(buf), "        THEN");
+            display.print(buf);
+            pos+=10;
+            for (c = 0; c < bloques[i].numActuadores; c++){
+               if(bloques[i].actuadores[c].evaluate){
+                  st = identificar(bloques[i].actuadores[c].id, bloques[i].actuadores[c].condicion);
+                  display.setCursor(0, 0 - scroll + 3 + pos);
+                  snprintf(buf, sizeof(buf), st);
+                  display.print(buf);
+                  pos+=10;
+               }
+            }
+         }
+
+         if ((else1 && i == 0) || (else2 && i == 1)){
+            elems++;
+            display.setCursor(0, 0 - scroll + 3 + pos);
+            snprintf(buf, sizeof(buf), "        ELSE");
+            display.print(buf);
+            pos+=10;
+            for (c = 0; c < bloques[i].numActuadores; c++){
+               if(!bloques[i].actuadores[c].evaluate){
+                  st = identificar(bloques[i].actuadores[c].id, bloques[i].actuadores[c].condicion);
+                  display.setCursor(0, 0 - scroll + 3 + pos);
+                  snprintf(buf, sizeof(buf), st);
+                  display.print(buf);
+                  pos += 10;
+               }
+            }
+         }
+
+      }
+
+      display.display();
+      
+      if (elems > 2){
+         scroll++;
+         if(scroll > elems * 10){
+            scroll = 0;
+         }
+      }
+   }
+
 void serieBefore(int bloque){
    int esp;
-         Serial.println("WWW");
 
    for (int j = 0; j < bloque2[bloque].numActuadores; j++)
   {
-
-
    esp = 30;
    Actuador actuador = bloque2[bloque].actuadores[j];
-
-
-      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+   actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
       
       while (esp > 0){   
            esp--;
@@ -1209,10 +1409,18 @@ int asignarPuerto(int type)
       return val;
    }
 
-
    void borra_POP_Avanzado (){
-      if (!IF_pasado){
-            numActuadoresBloque--;
-            bloque2[0].numActuadores--;
-      }
+      numActuadoresBloque--;
+      bloque2[0].numActuadores--;
+      if (numActuadoresBloque <= 0){
+         if (numActuadoresBloque < 0){
+            showBitmap(3,0,"Nada que borrar");
+         }
+         numActuadoresBloque = 0;
+         puertoAnalogico = 0;
+         puertoDigital = 3;
+         puertoAnalogico_bloque = 0;
+         puertoDigital_bloque = 0;
+      } else {
+      showBitmap(3,0,"Borrado del ultimo realizado");}
    }

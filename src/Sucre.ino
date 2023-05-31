@@ -139,6 +139,7 @@ void loop()
     }
     // Leemos la tag y guardamos la informacion codificada en tagInfo.
     getTagID(tagInfo);
+    scroll_timer = 0;
 
     play = false;
     if ( MODE == 0 ) {
@@ -332,6 +333,8 @@ void loop()
 
           // Ejecucion secuencia
           case 1:
+            display.clearDisplay();
+            display.setCursor(0,0);
             play = true;
             //showBitmap(3,0,"Ejecutando...");
             break;
@@ -403,7 +406,7 @@ void loop()
                 numSensoresBloque++;
 
               } else {
-                Serial.println("Puerto no disponibleeee");
+                Serial.println("Puerto no disponible");
               }
 
             } else {
@@ -578,6 +581,12 @@ void loop()
               THEN_pasado = false;
               ELSE_pasado = false;
 
+              if (numBloque == 0){
+                if1 = true;
+              } else {
+                if2 = true;
+              }
+
               numCondicionalesBloque = 0;
               numSensoresBloque = 0;
               numActuadoresBloque = 0;
@@ -638,6 +647,11 @@ void loop()
             if ( IF_pasado && (numSensoresBloque > 0) && (numSensoresBloque > numCondicionalesBloque)) {
 
               THEN_pasado = true;
+              if (numBloque == 0){
+                then1 = true;
+              } else {
+                then2 = true;
+              }
               showBitmap(3,0,"THEN");
             
             } else {
@@ -665,6 +679,11 @@ void loop()
             if ( IF_pasado && (numActuadoresBloque > 0)) {
 
               ELSE_pasado = true;
+              if (numBloque == 0){
+                else1 = true;
+              } else {
+                else2 = true;
+              }
               showBitmap(3,0,"ELSE");
             
             } else {
@@ -753,7 +772,14 @@ void loop()
       display.setCursor(0,0);
 
     }
-  
+
+    if (!play){
+
+      if (scroll_timer > 50){
+        listar();
+      }
+      scroll_timer++;}
+        
   // ------------------------------- Modo MUSICA --------------------------------------
   } else if (MODE == 2) {
 
