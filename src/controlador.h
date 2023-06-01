@@ -1088,6 +1088,7 @@ void getTagID(int infoTag[])
 }
 
 String identificar(int id, int cond){
+// Obtenemos el nombre del dispositivo a partir de su código
       String res;
       if (id == 0){
             switch (cond){
@@ -1191,7 +1192,9 @@ String identificar(int id, int cond){
 }
 
 void listar(){
+      // Mostramos la lista de targetas pasadas en el display.
       int elems = bloque2[0].numActuadores + bloques[0].numActuadores + bloques[0].numSensores + bloques[1].numActuadores + bloques[1].numSensores - 3;
+      // Calculamos el número de elementos que debemos mostrar
       String st;
       int pos = 0;
       int i;
@@ -1309,7 +1312,6 @@ int esp;
   for (int j = 0; j < bloques[bloque].numActuadores; j++)
   {
     Actuador actuador = bloques[bloque].actuadores[j];
-    //Serial.println(actuador.condicion);
     if (evaluacion == actuador.evaluate)
     {
       esp = 30;
@@ -1335,9 +1337,7 @@ int esp;
     }
     
   }
-
 }
-
 
 int asignarPuerto(int type)
 {
@@ -1421,6 +1421,7 @@ int asignarPuerto(int type)
          puertoDigital = 3;
          puertoAnalogico_bloque = 0;
          puertoDigital_bloque = 0;
+         bloque2[0].numActuadores = 0;
       } else {
       showBitmap(3,0,"Borrado del ultimo realizado");}
    }

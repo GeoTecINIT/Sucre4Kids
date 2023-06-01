@@ -462,7 +462,7 @@ void loop()
                 bloque2[0].actuadores[numActuadoresBloque] = newActuador;
                 numActuadoresBloque++;
                 bloque2[0].numActuadores++;
-                Serial.println(bloque2[0].numActuadores);
+                //Serial.println(bloque2[0].numActuadores);
               }
             }
 
@@ -733,6 +733,7 @@ void loop()
       if (!IF_pasado){
           ledObject = ChainableLED(puerto, puerto+1, 5);
           ledObject.init();
+          showBitmap(3,0,"Ejecutando");
       }
 
       serieBefore(0);
@@ -1015,7 +1016,6 @@ void loop()
           } else {
             showBitmap(1,0,""); //D2
           }
-          //displayPrint0(id); // Update screen info
           
         }
 
@@ -1061,12 +1061,6 @@ void loop()
               snprintf(buf, sizeof(buf), "      Turbidez:");
               break;
           }
-          //Serial.println(val);
-
-          //Serial.println(temp_rep);
-          //Serial.println(temp_prev);
-          //Serial.println("------------------");
-
           display.clearDisplay();
           display.setCursor(0, 0);
           
