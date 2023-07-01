@@ -183,7 +183,7 @@ void loop()
 
       // Tarjeta COMUN
       case 6:
-        blinkAndSleep(true);
+        //blinkAndSleep(true);
         switch (tagInfo[1])
         {
           // Cambio de MODO
@@ -266,7 +266,12 @@ void loop()
             if (actuador.puerto == 2) {
               showBitmap(1,4,""); //A2
             } else {
-              showBitmap(1,1,""); //D4
+              if (actuador.id == 1) {
+                showBitmap(1,2,""); //D6
+              } else {
+                showBitmap(1,1,""); //D4
+              }
+              
             }
             //displayPrint0(id);
           }
