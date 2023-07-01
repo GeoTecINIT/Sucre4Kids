@@ -2,7 +2,7 @@
 //       THIS IS A GENERATED FILE - DO NOT EDIT       //
 /******************************************************/
 
-#line 1 "c:/Users/SVO/GITSUCRE/Sucre4Kids/src/Sucre.ino"
+#line 1 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
 // This #include statement was automatically added by the Particle IDE.
 #include <Grove_ChainableLED.h>
 
@@ -24,7 +24,7 @@
 
 void setup();
 void loop();
-#line 20 "c:/Users/SVO/GITSUCRE/Sucre4Kids/src/Sucre.ino"
+#line 20 "c:/Users/diego/Documents/VisualStudio/Sucre/src/Sucre.ino"
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 void setup()
@@ -191,7 +191,7 @@ void loop()
 
       // Tarjeta COMUN
       case 6:
-        blinkAndSleep(true);
+        //blinkAndSleep(true);
         switch (tagInfo[1])
         {
           // Cambio de MODO
@@ -271,14 +271,15 @@ void loop()
             bloques[0].numActuadores++;
             numActuadoresBloque++;
 
-<<<<<<< HEAD
-            if (actuador.puerto == 0) {
-=======
             if (actuador.puerto == 2) {
->>>>>>> origin/Sergio2
               showBitmap(1,4,""); //A2
             } else {
-              showBitmap(1,1,""); //D4
+              if (actuador.id == 1) {
+                showBitmap(1,2,""); //D6
+              } else {
+                showBitmap(1,1,""); //D4
+              }
+              
             }
             //displayPrint0(id);
           }
