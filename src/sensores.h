@@ -8,10 +8,12 @@
 //------------------------------------- M O D O   0 -------------------------------------------------
 //---------------------------------------------------------------------------------------------------
 
-#define sensorLuz_PIN A2
+#define sensorLuz_PIN A0
 #define boton_PIN D2
-#define sensorSonido_PIN A4
+#define sensorSonido_PIN A0
 #define rotoryAngle_PIN A0
+
+int ruid = 0;
 
 boolean leerSensorLuz()
 {
@@ -45,10 +47,12 @@ boolean leerAngulo()
 
 boolean leerSensorSonido()
 {
-   // Serial.printlnf("analogico: %d", analogRead(A4));
-   if (analogRead(sensorSonido_PIN) >= 700)
-      return true;
-   return false;
+    // Serial.printlnf("analogico: %d", analogRead(A4));
+    unsigned int sample = analogRead(sensorSonido_PIN);
+    Serial.println(sample);
+    if (sample >= 700)
+        return true;
+    return false;
 }
 
 boolean leerSensor0(int sensor)
@@ -179,16 +183,35 @@ bool siRuido(int puerto)
 
 bool siRuido(int puerto)
 {
-    int soundValue = 0; //create variable to store many different readings
-    for (int i = 0; i < 32; i++) //create a for loop to read 
-    { soundValue += analogRead(puerto);  } //read the sound sensor
- 
-    soundValue >>= 5; //bitshift operation 
-    Serial.println(soundValue);
-    
-    if (soundValue > 500)
+    int p;
+    switch (puerto)
+    {
+    case 0:
+        p = A0;
+        break;
+
+    case 2:
+        p = A2;
+        break;
+
+    case 4:
+        p = A4;
+        break;
+
+    default:
+        return false;
+    }
+
+    int sonido = analogRead(p);
+    Serial.println(sonido);
+    if (sonido >= 1600)
+        ruid = 12;
+    if (ruid > 0){
+        ruid--;
         return true;
+    }
     return false;
+
 }
 
 bool noRuido(int puerto)
@@ -263,6 +286,99 @@ bool noRotativo(int puerto)
     return false;
 }
 
+bool BotonDualA(int puerto)
+{
+    pinMode(puerto, INPUT);
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto) == LOW && digitalRead(puerto+1) == HIGH)
+        return true;
+    return false;
+}
+
+bool BotonDualB(int puerto)
+{
+    pinMode(puerto+1, INPUT);
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto+1) == LOW && digitalRead(puerto) == HIGH)
+        return true;
+    return false;
+}
+
+bool BotonDual2(int puerto)
+{
+    pinMode(puerto, INPUT);
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto) == LOW && digitalRead(puerto+1) == LOW)
+        return true;
+    return false;
+}
+
+bool noBotonDual(int puerto)
+{
+    pinMode(puerto, INPUT);
+    pinMode(puerto+1, INPUT);
+    if (digitalRead(puerto) == HIGH && digitalRead(puerto+1) == HIGH)
+        return true;
+    return false;
+}
+
+bool siAgua(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == LOW)
+        return true;
+    return false;
+}
+
+bool noAgua(int puerto)
+{
+    pinMode(puerto, INPUT);
+    if (digitalRead(puerto) == HIGH)
+        return true;
+    return false;
+}
+
+bool Cafe(int puerto)
+{
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+    Serial.println(sensor_value);
+    if (sensor_value < 2000)
+        return true;
+    return false;
+}
+
+bool AguaClara(int puerto)
+{
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0:
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+    if (sensor_value > 2500)
+        return true;
+    return false;
+}
+
 bool tempFrio(int puerto)
 {
     DHT dht(puerto, DHT11);
@@ -322,6 +438,117 @@ bool tempTemplado(int puerto)
 }
 */
 
+//---------------------------------------------------------------------------------------------------
+//------------------------------------- M O D O   3 -------------------------------------------------
+//---------------------------------------------------------------------------------------------------
+
+int DistanciaExp(int puerto)
+{
+    Ultrasonic ultrasonic(puerto);
+    int range = ultrasonic.MeasureInCentimeters();
+    // Serial.printlnf("Distancia: %d", range);
+    return range;
+}
+
+int AnguloExp()
+{
+   float voltage;
+    int sensor_value;
+    for (int i = 0; i < 50; i++){
+        sensor_value = analogRead(rotoryAngle_PIN);
+        voltage += (float)sensor_value * 5 / 1023;
+    }
+    voltage = voltage/50;
+   float degrees = (voltage * 300) / 5;
+   degrees = degrees * 270 / 1200;
+   degrees = 270 - degrees;
+   if (degrees < 0)
+    degrees = 0;
+
+   return (int) degrees;
+}
+
+int LuzExp()
+{
+    int value = 0;
+    for (int i = 0; i < 50; i++){
+        value += analogRead(sensorLuz_PIN);
+    }
+    value = value/50;
+    value = map(value, 0, 4095, 0, 100);
+    return value;
+
+}
+
+int SensorSonidoExp()
+{
+    //return analogRead(sensorSonido_PIN);
+    const int sampleWindow = 50;                           // Sample window width in mS (50 mS = 20Hz)
+    unsigned int sample;
+    unsigned long startMillis= millis();                   // Start of sample window
+    double peakToPeak = 0;                                 // peak-to-peak level
+
+    unsigned int signalMax = 0;                            //minimum value
+    unsigned int signalMin = 1024;                         //maximum value
+
+                                                            // collect data for 50 mS
+    while (millis() - startMillis < sampleWindow)
+    {
+        sample = analogRead(sensorSonido_PIN);              //get reading from microphone
+        Serial.println(sample);
+        if (sample < 1024)                                  // toss out spurious readings
+        {
+            if (sample > signalMax)
+            {
+                signalMax = sample;                           // save just the max levels
+            }
+            else if (sample < signalMin)
+            {
+                signalMin = sample;                           // save just the min levels
+            }
+        }
+    }
+
+    peakToPeak = signalMax - signalMin;                    // max - min = peak-peak amplitude
+    int db = map(peakToPeak,20.0,900.0,49.5,90.0); 
+    return db;
+    }
+
+int SensorTempExp(int puerto)
+{
+    DHT dht(puerto, DHT11);
+    dht.begin();
+    float t = dht.getTempCelcius();
+
+    // The fast read may cause an invalid value like 0.0000 or NuLL. Repeat until valid value.
+    while (isnan(t) | t == 0.0)
+    {
+        t = dht.getTempCelcius();
+    }
+
+    //t = ajusta_temp(t); 
+
+    return t;
+}
+
+int TurbiaExp(int puerto)
+{
+    int sensor_value;
+    switch (puerto)
+    {
+    case 0: 
+        sensor_value = analogRead(A0);
+        break;
+    case 2:
+        sensor_value = analogRead(A2);
+        break;
+    case 4:
+        sensor_value = analogRead(A4);
+        break;
+    }
+    return sensor_value;
+}
+
 bool leerSensor(int id, int condicion, int puerto)
 {
     switch (id)
@@ -357,8 +584,62 @@ bool leerSensor(int id, int condicion, int puerto)
     case 7:
         return (condicion == 0 ? noDistancia(puerto) : siDistancia(puerto));
 
+    case 8:
+        return (condicion == 0 ? noAgua(puerto) : siAgua(puerto));
+
+    case 9:
+        switch (condicion)
+        {
+        case 0:
+            return noBotonDual(puerto);
+        case 1:
+            return BotonDualA(puerto);
+        case 2:
+            return BotonDualB(puerto);
+        case 3:
+            return BotonDual2(puerto);
+        }
+
+    case 10:
+        return BotonDualB(puerto);
+
+    case 11:
+        return BotonDual2(puerto);
+
+    case 12:
+        switch (condicion)
+        {
+        case 0:
+            return Cafe(puerto);
+        case 1:
+            return AguaClara(puerto);           
+        }
+
     default:
         Serial.println("InvalidSensorError");
         return false;
+    }
+}
+
+int leerSensorExp(int id, int puerto){
+    switch (id)
+    {
+    case 2:
+        return LuzExp();
+    case 3:
+        return SensorSonidoExp();
+    case 5:
+        return AnguloExp();
+    case 6:
+        return SensorTempExp(puerto);
+    case 7:
+        return DistanciaExp(puerto);
+    case 12:
+        return TurbiaExp(puerto);
+
+
+    default:
+        Serial.println("InvalidSensorError");
+        return -1;
     }
 }

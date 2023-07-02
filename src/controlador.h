@@ -26,15 +26,23 @@ boolean play = false;
 
 // Informacion de la tarjeta leida.
 int tagInfo[6] = {-1, -1, -1, -1, -1, -1};
+int tagAnt[6] = {-1, -1, -1, -1, -1, -1};
 int id;     // [1]
 int tipo;   // [2]
 int estado; // [3]
 boolean valor = false;
+int val = 0;
+
+int scroll = 0;
+int scroll_timer = 0;
+
+bool if1 = false, if2 = false, then1 = false, then2 = false, else1 = false, else2 = false;
 
 // Variable intermedia para almacenar el puerto
 int puerto;
 
 Bloque bloques[2];
+Bloque bloque2[2];
 
 // Memory sector chosen to r/w fron NFC Tag
 byte trailerBlock = 7;
@@ -125,6 +133,12 @@ bool bucle = false;
 int tam_bucle = 0;
 
 String secuencia[30];
+
+// ------- *** Variables MODO Explora *** --------------
+
+int temp_prev = -1;
+int temp_rep = 0;
+
 //--------------------------------  BITMAPS  -------------------------------------
 
 void showBitmap(int id1, int id2, String msg) {
@@ -153,6 +167,11 @@ void showBitmap(int id1, int id2, String msg) {
       case 2:
          // display.drawBitmap(0,0, modoMusicaBitmap, bitmap_width, bitmap_height, 1);
          snprintf(buf, sizeof(buf), "MODO MUSICA");
+         break;
+
+      case 3:
+         // display.drawBitmap(0,0, modoMusicaBitmap, bitmap_width, bitmap_height, 1);
+         snprintf(buf, sizeof(buf), "MODO EXPLORA");
          break;
 
       default:
@@ -354,6 +373,7 @@ void borradoALL(int modo)
    case 0: {
       Bloque bloque;
       bloques[0] = bloque;
+      bloque2[0] = bloque;
       numSensoresBloque = 0;
       numActuadoresBloque = 0;
       break;
@@ -362,6 +382,9 @@ void borradoALL(int modo)
       IF_pasado = false;
       THEN_pasado = false;
       ELSE_pasado = false;
+
+      if1 = false; if2 = false; then1 = false; then2 = false; else1 = false; else2 = false;
+      scroll = 0;
 
       numBloque = -1;
 
@@ -395,6 +418,10 @@ void borradoBLOQUE(int modo)
          IF_pasado = false;
          numBloque = 0;
          
+         if2 = false; then2 = false; else2 = false;
+         bloques[1].numActuadores = 0;
+         bloques[1].numSensores = 0;
+
          THEN_pasado = true;           //Para permitir la ejecucion del primer bloque
          numActuadoresBloque = 1;      //Para permitir iniciar el segundo bloque
 
@@ -685,16 +712,24 @@ bool isValidActuador(int deviceState, int actuadorID)
 // -1 si no ha sido usado en ningun bloque, o el puerto donde se encuantra conectado.
 int isNewActuador(int deviceID)
 {
-  for (int j = 0; j <= numBloque; j++)
-  {
-    for (int i = 0; i < bloques[j].numActuadores; i++)
-    {
-      if (bloques[j].actuadores[i].id == deviceID)
+   for (int j = 0; j <= numBloque; j++)
+   {
+      for (int i = 0; i < bloques[j].numActuadores; i++)
       {
-        return bloques[j].actuadores[i].puerto;
+         if (bloques[j].actuadores[i].id == deviceID)
+         {
+         return bloques[j].actuadores[i].puerto;
+         }
       }
-    }
-  }
+   }
+
+   for (int i = 0; i < bloque2[0].numActuadores; i++)
+   {
+      if (bloque2[0].actuadores[i].id == deviceID)
+      {
+         return bloque2[0].actuadores[i].puerto;
+      }
+   }
 
   return -1;
 }
@@ -734,7 +769,7 @@ bool makeEvaluate(Bloque bloque)
 
    return valorEvaluado;
 }
-
+/* 
 void ejecutarEvaluacion(bool evaluacion, int bloque) {
 
   for (int j = 0; j < bloques[bloque].numActuadores; j++)
@@ -756,7 +791,7 @@ void ejecutarEvaluacion(bool evaluacion, int bloque) {
     
   }
 
-}
+} */
 
 
 void cambioModo(int modo)
@@ -777,6 +812,11 @@ void cambioModo(int modo)
       Serial.println("Modo MUSICA detectado");
       MODE = 2;
       showBitmap(3,0,"Iniciando modo MUSICA...");
+
+   } else if (modo == 3) {
+      Serial.println("Modo EXPLORA detectado");
+      MODE = 3;
+      showBitmap(3,0,"Iniciando modo EXPLORA...");
 
    }
    EEPROM.put(0, MODE);
@@ -1078,6 +1118,257 @@ void getTagID(int infoTag[])
    mfrc522.PCD_StopCrypto1();
 }
 
+String identificar(int id, int cond){
+// Obtenemos el nombre del dispositivo a partir de su código
+      String res;
+      if (id == 0){
+            switch (cond){
+               case 0:{
+                  res = "      Luz verde ";
+                  break;
+               }
+               case 1:{
+                  res = "      Luz Roja ";
+                  break;
+               }
+               case 2:{
+                  res = "    Luz Amarilla ";
+                  break;
+               }
+               case 3:{
+                  res = "     Luz Morada ";
+                  break;
+               }
+               case 4:{
+                  res = "      Luz Azul ";
+                  break;
+               }
+               case 5:{
+                  res = "    Luz Naranja ";
+                  break;
+               }
+               case 6:{
+                  res = "    Luz parpadea ";
+                  break;
+               }
+               case 7:{
+                  res = "    Luz Arcoiris ";
+                  break;
+               }
+               case 8:{
+                  res = "    Luz apagada ";
+                  break;
+               }
+            }
+         } switch (id){
+               case 1:{
+                  if (cond == 1){res = "Zumbador intermitente ";}
+                  else{res = "      Zumbador ";}
+                  break;
+               }
+               case 2:{
+                  if (cond == 1){res = "      Mucha luz ";}
+                  else{res = "      Poca luz ";}
+                  break;
+               }
+               case 3:{
+                  if (cond == 1){res = "     Mucho ruido ";}
+                  else{res = "     Poco ruido ";}
+                  break;
+               }
+               case 4:{
+                  if (cond == 1){res = "   Boton activado ";}
+                  else{res = "  Boton desactivado ";}
+                  break;
+               }
+               case 5:{
+                  if (cond == 1){res = "     Giro pequeño ";}
+                  else{res = "    Giro grande ";}
+                  break;
+               }
+               case 6:{
+                  if (cond == 2){res = "      Calor ";}
+                  else{res = "      Frio ";}
+                  break;
+               }
+               case 7:{
+                  if (cond == 1){res = "   Mucha distancia ";}
+                  else{res = "   Poca distancia ";}
+                  break;
+               }
+               case 8:{
+                  if (cond == 1){res = "    Hay agua ";}
+                  else{res = " No hay agua ";}
+                  break;
+               }
+               case 9:{
+                  if (cond == 0 ){res = "Boton dual no activado";}
+                  else if (cond == 1){res = "Boton dual derecho";}
+                  else if (cond ==2){res = "Boton dual izquierdo";}
+                  else {res = "Boton dual doble";}
+                  break;
+               }
+               case 12:{
+                  res = "   Agua turbia ";
+                  break;
+               }
+               case 13:{
+                  res = "   Ventilador ";
+                  break;
+               }
+
+         }
+
+         return res;
+}
+
+void listar(){
+      // Mostramos la lista de targetas pasadas en el display.
+      int elems = bloque2[0].numActuadores + bloques[0].numActuadores + bloques[0].numSensores + bloques[1].numActuadores + bloques[1].numSensores - 3;
+      // Calculamos el número de elementos que debemos mostrar
+      String st;
+      int pos = 0;
+      int i;
+
+      int c;
+      display.clearDisplay();
+
+      for (c = 0; c < bloque2[0].numActuadores; c++){
+         st = identificar(bloque2[0].actuadores[c].id, bloque2[0].actuadores[c].condicion);
+         display.setCursor(0, (c*10) - scroll + 3);
+         snprintf(buf, sizeof(buf), st);
+         display.print(buf);
+         pos+=10;
+      }
+
+      for(i = 0; i <= numBloque; i++){
+
+         if ((if1 && i == 0) || if2){
+            elems++;
+            display.setCursor(0, 0 - scroll + 3 + pos);
+            snprintf(buf, sizeof(buf), "         IF");
+            display.print(buf);
+            pos+=10;
+
+            for (c = 0; c < bloques[i].numSensores; c++){
+               if (c != 0){
+                  display.setCursor(0, 0 - scroll + 3 + pos);
+                  if (bloques[i].condiciones.condicionesBloque[c - 1]){
+                     snprintf(buf, sizeof(buf), "         AND");  
+                  } else {
+                     snprintf(buf, sizeof(buf), "         OR");
+                  }
+                  display.print(buf);
+                  elems++;
+                  pos+=10; 
+               }
+               st = identificar(bloques[i].sensores[c].id, bloques[i].sensores[c].condicion);
+               display.setCursor(0, 0 - scroll + 3 + pos);
+               snprintf(buf, sizeof(buf), st);
+               display.print(buf);
+               pos+=10;
+            }
+         }
+
+         if ((then1 && i == 0) || then2){
+            elems++;
+            display.setCursor(0, 0 - scroll + 3 + pos);
+            snprintf(buf, sizeof(buf), "        THEN");
+            display.print(buf);
+            pos+=10;
+            for (c = 0; c < bloques[i].numActuadores; c++){
+               if(bloques[i].actuadores[c].evaluate){
+                  st = identificar(bloques[i].actuadores[c].id, bloques[i].actuadores[c].condicion);
+                  display.setCursor(0, 0 - scroll + 3 + pos);
+                  snprintf(buf, sizeof(buf), st);
+                  display.print(buf);
+                  pos+=10;
+               }
+            }
+         }
+
+         if ((else1 && i == 0) || (else2 && i == 1)){
+            elems++;
+            display.setCursor(0, 0 - scroll + 3 + pos);
+            snprintf(buf, sizeof(buf), "        ELSE");
+            display.print(buf);
+            pos+=10;
+            for (c = 0; c < bloques[i].numActuadores; c++){
+               if(!bloques[i].actuadores[c].evaluate){
+                  st = identificar(bloques[i].actuadores[c].id, bloques[i].actuadores[c].condicion);
+                  display.setCursor(0, 0 - scroll + 3 + pos);
+                  snprintf(buf, sizeof(buf), st);
+                  display.print(buf);
+                  pos += 10;
+               }
+            }
+         }
+
+      }
+
+      display.display();
+
+      if (elems > 2){
+         scroll++;
+         if(scroll > elems * 10){
+            scroll = 0;
+         }
+      }
+   }
+
+void serieBefore(int bloque){
+   int esp;
+
+   for (int j = 0; j < bloque2[bloque].numActuadores; j++)
+  {
+   esp = 30;
+   Actuador actuador = bloque2[bloque].actuadores[j];
+   actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+
+      while (esp > 0){   
+           esp--;
+           if (mfrc522.PICC_IsNewCardPresent()){
+            apagarActuador(actuador.id, actuador.puerto);
+            mfrc522.PICC_ReadCardSerial();
+            getTagID(tagInfo);
+            play = false;
+         return;}
+      }
+      apagarActuador(actuador.id, actuador.puerto);
+   }
+}
+
+void ejecutarEvaluacion(bool evaluacion, int bloque) {
+int esp;
+  for (int j = 0; j < bloques[bloque].numActuadores; j++)
+  {
+    Actuador actuador = bloques[bloque].actuadores[j];
+    if (evaluacion == actuador.evaluate)
+    {
+      esp = 30;
+      actuadorHandler(actuador.id, actuador.condicion, actuador.puerto);
+      while (esp > 0){
+         esp--;
+         if (mfrc522.PICC_IsNewCardPresent()){
+            apagarActuador(actuador.id, actuador.puerto);
+            mfrc522.PICC_ReadCardSerial();
+            getTagID(tagInfo);
+            play = false;
+         return;}
+      }
+      apagarActuador(actuador.id, actuador.puerto);
+    }
+
+    else
+    {
+      if (!isActuadorDual(actuador.id, bloque))
+      {
+        apagarActuador(actuador.id, actuador.puerto);
+      }
+    }
+
+  }
+}
 
 int asignarPuerto(int type)
 {
@@ -1132,4 +1423,35 @@ int asignarPuerto(int type)
       Serial.print("Error: No hay mas puertos disponibles \n");
       return -1;
    }
+}
+
+// Eliminar 'outliers' de la temperatura
+int ajusta_temp(int val)
+{
+   if (temp_rep == 0){
+      temp_prev = val;
+      temp_rep++;}
+   else if (temp_prev == val && temp_rep < 6)
+      temp_rep++;
+   else
+      temp_rep--;
+      val = temp_prev;
+   return val;
+}
+
+void borra_POP_Avanzado(){
+   numActuadoresBloque--;
+   bloque2[0].numActuadores--;
+   if (numActuadoresBloque <= 0){
+      if (numActuadoresBloque < 0){
+         showBitmap(3,0,"Nada que borrar");
+      }
+      numActuadoresBloque = 0;
+      puertoAnalogico = 0;
+      puertoDigital = 3;
+      puertoAnalogico_bloque = 0;
+      puertoDigital_bloque = 0;
+      bloque2[0].numActuadores = 0;
+   } else {
+   showBitmap(3,0,"Borrado del ultimo realizado");}
 }

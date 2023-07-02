@@ -109,6 +109,10 @@ void loop()
     {
       showBitmap(0,1,"");
 
+    } else if (MODE == 3)
+    {
+      showBitmap(0,3,"");
+
     } else
     {
       showBitmap(0,2,"");
@@ -135,6 +139,7 @@ void loop()
     }
     // Leemos la tag y guardamos la informacion codificada en tagInfo.
     getTagID(tagInfo);
+    scroll_timer = 0;
 
     play = false;
     if ( MODE == 0 ) {
@@ -333,6 +338,8 @@ void loop()
 
           // Ejecucion secuencia
           case 1:
+            display.clearDisplay();
+            display.setCursor(0,0);
             play = true;
             //showBitmap(3,0,"Ejecutando...");
             break;
@@ -341,12 +348,16 @@ void loop()
           // Borrado (ALL Y BLOQUE)
           case 2:
             if ( tagInfo[2] == 1 ) {
+              borradoALL(0);
               borradoALL(1);
               showBitmap(3,0,"Borrado completo realizado");
 
             } else if (tagInfo[2] == 2) {
               borradoBLOQUE(1);
 
+            } else if(tagInfo[2] == 0) {
+              borra_POP_Avanzado();
+            
             } else {
               Serial.println("Borrado no permitido para este modo");
               showBitmap(2,1,"");
@@ -432,9 +443,35 @@ void loop()
           case 1: {
             Serial.println("Actuador detectado");
             estado = tagInfo[4];
+            if (!IF_pasado) {
 
+              puerto = isNewActuador(id);
+
+              if (puerto == -1) {
+                puerto = asignarPuerto(tagInfo[2]);
+                showPort(tagInfo[2], puerto);
+
+              } else {
+                showBitmap(1,6,"");
+              }
+
+              if (puerto != -1) {
+
+                Actuador newActuador;
+                newActuador.id = id;
+                newActuador.condicion = estado;
+                newActuador.bloque = numBloque;
+                newActuador.puerto = puerto;
+                newActuador.evaluate = true;
+
+                bloque2[0].actuadores[numActuadoresBloque] = newActuador;
+                numActuadoresBloque++;
+                bloque2[0].numActuadores++;
+                //Serial.println(bloque2[0].numActuadores);
+              }
+            }
             //  Actuador then ( condicion = True )
-            if ( THEN_pasado && !ELSE_pasado && isValidActuador(estado, id) && numActuadoresBloque==0 ) {
+            if ( THEN_pasado && !ELSE_pasado ) {
 
               puerto = isNewActuador(id);
 
@@ -473,7 +510,7 @@ void loop()
               }
 
             //  Actuador else ( condicion = False )
-            } else if ( THEN_pasado && ELSE_pasado && isValidActuador(estado, id) ) {
+            } else if ( THEN_pasado && ELSE_pasado ) {
 
               puerto = isNewActuador(id);
 
@@ -514,8 +551,8 @@ void loop()
             } else {
 
               if (!IF_pasado) {
-                Serial.println("Se esperaba IF tag");
-                showBitmap(2,2,"");
+                //Serial.println("Se esperaba IF tag");
+                //showBitmap(2,2,"");
 
               } else if (!THEN_pasado) {
                 Serial.println("Se esperaba THEN tag");
@@ -547,6 +584,12 @@ void loop()
               IF_pasado = true;
               THEN_pasado = false;
               ELSE_pasado = false;
+
+              if (numBloque == 0){
+                if1 = true;
+              } else {
+                if2 = true;
+              }
 
               numCondicionalesBloque = 0;
               numSensoresBloque = 0;
@@ -608,6 +651,11 @@ void loop()
             if ( IF_pasado && (numSensoresBloque > 0) && (numSensoresBloque > numCondicionalesBloque)) {
 
               THEN_pasado = true;
+              if (numBloque == 0){
+                then1 = true;
+              } else {
+                then2 = true;
+              }
               showBitmap(3,0,"THEN");
             
             } else {
@@ -635,6 +683,11 @@ void loop()
             if ( IF_pasado && (numActuadoresBloque > 0)) {
 
               ELSE_pasado = true;
+              if (numBloque == 0){
+                else1 = true;
+              } else {
+                else2 = true;
+              }
               showBitmap(3,0,"ELSE");
             
             } else {
@@ -681,40 +734,60 @@ void loop()
     tagInfo[0] = -1;
 
     if (play) {
-      // Bloque 1
-      if ( (numBloque==0 && bloques[0].numActuadores>0) || numBloque==1 ) {
-        valor = makeEvaluate(bloques[0]);
-        ejecutarEvaluacion(valor, 0);
 
-        valor ? snprintf(buf, sizeof(buf), "BLOQUE 1: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 1: FALSE");
-        display.println(buf);
-
-      } else {
-        showBitmap(2,4,"  acaba bloque 1");
-        play = false;
+      if (!IF_pasado){
+          ledObject = ChainableLED(puerto, puerto+1, 5);
+          ledObject.init();
+          showBitmap(3,0,"Ejecutando");
       }
 
-      // Bloque 2
-      if ( numBloque==1 && bloques[1].numActuadores>0 ) {
-        valor = makeEvaluate(bloques[1]);
-        ejecutarEvaluacion(valor, 1);
+      serieBefore(0);
 
-        valor ? snprintf(buf, sizeof(buf), "BLOQUE 2: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 2: FALSE");
-        display.print(buf);
+      if (IF_pasado){
+        // Bloque 1
+        if ( (numBloque==0 && bloques[0].numActuadores>0) || numBloque==1 ) {
+          valor = makeEvaluate(bloques[0]);
+          if (play){
+          ejecutarEvaluacion(valor, 0);}
 
-      } else if (numBloque==1){
-        snprintf(buf, sizeof(buf), "BLOQUE 2:   no finalizado");
-        display.print(buf);
+          valor ? snprintf(buf, sizeof(buf), "BLOQUE 1: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 1: FALSE");
+          display.println(buf);
+
+        } else {
+          showBitmap(2,4,"  acaba bloque 1");
+          play = false;
+        }
+
+        // Bloque 2
+        if ( numBloque==1 && bloques[1].numActuadores>0 ) {
+          valor = makeEvaluate(bloques[1]);
+          ejecutarEvaluacion(valor, 1);
+
+          valor ? snprintf(buf, sizeof(buf), "BLOQUE 2: TRUE") : snprintf(buf, sizeof(buf), "BLOQUE 2: FALSE");
+          display.print(buf);
+
+        } else if (numBloque==1){
+          snprintf(buf, sizeof(buf), "BLOQUE 2:   no finalizado");
+          display.print(buf);
+        }
+
       }
 
       display.display();
       display.clearDisplay();
       display.setCursor(0,0);
 
+      if (!play){
+
+      if (scroll_timer > 50){
+        listar();
+      }
+      scroll_timer++;}
+
     }
   
   // ------------------------------- Modo MUSICA --------------------------------------
-  } else {
+  } else if (MODE == 2){
 
     switch (tagInfo[0])
     {
@@ -880,6 +953,138 @@ void loop()
     if (play) {
       reproducir();
       play = false;
+    }
+
+// ------------------------------ Modo EXPLORA --------------------------------------
+  } else {
+    // Tipo de tarjeta
+    switch (tagInfo[0])
+    {
+
+      // Tarjeta COMUN
+      case 6:
+        blinkAndSleep(true);
+        switch (tagInfo[1])
+        {
+          // Cambio de MODO
+          case 0:
+
+            cambioModo(tagInfo[2]);
+            resetFunc();
+            break;
+          // Ejecucion
+          case 1:
+            play = true;
+            //showBitmap(3,0,"Ejecutando...");
+            break;
+
+          // Borrado (ALL)
+          case 2:
+            if ( tagInfo[2] == 1 ) {
+              borradoALL(0);
+              showBitmap(3,0,"Borrado completo realizado");
+
+            } else {
+              showBitmap(2,1,"");
+              Serial.println("Borrado no permitido para este modo");
+            }
+            break;
+
+          default:
+            break;
+        }
+        break;
+
+      case 3:
+
+        id = tagInfo[3];
+        tipo = tagInfo[2];
+
+        // Si la tag corresponde a un sensor:
+        if (tagInfo[1] == 0) {
+          Serial.println("Sensor detectado");
+
+          Sensor sensor;
+          sensor.id = id;
+
+          // Sensores: A0 y D2
+          tipo == 0 ? sensor.puerto = 0 : sensor.puerto = 2;
+
+          bloques[0].sensores[0] = sensor;
+          bloques[0].numSensores++;
+          numSensoresBloque++;
+
+          if (sensor.puerto == 0) {
+            showBitmap(1,3,""); //A0
+          } else {
+            showBitmap(1,0,""); //D2
+          }
+
+        }
+        break;
+
+      default:
+        if ( tagInfo[0] != -1 ) {
+          showBitmap(2,0,"");
+        }
+        break;
+    }
+
+    if (tagInfo[0]!=-1) { 
+      tagInfo[0]=-1;
+    }
+
+    if ( numSensoresBloque > 0 &&  play == true) {
+      val = leerSensorExp(bloques[0].sensores[0].id, bloques[0].sensores[0].puerto);
+
+      switch (tagInfo[3])
+      {
+        case 2:
+          snprintf(buf, sizeof(buf), "         Luz:");
+          break;
+        case 3:
+          snprintf(buf, sizeof(buf), "  Ruido (decibelios):");
+          break;
+        case 5:
+          snprintf(buf, sizeof(buf), "   Angulo (grados):");
+          break;
+        case 6:
+          snprintf(buf, sizeof(buf), "  Temperatura (grados):");
+          val = ajusta_temp(val);
+          break;
+        case 7:
+          snprintf(buf, sizeof(buf), "   Distancia (cm):");
+          break;
+        case 12:
+          snprintf(buf, sizeof(buf), "      Turbidez:");
+          break;
+      }
+      display.clearDisplay();
+      display.setCursor(0, 0);
+
+      display.print(buf);
+
+      snprintf(buf, sizeof(buf), "%d", val);
+
+      if (val <= 9){
+        display.setCursor(53, 25);
+      } else if (val <= 99){
+        display.setCursor(40, 25);
+      } else if (val <= 999){
+        display.setCursor(27, 25);
+      } else{
+        display.setCursor(10, 25);
+      }
+
+      display.setTextSize(4);
+      display.print(buf);
+      display.setTextSize(1);
+
+      display.display();
+
+    } else if (numSensoresBloque==0 && play == true) {
+      showBitmap(2,4,"");
+      play=false;
     }
   }
 }  
