@@ -189,7 +189,7 @@ void showBitmap(int id1, int id2, String msg) {
       {
       case 0:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A:");
          display.fillTriangle(40, 40, 50, 20, 50, 60,WHITE);
          display.fillRect(50,20,20,40,WHITE);
          display.fillTriangle(70, 20, 80, 40, 70, 60,WHITE);
@@ -197,33 +197,33 @@ void showBitmap(int id1, int id2, String msg) {
       
       case 1:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A:");
          display.fillRect(40,20,40,40,WHITE);
          break;
 
       case 2:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A:");
          display.fillTriangle(60, 20, 30, 100, 90, 100,WHITE);
          break;
 
       case 3:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A:");
          display.fillTriangle(60, 20, 52, 40, 67, 40,WHITE);
          display.fillTriangle(60, 60, 52, 40, 67, 40,WHITE);
          break;
 
       case 4:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), msg+"     CONECTAR A:");
+         snprintf(buf, sizeof(buf), msg+" CONECTAR A:");
          display.fillCircle(60,50,15,WHITE);
          display.fillRect(10,50,90,40,BLACK);
          break;
 
       case 5:
          // display.drawBitmap(0,0, cuadrado_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "     CONECTAR A:");
+         snprintf(buf, sizeof(buf), " CONECTAR A:");
          display.fillCircle(60,40,15,WHITE);
          break;
 
@@ -247,22 +247,22 @@ void showBitmap(int id1, int id2, String msg) {
       {
       case 0:
          // display.drawBitmap(0,0, modoInvalido_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "Tarjeta invalida para este modo");
+         snprintf(buf, sizeof(buf), "Tarjeta invalida     para este modo");
          break;
       
       case 1:
          // display.drawBitmap(0,0, borradoInvalido_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "Borrado invalido para este modo");
+         snprintf(buf, sizeof(buf), "Borrado invalido     para este modo");
          break;
 
       case 2:
          // display.drawBitmap(0,0, ordenInvalido_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "Orden de tarjetas invalido");
+         snprintf(buf, sizeof(buf), "Orden de tarjetas    invalido");
          break;
 
       case 3:
          // display.drawBitmap(0,0, puertoInvalido_bitmap, bitmap_width, bitmap_height, 1);
-         snprintf(buf, sizeof(buf), "Puerto no disponible");
+         snprintf(buf, sizeof(buf), "Puerto no            disponible");
          break;
 
       case 4:

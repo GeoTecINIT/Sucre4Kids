@@ -411,7 +411,7 @@ void loop()
                 numSensoresBloque++;
 
               } else {
-                Serial.println("Puerto no disponibleeee");
+                Serial.println("Puerto no disponible");
               }
 
             } else {
@@ -813,11 +813,11 @@ void loop()
         case 2:
           if ( tagInfo[2] == 0 ) {
             borradoPOP();
-            showBitmap(3,0,"Borrada ultima lectura");
+            showBitmap(3,0,"Borrada ultima       lectura");
 
           } else if ( tagInfo[2] == 1 ){
             borradoALL(2);
-            showBitmap(3,0,"Borrado completo realizado");
+            showBitmap(3,0,"Borrado completo     realizado");
 
           } else {
             borradoBLOQUE(2);

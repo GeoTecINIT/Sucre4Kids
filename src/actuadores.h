@@ -381,6 +381,69 @@ void activarZumbador(int opcion, int puerto)
     }
 }
 
+void activarVentilador(int opcion, int puerto)
+{
+   pitidoOFF0();
+   ledApagar();
+
+   int p;
+   switch (puerto)
+    {
+    case 0:
+        p = A0;
+        break;
+    case 2:
+        p = A2;
+        break;
+    case 4:
+        p = A4;
+        break;
+
+    default:
+        p = -1;
+        break;
+    }
+
+   pinMode(p, OUTPUT);
+    switch (opcion)
+    {
+    case 0:
+      analogWrite(p, 50, 50);
+      break;
+    case 1:
+      analogWrite(p, 50, 50);
+      break;
+   default:
+      Serial.println("Valor no valido");
+      break;
+    }
+
+
+}
+
+void ventApagar(int puerto)
+{
+      int p;
+      switch (puerto)
+      {
+      case 0:
+         p = A0;
+         break;
+      case 2:
+         p = A2;
+         break;
+      case 4:
+         p = A4;
+         break;
+
+      default:
+         p = -1;
+         break;
+      }
+      pinMode(p, OUTPUT);
+      analogWrite(p, 0, 0);
+}
+
 void apagarActuador(int id, int puerto)
 {
     id == 0 ? ledApagar() : digitalWrite(puerto, 0);
